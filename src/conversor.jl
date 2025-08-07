@@ -3,6 +3,9 @@
 #
 function ConversorFEM1(arquivo,esp=0.01)
 
+    # Evita que o usuário seja tanso
+    contains(arquivo,".geo") && error("Usar o .msh e não o .geo")
+
     # Processa o arquivo usando o lgmsh
     malha = Lgmsh.Parsemsh_FEM_Solid(arquivo)
 
@@ -67,7 +70,10 @@ function ConversorFEM1(arquivo,esp=0.01)
     na = malha.nap
     AP = malha.AP
 
+    # centroides
+    centroides = malha.centroids
+
     # Retorna como estava em Dados()
-    return nn,XY,ne,IJ,MAT,ESP,nf,FC,np,P,na,AP,nfb,FB,etypes
+    return nn,XY,ne,IJ,MAT,ESP,nf,FC,np,P,na,AP,nfb,FB,etypes,centroides
 
 end

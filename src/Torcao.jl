@@ -12,6 +12,7 @@ module Torcao
     include("apoios.jl")
     include("corpo.jl")
     include("jeq.jl")
+    include("momentosinercia.jl")
     include("main.jl")
     include("tensoes.jl")
 

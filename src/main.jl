@@ -5,7 +5,7 @@
 function AnaliseTorcao(arquivo)
 
     # Entrada de dados
-    nn,XY,ne,IJ,MAT,ESP,nf,FC,np,P,na,AP,nfb,FB,etypes = ConversorFEM1(arquivo)
+    nn,XY,ne,IJ,MAT,ESP,nf,FC,np,P,na,AP,nfb,FB,etypes,centroides = ConversorFEM1(arquivo)
 
     #
     #                      Processamento
@@ -27,11 +27,18 @@ function AnaliseTorcao(arquivo)
     Φ = K\F
 
     # Calcula o J_eq para a seção transversal
-    Jeq, area = Jequivalente(Φ, ne, IJ,XY)
+    Jeq, A = Jequivalente(Φ, ne, IJ,XY)
+
+    # Área total da seção 
+    area = sum(A)
 
     println("Momento de inércia polar equivalente para a seção:  ",Jeq)
     println("Área da seção ", area)
         
+    # Agora podemos calcular as outras propriedades da seção transversal
+    # como posição do centróide, Ix, Iy, Ixy e α
+    α, Izl , Iyl = MomentosInercia(nn,XY,ne,IJ,A,centroides)
+
     # Podemos calcular as tensões tangenciais no centro de cada elemento da 
     # malha. 
     τ =  Tensoes(Φ,ne,IJ,XY)
@@ -52,6 +59,6 @@ function AnaliseTorcao(arquivo)
     Lgmsh_export_element_scalar("saida.pos",sqrt.(τ[:,1].^2 + τ[:,2].^2),"τ")
     
     # Retorna os valores calculados
-    return Jeq, area
+    return Jeq, area, Izl, Iyl, α
 
 end

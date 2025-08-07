@@ -10,6 +10,9 @@ function Jequivalente(Φ, ne, IJ, XY)
     # Inicializa o somatório para a área
     area = 0.0
 
+    # Devolve o vetor com as áreas de cada elemento
+    A = zeros(ne)
+
     # Loop pelos elementos 
     for ele = 1:ne
 
@@ -28,12 +31,12 @@ function Jequivalente(Φ, ne, IJ, XY)
         # Soma a contribuição do elemento para o Jeq
         jeq = jeq + je
 
-        # Soma a área
-        area = area + ae
-       
+        # Armazena a área de cada elemento
+        A[ele] = ae
+
     end
 
-    # J equivalente do elemento e área
-    return 2*jeq, area
+    # J equivalente do elemento e o vetor de áreas
+    return 2*jeq, A
 
 end
