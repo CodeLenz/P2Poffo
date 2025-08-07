@@ -1,5 +1,9 @@
-function MomentosInercia(nn,XY,ne,IJ,A,centroides)
-
+#
+# Calcula os momentos de inércia da geometria no sistema central 
+# principal de inércia
+#
+#
+function MomentosInercia(A,centroides)
 
     # Incializa os valores
     area = sum(A)
@@ -8,7 +12,7 @@ function MomentosInercia(nn,XY,ne,IJ,A,centroides)
     centroide_x = sum(centroides[:,1].*A)/area;
     centroide_y = sum(centroides[:,2].*A)/area;
 
-    # Podemos calcular os momentos de inércia
+    # Podemos calcular os momentos e o produto de inércia em relação ao centróide 
     Ix   = 0.0 
     Iy   = 0.0
     Ixy  = 0.0
@@ -24,7 +28,7 @@ function MomentosInercia(nn,XY,ne,IJ,A,centroides)
      
     # Se o produto de inércia for nulo, não precisamos calcular a rotação do sistema 
     # de referência
-    if isapprox(Izy,0.0, atol=1E-12)
+    if isapprox(Izy, 0.0, atol=1E-3)
  
        α = 0.0
        Izl = Iz

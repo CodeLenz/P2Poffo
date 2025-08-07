@@ -31,13 +31,10 @@ function AnaliseTorcao(arquivo)
 
     # Área total da seção 
     area = sum(A)
-
-    println("Momento de inércia polar equivalente para a seção:  ",Jeq)
-    println("Área da seção ", area)
-        
+    
     # Agora podemos calcular as outras propriedades da seção transversal
     # como posição do centróide, Ix, Iy, Ixy e α
-    α, Izl , Iyl = MomentosInercia(nn,XY,ne,IJ,A,centroides)
+    α, Izl , Iyl = MomentosInercia(A,centroides)
 
     # Podemos calcular as tensões tangenciais no centro de cada elemento da 
     # malha. 

@@ -153,7 +153,7 @@ function MontaKe(X,Y)
        B = MontaB(dNxy)
 
        # Acumula a matriz (somatório da integração)
-       Ke = Ke + transpose(B)*B*dJ
+       Ke .= Ke .+ transpose(B)*B*dJ
 
     end #i
 
