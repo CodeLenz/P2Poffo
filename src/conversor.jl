@@ -33,8 +33,8 @@ function ConversorFEM1(arquivo,esp=0.01)
 
         # Se for um triângulo
         if etypes[ele]==2
-            println("Elemento $ele é um triângulo")
-            error("Triângulo")
+            #println("Elemento $ele é um triângulo")
+            #error("Triângulo")
             #@show IJ[ele,:]
             IJ[ele,end] = IJ[ele,end-1]
         end 
