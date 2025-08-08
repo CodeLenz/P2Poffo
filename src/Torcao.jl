@@ -16,8 +16,14 @@ module Torcao
     include("main.jl")
     include("tensoes.jl")
 
+    # Exporta o arquivo .dat
+    include("exportaarquivo.jl")
+    
 	# Exporta a rotina principal de análise
 	export AnaliseTorcao
+
+    # Exporta a rotina que cria o .dat
+    export ExportaDat
 
 	
 end
