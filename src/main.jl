@@ -96,6 +96,6 @@ function AnaliseTorcao(arquivo)
     # Lgmsh_export_element_scalar("saida.pos",sqrt.(τ[:,1].^2 + τ[:,2].^2),"τ")
     
     # Retorna os valores calculados para a seção
-    return (cx,cy), Qx , Qy, Izl, Iyl, Jeq, α
+    return (cx,cy), area, Izl, Iyl, Jeq, α
 
 end

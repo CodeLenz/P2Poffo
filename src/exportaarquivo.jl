@@ -19,7 +19,7 @@ function ExportaDat(arquivo)
     nome = nome_msh[1:end-4]   
 
     # Obtém os valores da análise
-    centroide , Qx , Qy, Izl, Iyl, Jeq, α  = AnaliseTorcao(arquivo)
+    centroide, area, Izl, Iyl, Jeq, α  = AnaliseTorcao(arquivo)
 
     # Define o nome do arquivo .dat
     nome_dat = string(nome, ".dat")
@@ -27,7 +27,7 @@ function ExportaDat(arquivo)
     # Abre o arquivo para escrita e grava as informações uma por linha
     open(nome_dat, "w") do file
         println(file, nome)
-        println(file, A)
+        println(file, area)
         println(file, Izl)
         println(file, Iyl)
         println(file, Jeq)

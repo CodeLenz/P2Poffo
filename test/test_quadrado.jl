@@ -1,13 +1,13 @@
 #
-# Propriedades de um círculo de raio 1cm
+# Propriedades de um quadrado de lado 1cm
 #
-@testset "Circulo" begin
+@testset "Quadrado" begin
 
     # Valor de referência 
-    area, Iz, Jeq = Torcao.Circulo(1E-2)
+    area, Iz, Jeq = Torcao.Quadrado(1E-2)
 
     # Vamos utilizar o .msh de referência
-    arquivo = "circular.msh"
+    arquivo = "qudrado.msh"
 
     # Calcula com o programa
     centroide, area, Izl, Iyl, Jeq, α = AnaliseTorcao(arquivo)
