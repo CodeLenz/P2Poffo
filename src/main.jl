@@ -17,16 +17,14 @@ function AnaliseTorcao(arquivo)
     # Vetor de forças de corpo
     VFB = ForcabGlobal(nn,ne,XY,IJ)
 
-    # Soma as contribuições das forças 
-    F = VFB
-
     # Aplica as condições de contorno essenciais homogêneas
-    K,F = AplicaCCH(nn,na,AP,K,F)
+    K,F = AplicaCCH(nn,na,AP,K,VFB)
 
     # Solução do sistema linear de Equações 
-    Φ = K\F
+    Φ = K\FFB
 
-    # Calcula o J_eq para a seção transversal
+    # Calcula o J_eq para a seção transversal e também 
+    # devolve um vetor com a área de cada elemento da malha
     Jeq, A = Jequivalente(Φ, ne, IJ,XY)
 
     # Área total da seção 
@@ -38,7 +36,7 @@ function AnaliseTorcao(arquivo)
 
     # Podemos calcular as tensões tangenciais no centro de cada elemento da 
     # malha. 
-    τ =  Tensoes(Φ,ne,IJ,XY)
+    #τ =  Tensoes(Φ,ne,IJ,XY)
 
     # Visualização dos resultados
     Lgmsh_export_init("saida.pos",nn,ne,XY,etypes,IJ) 
@@ -47,15 +45,15 @@ function AnaliseTorcao(arquivo)
     Lgmsh_export_nodal_scalar("saida.pos",Φ,"Φ")
 
     # Exporta as tensões τ_zx
-    Lgmsh_export_element_scalar("saida.pos",τ[:,1],"τzx")
+    #Lgmsh_export_element_scalar("saida.pos",τ[:,1],"τzx")
 
     # Exporta o campo τ_zy
-    Lgmsh_export_element_scalar("saida.pos",τ[:,2],"τzy")
+    #Lgmsh_export_element_scalar("saida.pos",τ[:,2],"τzy")
 
     # Exporta o campo τ
-    Lgmsh_export_element_scalar("saida.pos",sqrt.(τ[:,1].^2 + τ[:,2].^2),"τ")
+    # Lgmsh_export_element_scalar("saida.pos",sqrt.(τ[:,1].^2 + τ[:,2].^2),"τ")
     
-    # Retorna os valores calculados
+    # Retorna os valores calculados para a seção
     return Jeq, area, Izl, Iyl, α
 
 end
