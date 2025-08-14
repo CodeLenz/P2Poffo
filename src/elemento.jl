@@ -11,7 +11,7 @@ function MontadN(r,s)
                   r-1 -(1+r)  1+r   1-r ]
 
     # Retorna a matriz
-    return dNrs
+    return SMatrix{2,4}(dNrs)
 
 end
 
@@ -42,7 +42,7 @@ function MontaJ(dNrs,X,Y)
     end #i
 
     # Retorna a matriz J no ponto (r,s)
-    return J
+    return SMatrix{2,2}(J)
 
 end
 
@@ -83,7 +83,7 @@ function MontaB(dNxy)
     end
 
     # Retorna a matriz B no ponto (r,s)
-    return B
+    return SMatrix{2,4}(B)
 
 end
 
@@ -123,7 +123,7 @@ end
 function MontaKe(X,Y)
 
     # Aloca a matriz
-    Ke = zeros(4,4)
+    Ke = @MMatrix zeros(4,4)
 
     # Define os pontos de Gauss-Legendre
     pg = (1/sqrt(3))*[-1  1 1 -1 ;
@@ -213,5 +213,86 @@ function Jelemento(ϕ_e,X,Y)
     # Retorna o valor da integral de Φ em Ωe
     # e a área
     return je, area 
+
+end
+
+
+#
+# Calcula os momentos de inércia do elemento 
+# em relação a origem do sistema de referência
+#
+#
+# area 
+# Qx (primeiro momento  em x)
+# Qy (primeiro momento em y)
+# Ix (segundo momento em x)
+# Iy (segundo momento em x)
+# Ixy (produto de inércia)
+# Jeq (J equivalente)
+#
+function Inercias_elemento(ϕ_e,X,Y)
+
+    # Matriz dos pontos de Gauss (r, s)
+    pg = (1/sqrt(3)) * [-1  1  1 -1;
+                        -1 -1  1  1]
+
+    # Inicializa os somátorios
+    Je = 0.0  
+    area = 0.0
+    Qx = 0.0
+    Qy = 0.0
+    Ix = 0.0
+    Iy = 0.0
+    Ixy = 0.0
+
+    # Loop pelos 4 pontos de Gauss
+    for i=1:4
+
+        # Recupera o ponto 
+        r = pg[1, i]
+        s = pg[2, i]
+        
+        # Funções de interpolação neste ponto
+        N = MontaN(r, s) 
+        
+        # Derivadas das funções de interpolação 
+        # em relação a rs neste ponto
+        dNrs = MontadN(r,s)
+
+        # Calcula a matriz J no ponto
+        J = MontaJ(dNrs,X,Y)
+
+        # Calcula o determinante no ponto 
+        dJ = det(J)
+
+        # Valor de Φ_e interpolado no ponto (r,s)
+        ϕrs = dot(N,ϕ_e)
+
+        # Valores interpolados das coordenadas X e Y
+        # em rs
+        xrs = dot(N,X)
+        yrs = dot(N,Y)
+        
+        # Acumula o valor da integral do je
+        Je = Je + 2*ϕrs*dJ
+
+        # Primeiros momentos 
+        Qx = Qx + yrs*dJ
+        Qy = Qy + xrs*dJ
+
+        # Segundos momentos
+        Ix = Ix + (yrs^2)*dJ
+        Iy = Iy + (xrs^2)*dJ
+
+        # Produto de inércia
+        Ixy = Ixy + (xrs*yrs)*dJ
+        
+        # Acumula a área
+        area = area + dJ
+
+    end
+    
+    # Retorna os valores para o elemento 
+    return area, Qx, Qy, Ix, Iy, Ixy, Je
 
 end

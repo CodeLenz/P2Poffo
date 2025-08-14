@@ -23,16 +23,58 @@ function AnaliseTorcao(arquivo)
     # Solução do sistema linear de Equações 
     Φ = K\VFB
 
-    # Calcula o J_eq para a seção transversal e também 
-    # devolve um vetor com a área de cada elemento da malha
-    Jeq, A = Jequivalente(Φ, ne, IJ,XY)
+    # Calcula as propriedaes da seção em relação a origem do 
+    # sistema de referência e também o vetor A com a área de cada elemento da malha
+    A, Qx, Qy, Ix, Iy, Ixy, Jeq = Propriedades_secao(Φ, ne, IJ, XY)
 
     # Área total da seção 
     area = sum(A)
+
+    # Centróide da seção 
+    An = A./area
+    cx = sum(centroides[:,1].*An)
+    cy = sum(centroides[:,2].*An)
+ 
+    #
+    # Por fim, podemos converter os valores para o centróide da seção
+    #
+    Ix  = Ix - Qx^2 / area
+    Iy  = Iy - Qy^2 / area
+    Ixy = Ixy - Qx*Qy / area
     
+    # Mudamos a notação para zy
+    Iz  = Ix
+    Izy = -Ixy 
+
+    # Se o produto de inércia for nulo, não precisamos calcular a rotação do sistema 
+    # de referência
+    if isapprox(Izy, 0.0, atol=1E-6)
+ 
+       α = 0.0
+       Izl = Iz
+       Iyl = Iy
+ 
+    else
+ 
+       # Podemos calcular o α da direção principal;
+       # Evitamos divisão por zero
+       if isapprox(Iz,Iy,atol=1E-6)
+          α = sign(Izy)*45.0
+       else
+          α = 0.5*atand( 2*Izy/(Iz-Iy) )
+       end
+ 
+       # Com isso, temos os valores extremos dados por
+       Im = (Iz + Iy) / 2
+       R = sqrt( ((Iz-Iy)/2)^2 + Ixy^2 )
+       Izl = Im + R
+       Iyl = Im - R
+    end
+
+
     # Agora podemos calcular as outras propriedades da seção transversal
     # como posição do centróide, Ix, Iy, Ixy e α
-    α, Izl , Iyl = MomentosInercia(A,centroides)
+    # α, Izl , Iyl, cx, cy = MomentosInercia(A,centroides)
 
     # Podemos calcular as tensões tangenciais no centro de cada elemento da 
     # malha. 
@@ -54,6 +96,6 @@ function AnaliseTorcao(arquivo)
     # Lgmsh_export_element_scalar("saida.pos",sqrt.(τ[:,1].^2 + τ[:,2].^2),"τ")
     
     # Retorna os valores calculados para a seção
-    return Jeq, area, Izl, Iyl, α
+    return (cx,cy), Qx , Qy, Izl, Iyl, Jeq, α
 
 end

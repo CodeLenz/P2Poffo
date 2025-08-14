@@ -2,6 +2,7 @@ module Torcao
 
     using LinearAlgebra
     using SparseArrays
+    using StaticArrays
     using Lgmsh
 
     # Carrega as rotinas
@@ -11,10 +12,11 @@ module Torcao
     include("global.jl")
     include("apoios.jl")
     include("corpo.jl")
-    include("jeq.jl")
-    include("momentosinercia.jl")
     include("main.jl")
     include("tensoes.jl")
+
+    # Alguns valores para referência
+    include("referencias.jl")
 
     # Exporta o arquivo .dat
     include("exportaarquivo.jl")
