@@ -5,12 +5,12 @@
 #
 function MomentosInercia(A,centroides)
 
-    # Incializa os valores
-    area = sum(A)
+    # Normaliza as áreas pela área total 
+    An = A./sum(A)
     
     # Centróide da seção 
-    centroide_x = sum(centroides[:,1].*A)/area;
-    centroide_y = sum(centroides[:,2].*A)/area;
+    centroide_x = sum(centroides[:,1].*An)
+    centroide_y = sum(centroides[:,2].*An)
 
     # Podemos calcular os momentos e o produto de inércia em relação ao centróide 
     Ix   = 0.0 
@@ -38,7 +38,7 @@ function MomentosInercia(A,centroides)
  
        # Podemos calcular o α da direção principal;
        # Evitamos divisão por zero
-       if isapprox(Iz,Iy,atol=1E-12)
+       if isapprox(Iz,Iy,atol=1E-6)
           α = sign(Izy)*45.0
        else
           α = 0.5*atand( 2*Izy/(Iz-Iy) )

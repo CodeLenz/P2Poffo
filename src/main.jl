@@ -18,10 +18,10 @@ function AnaliseTorcao(arquivo)
     VFB = ForcabGlobal(nn,ne,XY,IJ)
 
     # Aplica as condições de contorno essenciais homogêneas
-    K,F = AplicaCCH(nn,na,AP,K,VFB)
+    K,VFB = AplicaCCH(nn,na,AP,K,VFB)
 
     # Solução do sistema linear de Equações 
-    Φ = K\FFB
+    Φ = K\VFB
 
     # Calcula o J_eq para a seção transversal e também 
     # devolve um vetor com a área de cada elemento da malha
