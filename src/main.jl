@@ -35,11 +35,12 @@ function AnaliseTorcao(arquivo)
     cx = sum(centroides[:,1].*An)
     cy = sum(centroides[:,2].*An)
 
-    print("área",area)
-    print("Ix",Ix)
-    print("Iy",Iy)
-    print("Ixy",Ixy)
-    print("Jeq",Jeq)
+    println("área",area)
+    println("Ix",Ix)
+    println("Iy",Iy)
+    println("Ixy",Ixy)
+    println("Jeq",Jeq)
+    println("")
    
  
     #
