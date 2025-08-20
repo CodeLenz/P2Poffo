@@ -56,7 +56,7 @@ function AnaliseTorcao(arquivo)
 
     # Se o produto de inércia for nulo, não precisamos calcular a rotação do sistema 
     # de referência
-    if isapprox(Izy, 0.0, atol=1E-6)
+    if isapprox(Izy, 0.0, atol=1E-16)
  
        α = 0.0
        Izl = Iz
@@ -66,7 +66,7 @@ function AnaliseTorcao(arquivo)
  
        # Podemos calcular o α da direção principal;
        # Evitamos divisão por zero
-       if isapprox(Iz,Iy,atol=1E-6)
+       if isapprox(Iz,Iy,atol=1E-16)
           α = sign(Izy)*45.0
        else
           α = 0.5*atand( 2*Izy/(Iz-Iy) )
