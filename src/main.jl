@@ -34,6 +34,13 @@ function AnaliseTorcao(arquivo)
     An = A./area
     cx = sum(centroides[:,1].*An)
     cy = sum(centroides[:,2].*An)
+
+    print("área",A)
+    print("Ix",Ix)
+    print("Iy",Iy)
+    print("Ixy",Ixy)
+    print("Jeq",Jeq)
+   
  
     #
     # Por fim, podemos converter os valores para o centróide da seção
