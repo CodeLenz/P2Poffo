@@ -35,13 +35,7 @@ function AnaliseTorcao(arquivo)
     cx = sum(centroides[:,1].*An)
     cy = sum(centroides[:,2].*An)
 
-    println("área",area)
-    println("Ix",Ix)
-    println("Iy",Iy)
-    println("Ixy",Ixy)
-    println("Jeq",Jeq)
-    println("")
-   
+    
  
     #
     # Por fim, podemos converter os valores para o centróide da seção
@@ -53,6 +47,14 @@ function AnaliseTorcao(arquivo)
     # Mudamos a notação para zy
     Iz  = Ix
     Izy = -Ixy 
+
+    println("área",area)
+    println("Iz",Iz)
+    println("Iy",Iy)
+    println("Izy",Izy)
+    println("Jeq",Jeq)
+    println("")
+   
 
     # Se o produto de inércia for nulo, não precisamos calcular a rotação do sistema 
     # de referência
@@ -66,7 +68,7 @@ function AnaliseTorcao(arquivo)
  
        # Podemos calcular o α da direção principal;
        # Evitamos divisão por zero
-       if isapprox(Iz,Iy,atol=1E-8)
+       if isapprox(Iz,Iy,atol=1E-15)
           α = sign(Izy)*45.0
        else
           α = 0.5*atand( 2*Izy/(Iz-Iy) )
