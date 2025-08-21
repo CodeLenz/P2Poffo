@@ -9,7 +9,7 @@ b = 1e-3;
 // tamanho do elemento
 lc = a/20;
 
-// 
+// Pontos
 Point(1) = {   0 ,   0,   0, lc};
 Point(2) = {   a ,   0,   0, lc};
 Point(3) = {   a ,   b,   0, lc};
