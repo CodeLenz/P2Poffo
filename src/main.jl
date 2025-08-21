@@ -66,7 +66,7 @@ function AnaliseTorcao(arquivo)
  
        # Podemos calcular o α da direção principal;
        # Evitamos divisão por zero
-       if isapprox(Iz,Iy,atol=1E-16)
+       if isapprox(Iz,Iy,atol=1E-8)
           α = sign(Izy)*45.0
        else
           α = 0.5*atand( 2*Izy/(Iz-Iy) )
