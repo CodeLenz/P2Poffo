@@ -10,7 +10,7 @@
 # Iy
 # J0
 # α
-function ExportaDat(arquivo)
+function ExportaDat(arquivo, gera_pos=false)
 
     # Recupera o nome do arquivo sem caminho
     nome_msh = basename(arquivo)
@@ -19,7 +19,7 @@ function ExportaDat(arquivo)
     nome = nome_msh[1:end-4]   
 
     # Obtém os valores da análise
-    centroide, area, Izl, Iyl, Jeq, α  = AnaliseTorcao(arquivo)
+    centroide, area, Izl, Iyl, Jeq, α  = AnaliseTorcao(arquivo, gera_pos)
 
     # Define o nome do arquivo .dat
     nome_dat = string(nome, ".dat")

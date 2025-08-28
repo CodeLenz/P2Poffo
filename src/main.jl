@@ -2,7 +2,7 @@
 # Programa principal
 #
 
-function AnaliseTorcao(arquivo)
+function AnaliseTorcao(arquivo, gera_pos=true)
 
     # Entrada de dados
     nn,XY,ne,IJ,MAT,ESP,nf,FC,np,P,na,AP,nfb,FB,etypes,centroides = ConversorFEM1(arquivo)
@@ -90,19 +90,25 @@ function AnaliseTorcao(arquivo)
     #τ =  Tensoes(Φ,ne,IJ,XY)
 
     # Visualização dos resultados
-    Lgmsh_export_init("saida.pos",nn,ne,XY,etypes,IJ) 
+    if gera_pos
 
-    # Exporta o campo Φ
-    Lgmsh_export_nodal_scalar("saida.pos",Φ,"Φ")
+       # Inicializa o arquivo de saída
+       Lgmsh_export_init("saida.pos",nn,ne,XY,etypes,IJ) 
 
-    # Exporta as tensões τ_zx
-    #Lgmsh_export_element_scalar("saida.pos",τ[:,1],"τzx")
+       # Exporta o campo Φ
+       Lgmsh_export_nodal_scalar("saida.pos",Φ,"Φ")
 
-    # Exporta o campo τ_zy
-    #Lgmsh_export_element_scalar("saida.pos",τ[:,2],"τzy")
+      # Exporta as tensões τ_zx
+      #Lgmsh_export_element_scalar("saida.pos",τ[:,1],"τzx")
 
-    # Exporta o campo τ
-    # Lgmsh_export_element_scalar("saida.pos",sqrt.(τ[:,1].^2 + τ[:,2].^2),"τ")
+      # Exporta o campo τ_zy
+      #Lgmsh_export_element_scalar("saida.pos",τ[:,2],"τzy")
+
+      # Exporta o campo τ
+      # Lgmsh_export_element_scalar("saida.pos",sqrt.(τ[:,1].^2 + τ[:,2].^2),"τ")
+
+   end
+
     
     # Retorna os valores calculados para a seção
     return (cx,cy), area, Izl, Iyl, Jeq, α
