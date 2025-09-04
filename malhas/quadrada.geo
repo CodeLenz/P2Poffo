@@ -6,7 +6,7 @@
 a = 1E-2;
 
 // tamanho do elemento
-lc = a/4;
+lc = a/20;
 
 // 
 Point(1) = {   0 ,   0,   0, lc};
