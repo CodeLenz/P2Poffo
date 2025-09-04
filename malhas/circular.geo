@@ -6,7 +6,7 @@
 R = 1E-2;
 
 // tamanho do elemento
-lc = R/10;
+lc = R/30;
 
 // Centro, direita e acima esquerda e abaixo
 Point(1) = {   R ,   R,   0, lc};
