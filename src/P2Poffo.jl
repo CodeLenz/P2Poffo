@@ -12,7 +12,7 @@ module P2Poffo
     include("global.jl")
     include("apoios.jl")
     include("corpo.jl")
-    include("PreProcessamento.jl")
+    include("Pre.jl" )
     include("tensoes.jl")
 
     # Alguns valores para referência
