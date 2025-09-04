@@ -2,7 +2,7 @@
 # Programa principal
 #
 
-function AnaliseTorcao(arquivo, gera_pos=true)
+function Pre_processamento(arquivo, gera_pos=true)
 
     # Entrada de dados
     nn,XY,ne,IJ,MAT,ESP,nf,FC,np,P,na,AP,nfb,FB,etypes,centroides = ConversorFEM1(arquivo)
@@ -79,11 +79,6 @@ function AnaliseTorcao(arquivo, gera_pos=true)
        Izl = Im + R
        Iyl = Im - R
     end
-
-
-    # Agora podemos calcular as outras propriedades da seção transversal
-    # como posição do centróide, Ix, Iy, Ixy e α
-    # α, Izl , Iyl, cx, cy = MomentosInercia(A,centroides)
 
     # Podemos calcular as tensões tangenciais no centro de cada elemento da 
     # malha. 
