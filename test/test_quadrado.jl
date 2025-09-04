@@ -7,7 +7,7 @@
     area, Iz, Jeq = P2Poffo.Quadrado(1E-2)
 
     # Vamos utilizar o .msh de referência
-    arquivo = "qudrado.msh"
+    arquivo = "quadrada.msh"
 
     # Calcula com o programa
     centroide, area, Izl, Iyl, Jeq, α = Pre_processamento(arquivo)
