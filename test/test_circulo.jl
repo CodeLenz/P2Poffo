@@ -6,8 +6,8 @@
     # Valor de referência 
     area, Iz, Jeq = P2Poffo.Circulo(1E-2)
 
-    # Vamos utilizar o .msh de referência
-    arquivo = "circular.msh"
+    caminho = pathof(P2Poffo)[1:end-14]*"\\test"
+    arquivo = joinpath([caminho,"data","quadrado.msh"])
 
     # Calcula com o programa
     centroide, area, Izl, Iyl, Jeq, α = Pre_processamento(arquivo)
