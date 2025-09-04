@@ -22,7 +22,7 @@ module P2Poffo
     include("exportaarquivo.jl")
     
 	# Exporta a rotina principal de análise
-	export AnaliseTorcao
+	export Pre_processamento
 
     # Exporta a rotina que cria o .dat
     export ExportaDat
