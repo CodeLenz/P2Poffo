@@ -14,6 +14,7 @@ module P2Poffo
     include("corpo.jl")
     include("Pre.jl" )
     include("tensoes.jl")
+    include("rotacao.jl")
 
     # Alguns valores para referência
     include("referencias.jl")
@@ -27,5 +28,5 @@ module P2Poffo
     # Exporta a rotina que cria o .dat
     export ExportaDat
 
-	
+	export muda_coordenada
 end
