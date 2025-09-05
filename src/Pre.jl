@@ -19,6 +19,11 @@ function Pre_processamento(arquivo, gera_pos=true)
 
        # Cria o .msh
        gmsh.write(mshfile)
+      
+    else 
+
+       # Assumimos que já passaram o .msh (seria bom testar...)
+       mshfile = arquivo
 
     end
 
@@ -105,9 +110,15 @@ function Pre_processamento(arquivo, gera_pos=true)
     # Visualização dos resultados
     if gera_pos
 
-       # Gera o nome do arquivo .pos 
-       posfile = replace(arquivo,".geo"=>".pos")
+       # Retira os caminhos do nome do arquivo
+       mshfile2 = basename(mshfile)
 
+       @show mshfile, mshfile2
+
+       # Gera o nome do arquivo .pos 
+       posfile = replace(mshfile2,".msh"=>".pos")
+ 
+       @show posfile 
 
        # Inicializa o arquivo de saída
        Lgmsh_export_init(posfile,nn,ne,XY,etypes,IJ) 
