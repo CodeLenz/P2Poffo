@@ -4,6 +4,7 @@ authors = ["PedroPoffo <pedrohenriquepoffo@gmail.com>"]
 version = "0.1.0"
 
 [deps]
+Gmsh = "705231aa-382f-11e9-3f0c-b7cb4346fdeb"
 Lgmsh = "901517f6-ef86-4a80-bf35-2c5b8e720204"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
@@ -13,3 +14,4 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
+Gmsh = "0.3.1"

@@ -7,7 +7,6 @@ module P2Poffo
 
     # Carrega as rotinas
     include("conversor.jl")
-    include("material.jl")
     include("elemento.jl")
     include("global.jl")
     include("apoios.jl")

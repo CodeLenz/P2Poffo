@@ -4,6 +4,10 @@
 
 function Pre_processamento(arquivo, gera_pos=true)
 
+
+    # Se o arquivo for um .geo, geramos um .msh utilizando a biblioteca
+    # do gmsh
+
     # Entrada de dados
     nn,XY,ne,IJ,MAT,ESP,nf,FC,np,P,na,AP,nfb,FB,etypes,centroides = ConversorFEM1(arquivo)
 
