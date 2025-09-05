@@ -7,9 +7,23 @@ function Pre_processamento(arquivo, gera_pos=true)
 
     # Se o arquivo for um .geo, geramos um .msh utilizando a biblioteca
     # do gmsh
+    if occursin(".geo",arquivo)
+       
+       # Gera a malha
+       gmsh.initialize()
+       gmsh.open(arquivo)
+       gmsh.model.mesh.generate(2)
+       
+       # Cria o mesmo nome, mas com .msh
+       mshfile = replace(arquivo,".geo"=>".msh")
 
-    # Entrada de dados
-    nn,XY,ne,IJ,MAT,ESP,nf,FC,np,P,na,AP,nfb,FB,etypes,centroides = ConversorFEM1(arquivo)
+       # Cria o .msh
+       gmsh.write(mshfile)
+
+    end
+
+    # Entrada de dados, lendo do arquivo .msh
+    nn,XY,ne,IJ,MAT,na,AP,etypes,centroides = ConversorFEM(mshfile)
 
     #
     #                      Processamento
@@ -91,20 +105,24 @@ function Pre_processamento(arquivo, gera_pos=true)
     # Visualização dos resultados
     if gera_pos
 
+       # Gera o nome do arquivo .pos 
+       posfile = replace(arquivo,".geo"=>".pos")
+
+
        # Inicializa o arquivo de saída
-       Lgmsh_export_init("saida.pos",nn,ne,XY,etypes,IJ) 
+       Lgmsh_export_init(posfile,nn,ne,XY,etypes,IJ) 
 
        # Exporta o campo Φ
-       Lgmsh_export_nodal_scalar("saida.pos",Φ,"Φ")
+       Lgmsh_export_nodal_scalar(posfile,Φ,"Φ")
 
       # Exporta as tensões τ_zx
-      #Lgmsh_export_element_scalar("saida.pos",τ[:,1],"τzx")
+      #Lgmsh_export_element_scalar(posfile,τ[:,1],"τzx")
 
       # Exporta o campo τ_zy
-      #Lgmsh_export_element_scalar("saida.pos",τ[:,2],"τzy")
+      #Lgmsh_export_element_scalar(posfile,τ[:,2],"τzy")
 
       # Exporta o campo τ
-      # Lgmsh_export_element_scalar("saida.pos",sqrt.(τ[:,1].^2 + τ[:,2].^2),"τ")
+      # Lgmsh_export_element_scalar(posfile,sqrt.(τ[:,1].^2 + τ[:,2].^2),"τ")
 
    end
 

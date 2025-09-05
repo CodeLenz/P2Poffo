@@ -4,6 +4,7 @@ module P2Poffo
     using SparseArrays
     using StaticArrays
     using Lgmsh
+    using Gmsh
 
     # Carrega as rotinas
     include("conversor.jl")

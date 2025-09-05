@@ -1,7 +1,7 @@
 #
 # Lê um arquivo .msh do gmsh e converte para a nossa entrada de dados
 #
-function ConversorFEM1(arquivo,esp=0.01)
+function ConversorFEM(arquivo)
 
     # Evita que o usuário seja tanso
     contains(arquivo,".geo") && error("Usar o .msh e não o .geo")
@@ -52,21 +52,6 @@ function ConversorFEM1(arquivo,esp=0.01)
     # ν
     MAT[:,2] .= malha.materials[1,2]
 
-    # Espessura 
-    ESP = esp*ones(ne)
-
-    # Forças concentradas
-    nf = malha.nfc
-    FC = malha.FC
-
-    # Forças distribuídas
-    np = malha.nft
-    P  = malha.FT
-
-    # Forças de corpo
-    nfb = malha.nfb
-    FB  = malha.FB
-
     # Apoios
     na = malha.nap
     AP = malha.AP
@@ -74,7 +59,7 @@ function ConversorFEM1(arquivo,esp=0.01)
     # centroides
     centroides = malha.centroids
 
-    # Retorna como estava em Dados()
-    return nn,XY,ne,IJ,MAT,ESP,nf,FC,np,P,na,AP,nfb,FB,etypes,centroides
+    # Retorna os dados que precisamos para o processamento da geometria
+    return nn,XY,ne,IJ,MAT,na,AP,etypes,centroides
 
 end
