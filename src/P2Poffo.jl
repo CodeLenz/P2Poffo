@@ -16,9 +16,6 @@ module P2Poffo
     include("tensoes.jl")
     include("rotacao.jl")
 
-    # Alguns valores para referência
-    include("referencias.jl")
-
     # Exporta o arquivo .dat
     include("exportaarquivo.jl")
     
