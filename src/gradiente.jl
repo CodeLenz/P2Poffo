@@ -1,11 +1,10 @@
 #
-# Calcula as tensões tangenciais no centro de cada 
-# elemento da malha
+# Calcula o gradiente de Φ no centro de cada elemento da malha
 #
-function Tensoes(Φ,ne,IJ,XY)
+function GradΦ(Φ,ne,IJ,XY)
 
-    # Cada linha é um elemento. Coluna 1 é τ_zx e coluna 2 é τ_zy
-    τ = zeros(ne,2)
+    # Cada linha é um elemento. Coluna 1 é ∇xΦ e coluna 2 é ∇yΦ
+    ∇Φ = zeros(ne,2)
 
     # Loop por cada elemento da malha
     for ele=1:ne
@@ -35,11 +34,11 @@ function Tensoes(Φ,ne,IJ,XY)
         B = MontaB(dNxy)
 
         # Tensões no centro do elemento 
-        τ[ele,:] .= B*ϕ_e
+        ∇Φ[ele,:] .= B*ϕ_e
 
     end
 
-    # Retorna as tensões 
-    return τ
+    # Retorna o gradiente 
+    return ∇Φ
     
 end

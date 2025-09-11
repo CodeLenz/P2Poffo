@@ -70,11 +70,11 @@ function Pre_processamento(arquivo, gera_pos=true)
     Iz  = Ix
     Izy = -Ixy 
 
-    println("área",area)
-    println("Iz",Iz)
-    println("Iy",Iy)
-    println("Izy",Izy)
-    println("Jeq",Jeq)
+    println("área ",area)
+    println("Iz   ",Iz)
+    println("Iy   ",Iy)
+    println("Izy  ",Izy)
+    println("Jeq  ",Jeq)
     println("")
    
 
@@ -103,42 +103,38 @@ function Pre_processamento(arquivo, gera_pos=true)
        Iyl = Im - R
     end
 
-    # Podemos calcular as tensões tangenciais no centro de cada elemento da 
-    # malha. 
-    #τ =  Tensoes(Φ,ne,IJ,XY)
+    #
+    # CUIDADO...esses são só as derivadas de Φ em relação a x e a y
+    #
+    ∇Φ =  GradΦ(Φ,ne,IJ,XY)
 
     # Visualização dos resultados
     if gera_pos
 
-       # Retira os caminhos do nome do arquivo
-       mshfile2 = basename(mshfile)
+      # Retira os caminhos do nome do arquivo
+      mshfile2 = basename(mshfile)
+      
+      # Gera o nome do arquivo .pos 
+      posfile = replace(mshfile2,".msh"=>".pos")
+      
+      # Inicializa o arquivo de saída
+      Lgmsh_export_init(posfile,nn,ne,XY,etypes,IJ) 
 
-       @show mshfile, mshfile2
+      # Exporta o campo Φ
+      Lgmsh_export_nodal_scalar(posfile,Φ,"Φ")
 
-       # Gera o nome do arquivo .pos 
-       posfile = replace(mshfile2,".msh"=>".pos")
- 
-       @show posfile 
+      # Exporta o gradiente
+      Lgmsh_export_element_scalar(posfile,∇Φ[:,1],"∇Φx")
 
-       # Inicializa o arquivo de saída
-       Lgmsh_export_init(posfile,nn,ne,XY,etypes,IJ) 
+      # Exporta o gradiente
+      Lgmsh_export_element_scalar(posfile,∇Φ[:,2],"∇yΦ")
 
-       # Exporta o campo Φ
-       Lgmsh_export_nodal_scalar(posfile,Φ,"Φ")
-
-      # Exporta as tensões τ_zx
-      #Lgmsh_export_element_scalar(posfile,τ[:,1],"τzx")
-
-      # Exporta o campo τ_zy
-      #Lgmsh_export_element_scalar(posfile,τ[:,2],"τzy")
-
-      # Exporta o campo τ
-      # Lgmsh_export_element_scalar(posfile,sqrt.(τ[:,1].^2 + τ[:,2].^2),"τ")
+      # Exporta o módulo do gradiente
+      Lgmsh_export_element_scalar(posfile,sqrt.(∇Φ[:,1].^2 + ∇Φ[:,2].^2),"∇Φ")
 
    end
 
-    
     # Retorna os valores calculados para a seção
-    return (cx,cy), area, Izl, Iyl, Jeq, α
+    return (cx,cy), area, Izl, Iyl, Jeq, α, ∇Φ
 
 end

@@ -19,7 +19,7 @@ function ExportaDat(arquivo, gera_pos=false)
     nome = nome_msh[1:end-4]   
 
     # Obtém os valores da análise
-    centroide, area, Izl, Iyl, Jeq, α  = Pre_processamento(arquivo, gera_pos)
+    centroide, area, Izl, Iyl, Jeq, α, _  = Pre_processamento(arquivo, gera_pos)
 
     # Define o nome do arquivo .dat
     nome_dat = string(nome, ".dat")

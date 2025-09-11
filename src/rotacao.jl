@@ -2,7 +2,7 @@
 # Rotina que mudas as coordenadas para o centroide e rotaciona para o estado principal
 #
 
-function muda_coordenada(x,y,α,xc,yc)
+function Muda_coordenada(x,y,α,xc,yc)
 
     # Inicia o vetor coordenadas finais 2x1
     coordl = zeros(2)

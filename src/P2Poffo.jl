@@ -3,6 +3,7 @@ module P2Poffo
     using LinearAlgebra
     using SparseArrays
     using StaticArrays
+    using Statistics
     using Lgmsh
     using Gmsh
 
@@ -12,18 +13,17 @@ module P2Poffo
     include("global.jl")
     include("apoios.jl")
     include("corpo.jl")
-    include("Pre.jl" )
-    include("tensoes.jl")
+    include("gradiente.jl")
     include("rotacao.jl")
+
+    # Rotinas "principais"
+    include("Pre.jl" )
+    include("Pos.jl" )
 
     # Exporta o arquivo .dat
     include("exportaarquivo.jl")
     
 	# Exporta a rotina principal de análise
-	export Pre_processamento
+	export Pre_processamento, Pos_processamento 
 
-    # Exporta a rotina que cria o .dat
-    export ExportaDat
-
-	export muda_coordenada
 end

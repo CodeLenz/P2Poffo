@@ -11,7 +11,9 @@ OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 Gmsh = "0.3.1"
+Statistics = "1.11.1"
