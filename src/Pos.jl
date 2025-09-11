@@ -72,7 +72,7 @@ function Pos_processamento(arquivo_esforcos, ele, no)
     end
 
     # Vamos precisar dos dados da malha
-    nn,XY,ne,IJ,_ = ConversorFEM(arquivo_malha)
+    nn,XY,ne,IJ,MAT,na,AP,etypes,centroides = ConversorFEM(arquivo_malha)
 
     # Agora podemos alocar a matriz de saída
     # (σN σMy σMz σxy σxz)
@@ -110,7 +110,18 @@ function Pos_processamento(arquivo_esforcos, ele, no)
 
 
     end
+    # Retira os caminhos do nome do arquivo
+    mshfile2 = basename(arquivo_malha)
+      
+    # Gera o nome do arquivo .pos 
+    posfile = replace(mshfile2,".msh"=>".pos")
 
+    # Inicializa o arquivo de saída
+    Lgmsh_export_init(posfile,nn,ne,XY,etypes,IJ) 
+
+    # Exporta o campo σ 
+    ### OBS para a arrumar: aqui só está mostrando o sigma do Mz 
+    Lgmsh_export_nodal_scalar(posfile, σ[:,3],"σ")
     
     # Retorna a matriz com as tensões
     return σ
