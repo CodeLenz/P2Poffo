@@ -130,7 +130,6 @@ function Pos_processamento(arquivo_esforcos, ele, no)
     Lgmsh_export_init(nome_pos,nn,ne,XY,etypes,IJ) 
 
     # Exporta o campo σ 
-    ### OBS para a arrumar: aqui só está mostrando o sigma do Mz 
     Lgmsh_export_nodal_scalar(nome_pos, σ[:,3],"σ")
     
     # Retorna a matriz com as tensões
