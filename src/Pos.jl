@@ -129,8 +129,12 @@ function Pos_processamento(arquivo_esforcos, ele, no)
     # Inicializa o arquivo de saída
     Lgmsh_export_init(nome_pos,nn,ne,XY,etypes,IJ) 
 
-    # Exporta o campo σ 
-    Lgmsh_export_nodal_scalar(nome_pos, σ[:,3],"σ")
+    # Exporta o campo σ (falta "somar as tensões")
+    Lgmsh_export_nodal_scalar(nome_pos, σ[:,1],"σxxN")
+    Lgmsh_export_nodal_scalar(nome_pos, σ[:,2],"σxxMY")
+    Lgmsh_export_nodal_scalar(nome_pos, σ[:,3],"σxxMz")
+    Lgmsh_export_nodal_scalar(nome_pos, σ[:,4],"σzyT")
+    Lgmsh_export_nodal_scalar(nome_pos, σ[:,5],"σzxT")
     
     # Retorna a matriz com as tensões
     return σ
