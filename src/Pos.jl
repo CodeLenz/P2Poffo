@@ -42,14 +42,17 @@ function Pos_processamento(arquivo_esforcos, ele, no)
     # Testa para ver se temos 13 informações na linha
     length(dados)==13 || error("Pos_processamento:: Dados para o elemento $ele não tem a dimensão correta")
 
+    # Recupero o caminho da pasta
+    caminho = pathof(P2Poffo)[1:end-14]*"\\malhas"
+
     # O nome da seção transversal é a primeira informação da linha 
     nome_secao = dados[1]
 
-    # O nome da seção será 
-    arquivo_secao = nome_secao*".geo"
+    # O nome da seção será
+    arquivo_secao = joinpath([caminho,nome_secao*".geo"])
 
     # O nome do arquivo da malha será
-    arquivo_malha = nome_secao*".msh"
+    arquivo_malha = joinpath([caminho,nome_secao*".msh"])
 
     # Roda o pré-processamento e obtem todos os dados da seção transversal
     centroide, area, Izl, Iyl, Jeq, α, ∇Φ = Pre_processamento(arquivo_secao, false)

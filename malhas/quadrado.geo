@@ -44,4 +44,4 @@ Mesh.Algorithm = 8;
 Mesh 2;
 
 // Grava a malha
-Save "quadrada.msh";
+Save "quadrado.msh";
