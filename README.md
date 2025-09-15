@@ -134,7 +134,6 @@ Line(4) = {4,5};
 Line(5) = {5,6};
 Line(6) = {6,1};
 
-
 Curve Loop(1) = {1,2,3,4,5,6};
 Plane Surface(1) = {1};
 
