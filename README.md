@@ -109,7 +109,7 @@ b = 1 mm
 ```
 
 <p align="center">
-  <img src="Imagens/Seção L.png" alt="Figura 1" width="50%">
+  <img src="Imagens/Seção em L.png" alt="Figura 1" width="50%">
 </p>
 
 Criando o arquivo L.geo
