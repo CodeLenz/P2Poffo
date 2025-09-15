@@ -41,9 +41,9 @@ Pontos da circuferencia com o sistema de referêcia na esquerda baixo.
 
 Point(ID) = {coordenada em x, coordenada em y, coordenada em z, tamanho do lemento ao redor do nó}
 ```bash
-Point(1) = {   R ,   R,   0, lc};
-Point(2) = { 2*R ,   R,   0, lc};
-Point(3) = {   R , 2*R,   0, lc};
+Point(1) = {   R,    R,   0, lc};
+Point(2) = { 2*R,    R,   0, lc};
+Point(3) = {   R,  2*R,   0, lc};
 Point(4) = {   0,    R,   0, lc};
 Point(5) = {   R,    0,   0, lc};
 ```
