@@ -89,3 +89,9 @@ Grava a malha com .msh
 ```bash
 Save "circular.msh";
 ```
+
+### Exemplo
+Dada uma seção em L com as dimensões estabelecidadas na figura 1
+<p align="center">
+  <img src="Imagens/Seção em L.png" alt="Figura 1" width="50%">
+</p>
