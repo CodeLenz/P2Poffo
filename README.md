@@ -65,6 +65,7 @@ Physical Surface("Material,aço,1,210E9,0.3,7850.0") = {1};
 ```
 
 Prende todos os nós do contornor, ordem para tem que ser do conversor.
+
 Physical Curve("U,1,0,0")= {conectivadaes(1 ao 4)}; 
 ```bash
 Physical Curve("U,1,0.0") = {1:4};
