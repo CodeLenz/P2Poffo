@@ -113,7 +113,7 @@ b = 1 mm
 </p>
 
 Criando o arquivo L.geo
-
+#### L.geo
 ```bash
 a = 1E-2;
 b = 1e-3;
@@ -149,3 +149,24 @@ Mesh 2;
 
 Save "L.msh";
 ```
+
+#### Resultados
+Para os resultados relacionados à seção transversal, observam-se diferenças quanto à dependência da discretização por elementos finitos:
+
+1) Propriedades independentes de elementos finitos:
+
+a) Centroide 
+
+b) Área 
+
+c) Segundos momento de área(Izl,Iyl)
+
+d) Ângulo 𝛼
+
+Essas propriedades são obtidas diretamente a partir dos primeiros momentos de área, ou seja, não dependem do tamanho ou da densidade da malha de elementos finitos.
+
+2) Propriedades dependente de elementos finitos:
+
+a) Função de Airy
+
+b) Jeq da seção 
