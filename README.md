@@ -198,7 +198,6 @@ A distribuição da função de airy na seção
 </p>
 
 Resultados das propriedade da seção tranvesal:
-  7.342543859648254e-11, 6.178847989325534e-12, 45.0
 ```bash
     cx    = 0.002868421052631579  [m]
     cy    = 0.0028684210526315787 [m]
@@ -206,5 +205,5 @@ Resultados das propriedade da seção tranvesal:
     Izl   = 2.865833333333282e-10 [m] 
     Iyl   = 7.342543859648254e-11 [m]
     Jeq   = 6.178847989325534e-12 [m] 
-    α     = 45.0
+    α     = 45.0                  [°]
 ```
