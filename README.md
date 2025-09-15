@@ -13,7 +13,7 @@ Esta etapa do programa tem como objetivo utilizar o software livre Gmsh para a g
 ### Formato do arquivo de entrada
 Os arquivos de entrada podem estar nos formatos .geo ou .msh. No caso de arquivos .geo, o programa utiliza a biblioteca interna do Gmsh para a geração da malha, enquanto os arquivos .msh já contêm diretamente as informações da malha.
 
-'''bash
+```bash
 //
 // Arquivo .geo para a leitura no GMSH e geração de malha, exemplo com seção circular
 //
@@ -70,4 +70,4 @@ Mesh 2;
 // Grava a malha
 Save "circular.msh";
 
-'''
+```
