@@ -18,7 +18,7 @@ Retorno do Programa:
     Iyl     - Segundo momento de área em relação ao eixo y 
     Jeq     - Momento de inércia polar 
     α       - Ângulo formado entre o eixo de referência original e o eixo de referência principal
-    ∇Φ      - Gradiente da função de Airy
+    ∇Φ      - Vetor com Gradiente da função de Airy de todos os elementos da malha
 ```
 
 ### Formato do arquivo de entrada
