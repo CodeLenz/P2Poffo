@@ -59,7 +59,7 @@ Plane Surface(1) = {1};
 
 Material: Precisa para o conversor do Lgmsh
 
-Physical Surface("Material,nome do paterial,ID,E,Nu,G") = {ID};
+Physical Surface("Material,nome do paterial,ID,E,ν,ρ") = {ID};
 ```bash
 Physical Surface("Material,aço,1,210E9,0.3,7850.0") = {1};
 ```
