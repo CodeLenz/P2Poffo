@@ -27,7 +27,7 @@ Curve Loop(1) = {1,2,3,4};
 Plane Surface(1) = {1};
 
 // Material
-Physical Surface("Material,aço,1,210E9,0.3,7850.0") = {1};
+Physical Surface("") = {1};
 
 // Prende todos os nós do contorno
 Physical Curve("U,1,0.0") = {1:4};
