@@ -91,7 +91,7 @@ Save "circular.msh";
 ```
 
 ### Exemplo
-Dada uma seção em L com as dimensões estabelecidadas
+Dada uma seção em L com as seguintes dimensões
 ```bash
 a = 1 cm
 b = 1 mm
@@ -100,3 +100,42 @@ b = 1 mm
 <p align="center">
   <img src="Imagens/Seção L.png" alt="Figura 1" width="50%">
 </p>
+
+Criando o arquivo L.geo
+
+```bash
+a = 1E-2;
+b = 1e-3;
+
+lc = a/20;
+
+Point(1) = {   0 ,   0,   0, lc};
+Point(2) = {   a ,   0,   0, lc};
+Point(3) = {   a ,   b,   0, lc};
+Point(4) = {   b,    b,   0, lc};
+Point(5) = {   b,    a,   0, lc};
+Point(6) = {   0,    a,   0, lc};
+
+Line(1) = {1,2};
+Line(2) = {2,3};
+Line(3) = {3,4};
+Line(4) = {4,5};
+Line(5) = {5,6};
+Line(6) = {6,1};
+
+
+Curve Loop(1) = {1,2,3,4,5,6};
+Plane Surface(1) = {1};
+
+Physical Surface("Material,aço,1,210E9,0.3,7850.0") = {1};
+
+Physical Curve("U,1,0.0") = {1:6};
+
+Recombine Surface{:};
+
+Mesh.Algorithm = 8;
+
+Mesh 2;
+
+Save "L.msh";
+```
