@@ -91,7 +91,12 @@ Save "circular.msh";
 ```
 
 ### Exemplo
-Dada uma seção em L com as dimensões estabelecidadas na figura 1
+Dada uma seção em L com as dimensões estabelecidadas
+```bash
+a = 1 cm
+b = 1 mm
+```
+
 <p align="center">
   <img src="Imagens/Seção em L.png" alt="Figura 1" width="50%">
 </p>
