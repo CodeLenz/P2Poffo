@@ -10,6 +10,17 @@ Programa Pré e Pós processamento de seções transversais utilizando MEF.
 ## Pré-Processamento
 Esta etapa do programa tem como objetivo utilizar o software livre Gmsh para a geração da malha, de modo a obter as propriedades da seção transversal no sistema principal.
 
+Retorno do Programa:
+```bash
+    (cx,cy) - Centroides da seção
+    area    - Área da seção
+    Izl     - Segundo momento de área em relação ao eixo z 
+    Iyl     - Segundo momento de área em relação ao eixo y 
+    Jeq     - Momento de inércia polar 
+    α       - Ângulo formado entre o eixo de referência original e o eixo de referência principal
+    ∇Φ      - Gradiente da função de Airy
+```
+
 ### Formato do arquivo de entrada
 Os arquivos de entrada podem estar nos formatos .geo ou .msh. No caso de arquivos .geo, o programa utiliza a biblioteca interna do Gmsh para a geração da malha, enquanto os arquivos .msh já contêm diretamente as informações da malha.
 

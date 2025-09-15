@@ -1,9 +1,9 @@
 #
-# Exporta um arquivo em .dat com a ordem experada do LFrame
+# Exporta um arquivo em .sec com a ordem experada do LFrame
 #
 
 # Ordem que precisa ser salvo
-#*.dat
+#*.sec
 # nome
 # A
 # Iz 
