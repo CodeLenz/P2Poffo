@@ -149,7 +149,23 @@ Mesh 2;
 
 Save "L.msh";
 ```
-
+#### Rodando o exemplo
+No prompt de comando
+```bash
+cd Local arquivo
+```
+Inicie o julia
+```bash
+julia
+```
+Utilize o pacote e verifica as dependência
+```bash
+using P2Poffo
+```
+Rode o arquivo do exemplo
+```bash
+Pre_processamento("malhas/L.geo") 
+```
 #### Resultados
 Para os resultados relacionados à seção transversal, observam-se diferenças quanto à dependência da discretização por elementos finitos:
 
@@ -170,3 +186,13 @@ Essas propriedades são obtidas diretamente a partir dos primeiros momentos de �
 a) Função de Airy
 
 b) Jeq da seção 
+
+Com isso, notamos que a convergência do Jeq 
+<p align="center">
+  <img src="Imagens/Convergencia seção L.png" alt="Figura 1" width="80%">
+</p>
+
+A distribuição da função de airy na seção
+<p align="center">
+  <img src="Imagens/Phi L.png" alt="Figura 1" width="80%">
+</p>
