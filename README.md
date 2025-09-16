@@ -192,7 +192,7 @@ Com isso, notamos que a convergência do Jeq
   <img src="Imagens/Convergencia seção L.png" alt="Figura 1" width="80%">
 </p>
 
-A distribuição da função de airy na seção
+A distribuição da função de airy na seção pode ser encontrada na pasta Pos com o prefixo "∇Φ" e com o nome do arquivo ".pos". A visualização tambem foi utilizando o Gmsh
 <p align="center">
   <img src="Imagens/Phi L.png" alt="Figura 1" width="80%">
 </p>
