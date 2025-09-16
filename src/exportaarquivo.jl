@@ -15,16 +15,22 @@ function ExportaDat(arquivo, gera_pos=false)
     # Recupera o nome do arquivo sem caminho
     caminho = pathof(P2Poffo)[1:end-14]*"\\geometria"
 
-    # Nome do arquivo .msh
-    nome_msh = basename(arquivo)
+   # Nome do arquivo 
+    nome_ = basename(arquivo)
 
-    # repassa o nome do arquivo para .sec 
-    nome_sec = replace(nome_msh,".msh"=>".sec")
+    # repassa o nome do arquivo para .sec
+    if occursin(".msh",arquivo) 
+         
+        nome_sec = replace(nome_,".msh"=>".sec")
 
+    else 
+        nome_sec = replace(nome_,".geo"=>".sec")
+        
+    end
     # Cria o arquivo completo do .pos com o nome do yaml
     nome = joinpath(caminho, nome_sec)
  
-    geo = nome_msh[1:end-4]
+    geo = nome_[1:end-4]
     # Obtém os valores da análise
     centroide, area, Izl, Iyl, Jeq, α, _  = Pre_processamento(arquivo, gera_pos)
 
