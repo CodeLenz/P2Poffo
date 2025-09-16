@@ -10,7 +10,7 @@
 # Iy
 # J0
 # α
-function ExportaDat(arquivo, gera_pos=false)
+function Exporta(arquivo, gera_pos=false)
 
     # Recupera o nome do arquivo sem caminho
     caminho = pathof(P2Poffo)[1:end-14]*"\\geometria"

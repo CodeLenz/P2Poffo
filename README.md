@@ -207,3 +207,34 @@ Resultados das propriedade da seção tranvesal:
     Jeq   = 6.178847989325534e-12 [m^4] 
     α     = 45.0                  [°]
 ```
+## Exportando os dados
+Por vezes, é necessário determinar as propriedades das seções transversais para o cálculo dos deslocamentos da estrutura, uma vez que tais propriedades são fundamentais para a construção da matriz de rigidez. Nesse contexto, o P2Poffo pode ser utilizado como ferramenta de pré-processamento, ainda que sem a visualização da função de Airy. As propriedades calculadas são armazenadas na pasta geometria, com o mesmo nome do arquivo de entrada no formato.sec esse formato está compativo com o LFrame no formato de entrada das geometrias no .yaml
+
+Ordem que o arquivo .sec é salvo
+```bash
+geo - Nome da geometria
+area   - Área da seção
+Izl     - Segundo momento de área em relação ao eixo z 
+Iyl     - Segundo momento de área em relação ao eixo y 
+Jeq     - Momento de inércia polar 
+α       - Ângulo formado entre o eixo de referência 
+```
+#### Rodando a rotina
+Utilizando a mesma geometria (em "L"), arquivo de entrada pode ser no formato .geo ou .msh
+```bash
+Exporta("malhas/L.geo")
+```
+ou
+```bash
+Exporta("malhas/L.msh")
+```
+#### Resultados 
+Os resultados são encontrados na pasta geometria com geo.sec, para a geometria em L com a malha convergida. 
+```bash
+geo   = L                     [ - ]
+area  = 1.8999999999999998e-5 [m^2]
+Izl   = 2.865833333333282e-10 [m^4] 
+Iyl   = 7.342543859648254e-11 [m^4]
+Jeq   = 6.178847989325534e-12 [m^4] 
+α     = 45.0                  [ ° ]
+```
