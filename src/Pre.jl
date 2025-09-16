@@ -110,27 +110,33 @@ function Pre_processamento(arquivo, gera_pos=true)
 
     # Visualização dos resultados
     if gera_pos
+      
+      # Caminho para a pasta POS
+      caminho2 = pathof(P2Poffo)[1:end-14]*"\\Pos"
 
       # Retira os caminhos do nome do arquivo
-      mshfile2 = basename(mshfile)
+      mshfile2 = "∇Φ" * basename(mshfile)
       
       # Gera o nome do arquivo .pos 
       posfile = replace(mshfile2,".msh"=>".pos")
       
+      # Cria o arquivo completo do .pos com o nome do yaml
+      nome_pos = joinpath(caminho2,posfile)
+
       # Inicializa o arquivo de saída
-      Lgmsh_export_init(posfile,nn,ne,XY,etypes,IJ) 
+      Lgmsh_export_init(nome_pos,nn,ne,XY,etypes,IJ) 
 
       # Exporta o campo Φ
-      Lgmsh_export_nodal_scalar(posfile,Φ,"Φ")
+      Lgmsh_export_nodal_scalar(nome_pos,Φ,"Φ")
 
       # Exporta o gradiente
-      Lgmsh_export_element_scalar(posfile,∇Φ[:,1],"∇Φx")
+      Lgmsh_export_element_scalar(nome_pos,∇Φ[:,1],"∇Φx")
 
       # Exporta o gradiente
-      Lgmsh_export_element_scalar(posfile,∇Φ[:,2],"∇yΦ")
+      Lgmsh_export_element_scalar(nome_pos,∇Φ[:,2],"∇yΦ")
 
       # Exporta o módulo do gradiente
-      Lgmsh_export_element_scalar(posfile,sqrt.(∇Φ[:,1].^2 + ∇Φ[:,2].^2),"∇Φ")
+      Lgmsh_export_element_scalar(nome_pos,sqrt.(∇Φ[:,1].^2 + ∇Φ[:,2].^2),"∇Φ")
 
    end
 

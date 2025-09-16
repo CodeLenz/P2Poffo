@@ -115,16 +115,15 @@ function Pos_processamento(arquivo_esforcos, ele, no)
     end
 
     # Caminho para a pasta POS
-    caminho = pathof(P2Poffo)[1:end-14]*"\\Pos"
+    caminho2 = pathof(P2Poffo)[1:end-14]*"\\Pos"
 
     # Retira os caminhos do nome do arquivo
-    mshfile2 = basename(arquivo_malha)
-      
-    # Gera o nome do arquivo .pos 
-    posfile = replace(mshfile2,".msh"=>".pos")
+    mshfile3 = basename(arquivo_malha)
+    
+    posfile =  basename(arquivo_esforcos)[1:end-4]*" elemento "*mshfile3[1:end-4]*" nó $no"*".pos"
 
     # Cria o arquivo completo do .pos com o nome do yaml
-    nome_pos = joinpath(caminho,posfile)
+    nome_pos = joinpath(caminho2,posfile)
 
     # Inicializa o arquivo de saída
     Lgmsh_export_init(nome_pos,nn,ne,XY,etypes,IJ) 
