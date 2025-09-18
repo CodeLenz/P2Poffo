@@ -12,6 +12,9 @@ function Pos_processamento(arquivo_esforcos, ele, no)
     # Testa se elemento é maior ou igual a 1
     ele >=1 || error("Pos_processamento:: elemento deve ser >=1")
 
+    # Path base do arquivo de esforços
+    path_base = dirname(arquivo_esforcos)
+
     # Abre o arquivo de esforços e lê a linha relativa ao elemento 
     fd = open(arquivo_esforcos,"r")
 
@@ -42,17 +45,18 @@ function Pos_processamento(arquivo_esforcos, ele, no)
     # Testa para ver se temos 13 informações na linha
     length(dados)==13 || error("Pos_processamento:: Dados para o elemento $ele não tem a dimensão correta")
 
-    # Recupero o caminho da pasta
-    caminho = pathof(P2Poffo)[1:end-14]*"\\malhas"
+
+    # Agora que lemos os esforços do elemento, podemos processar a malha de elementos finitos 
+    # associada a essa seção transversal
 
     # O nome da seção transversal é a primeira informação da linha 
     nome_secao = dados[1]
 
     # O nome da seção será
-    arquivo_secao = joinpath([caminho,nome_secao*".geo"])
+    arquivo_secao = joinpath(path_base,nome_secao*".geo")
 
     # O nome do arquivo da malha será
-    arquivo_malha = joinpath([caminho,nome_secao*".msh"])
+    arquivo_malha = joinpath(path_base,nome_secao*".msh")
 
     # Roda o pré-processamento e obtem todos os dados da seção transversal
     centroide, area, Izl, Iyl, Jeq, α, ∇Φ = Pre_processamento(arquivo_secao, false)
@@ -115,25 +119,17 @@ function Pos_processamento(arquivo_esforcos, ele, no)
     end
 
     # Caminho para a pasta POS
-    caminho2 = pathof(P2Poffo)[1:end-14]*"\\Pos"
-
-    # Retira os caminhos do nome do arquivo
-    mshfile3 = basename(arquivo_malha)
-    
-    posfile =  basename(arquivo_esforcos)[1:end-4]*" elemento "*mshfile3[1:end-4]*" nó $no"*".pos"
-
-    # Cria o arquivo completo do .pos com o nome do yaml
-    nome_pos = joinpath(caminho2,posfile)
+    pos_file_node = joinpath(path_base,nome_secao*"_$(ele)_$(no).pos")
 
     # Inicializa o arquivo de saída
-    Lgmsh_export_init(nome_pos,nn,ne,XY,etypes,IJ) 
+    Lgmsh_export_init(pos_file_node,nn,ne,XY,etypes,IJ) 
 
     # Exporta o campo σ (falta "somar as tensões")
-    Lgmsh_export_nodal_scalar(nome_pos, σ[:,1],"σxxN")
-    Lgmsh_export_nodal_scalar(nome_pos, σ[:,2],"σxxMY")
-    Lgmsh_export_nodal_scalar(nome_pos, σ[:,3],"σxxMz")
-    Lgmsh_export_nodal_scalar(nome_pos, σ[:,4],"σzyT")
-    Lgmsh_export_nodal_scalar(nome_pos, σ[:,5],"σzxT")
+    Lgmsh_export_nodal_scalar(pos_file_node, σ[:,1],"σxxN")
+    Lgmsh_export_nodal_scalar(pos_file_node, σ[:,2],"σxxMY")
+    Lgmsh_export_nodal_scalar(pos_file_node, σ[:,3],"σxxMz")
+    Lgmsh_export_nodal_scalar(pos_file_node, σ[:,4],"σzyT")
+    Lgmsh_export_nodal_scalar(pos_file_node, σ[:,5],"σzxT")
     
     # Retorna a matriz com as tensões
     return σ
