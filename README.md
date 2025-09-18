@@ -37,9 +37,9 @@ Tamanho do elemento
 lc = R/30;
 ```
 
-Pontos da circuferencia com o sistema de referêcia na esquerda baixo.
+Pontos da circunferência com o sistema de referência na esquerda baixo.
 
-Point(ID) = {coordenada em x, coordenada em y, coordenada em z, tamanho do lemento ao redor do nó}
+Point(ID) = {coordenada em x, coordenada em y, coordenada em z, tamanho do elemento ao redor do nó}
 ```bash
 Point(1) = {   R,    R,   0, lc};
 Point(2) = { 2*R,    R,   0, lc};
@@ -49,7 +49,7 @@ Point(5) = {   R,    0,   0, lc};
 ```
 
 
-Circle(ID) = {nó inicial, nó central da circunferencia, nó final};
+Circle(ID) = {nó inicial, nó central da circunferência, nó final};
 ```bash
 Circle(1) = {2,1,3};
 Circle(2) = {3,1,4};
@@ -70,14 +70,14 @@ Plane Surface(1) = {1};
 
 Material: Precisa para o conversor do Lgmsh
 
-Physical Surface("Material,nome do paterial,ID,E,ν,ρ") = {ID};
+Physical Surface("Material,nome do material,ID,E,ν,ρ") = {ID};
 ```bash
 Physical Surface("Material,aço,1,210E9,0.3,7850.0") = {1};
 ```
 
-Prende todos os nós do contornor, ordem para tem que ser do conversor.
+Prende todos os nós do contorno, ordem para tem que ser do conversor.
 
-Physical Curve("U,1,0,0")= {conectivadaes(1 ao 4)}; 
+Physical Curve("U,1,0,0")= {conectividades(1 ao 4)}; 
 ```bash
 Physical Curve("U,1,0.0") = {1:4};
 ```
@@ -208,7 +208,7 @@ Resultados das propriedade da seção tranvesal:
     α     = 45.0                  [°]
 ```
 ## Exportando os dados
-Por vezes, é necessário determinar as propriedades das seções transversais para o cálculo dos deslocamentos da estrutura, uma vez que tais propriedades são fundamentais para a construção da matriz de rigidez. Nesse contexto, o P2Poffo pode ser utilizado como ferramenta de pré-processamento, ainda que sem a visualização da função de Airy. As propriedades calculadas são armazenadas na pasta geometria, com o mesmo nome do arquivo de entrada no formato.sec esse formato está compativo com o LFrame no formato de entrada das geometrias no .yaml
+Por vezes, é necessário determinar as propriedades das seções transversais para o cálculo dos deslocamentos da estrutura, uma vez que tais propriedades são fundamentais para a construção da matriz de rigidez. Nesse contexto, o P2Poffo pode ser utilizado como ferramenta de pré-processamento, ainda que sem a visualização da função de Airy. As propriedades calculadas são armazenadas na pasta geometria, com o mesmo nome do arquivo de entrada no formato.sec esse formato está compatível com o LFrame no formato de entrada das geometrias no .yaml
 
 Ordem que o arquivo .sec é salvo
 ```bash
