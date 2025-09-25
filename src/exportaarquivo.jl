@@ -22,14 +22,15 @@ function Exporta(arquivo, gera_pos=false)
         
     end
 
-    # Nome da geometria 
+    # Nome da geometria
+    nome_ = basename(nome_sec) 
     geo = nome_[1:end-4]
     
     # Obtém os valores da análise
     centroide, area, Izl, Iyl, Jeq, α, _  = Pre_processamento(arquivo, gera_pos)
 
     # Abre o arquivo para escrita e grava as informações uma por linha
-    open(nome, "w") do file
+    open(nome_sec, "w") do file
         println(file, geo)
         println(file, area)
         println(file, Izl)
