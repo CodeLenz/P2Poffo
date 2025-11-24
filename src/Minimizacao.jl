@@ -4,10 +4,11 @@
 
 function OTM(arquivo::AbstractString,posfile=true; verbose=false,ρ0=[])
 
+    # Calcula os deslocamentos e propriedades da malha inicial
     U, malha = LFrame.Analise3D(arquivo,posfile,verbose=verbose,ρ0=ρ0)
 
-    
-    V = volumes(malha)
+    # Calcula o volume inicial da malha    
+    V0 = volumes(malha)
 
 end
 
