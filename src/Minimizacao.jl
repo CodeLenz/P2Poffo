@@ -2,7 +2,7 @@
 # Rotinhas de integração
 #
 
-function OTM(arquivo::AbstractString,posfile=true; verbose=false,ρ0=[])
+function Criterio_Otimo(arquivo::AbstractString,posfile=true; verbose=false,ρ0=[])
 
     # Calcula os deslocamentos e propriedades da malha inicial
     U, malha = LFrame.Analise3D(arquivo,posfile,verbose=verbose,ρ0=ρ0)
