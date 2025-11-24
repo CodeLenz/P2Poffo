@@ -24,6 +24,9 @@ module P2Poffo
     # Exporta o arquivo .dat
     include("exportaarquivo.jl")
     
+
+    # rotinas OTM
+    include("Minimizacao.jl")
 	# Exporta a rotina principal de análise
 	export Pre_processamento, Pos_processamento, Exporta 
 

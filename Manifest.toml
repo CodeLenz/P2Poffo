@@ -2,7 +2,7 @@
 
 julia_version = "1.12.1"
 manifest_format = "2.0"
-project_hash = "a7d2ecfd100eca43f8015c64b8dd8d796ec5bb4f"
+project_hash = "7bdd27303b3087e4ad51168bba414a17356e037f"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "8be2ae325471fc20b11c27bb34b518541d07dd3a"
@@ -681,7 +681,7 @@ uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 version = "1.8.1"
 
 [[deps.P2Poffo]]
-deps = ["Gmsh", "Lgmsh", "LinearAlgebra", "OrderedCollections", "RecursiveArrayTools", "SparseArrays", "StaticArrays", "Statistics", "Test"]
+deps = ["Gmsh", "LFrame", "Lgmsh", "LinearAlgebra", "OrderedCollections", "RecursiveArrayTools", "SparseArrays", "StaticArrays", "Statistics", "Test"]
 path = "."
 uuid = "15746f16-e5ef-480f-93b5-237a577d2332"
 version = "0.1.0"
