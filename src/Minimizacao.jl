@@ -8,7 +8,10 @@ function Criterio_Otimo(arquivo::AbstractString,posfile=true; verbose=false,ρ0=
     U, malha = LFrame.Analise3D(arquivo,posfile,verbose=verbose,ρ0=ρ0)
 
     # Calcula o volume inicial da malha    
-    V0 = volumes(malha)
+    V = volumes(malha)
+
+    # Volume total ta estrutura
+    V0 = sum(V)
 
 end
 
@@ -27,7 +30,7 @@ function volumes(malha)
 
         Iz, Iy, J0, A, α, E, G, geo = LFrame.Dados_fundamentais(ele, dados_ele, dicionario_mat, dicionario_geo)
 
-        V = A * L[ele]
+        V[ele] = A * L[ele]
     end
 
     return V
