@@ -19,7 +19,10 @@ function Criterio_Otimo(arquivo::AbstractString,posfile=true; verbose=false,ρ0=
     # Volume máximo
     V_sup = vf * V0
 
+    # Copia do ρ0
     ρ_estimado = copy(ρ0)
+
+    # iniciando as derivadas
     dC = zeros(malha.ne)
     dV = zeros(malha.ne)
 
@@ -39,13 +42,13 @@ function Criterio_Otimo(arquivo::AbstractString,posfile=true; verbose=false,ρ0=
             # Derivada do volume em relação ao ρ
             dV[i] = V[i]
 
-            # fator beta
+            # fator beta(aqui tinha um min)
             β = -dC[i]/(μ*dV[i])
         
-            # New value for this variable
+            # Novo valor ρ estimado 
             ρ_e = ρ0[i] * (β^0.5)
             
-            # Moving limits
+            # Limites
             ρ_dir = min(ρ0[i] + δ, 1.0) 
             ρ_esq = max(ρ0[i] - δ, ρ_min) 
            
@@ -54,19 +57,19 @@ function Criterio_Otimo(arquivo::AbstractString,posfile=true; verbose=false,ρ0=
             #           x-δ    x+δ 
             #
             
-            # Check moving limits 
+            # Verificando os Limites
             ρ_estimado[i] = max( min( ρ_e, ρ_dir), ρ_esq)
         end 
 
-       # volume
+       # Volume novo
        V_atual = sum(ρ_estimado .* V)
  
-       # Test constraint
+       # Testando se atingiu a tolerancia
        if abs(μ2 - μ1)<=tol
             break
        end
         
-       # Adjust λ to match the volume constraint
+       # Verificando se o volume atingiu o máximo
        if (V_atual > V_sup)
             μ1 =  μ
        else
@@ -76,7 +79,7 @@ function Criterio_Otimo(arquivo::AbstractString,posfile=true; verbose=false,ρ0=
         
     end # k
  
-    # Return the x_estim
+    # Return o ρ_estimado
     return ρ_estimado
     
 end
@@ -100,6 +103,7 @@ function volumes(malha)
         V[ele] = A * L[ele]
     end
 
+    # Retorna o volume
     return V
 end
 
@@ -136,6 +140,7 @@ function dCompliance(malha,U::Vector,ρ::Vector)
         # Rigidez
         Ke = LFrame.Ke_portico3d(E,Iz,Iy,G,J0,malha.L[ele],A)
 
+        # Vetor das derivada
         D[ele]  =  -dot(ul,Ke,ul)
 
     end
