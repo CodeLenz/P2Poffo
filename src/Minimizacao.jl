@@ -1,11 +1,20 @@
 #
-# Rotinhas de integração
+# Rotinas de integração
 #
-
+#
 # V(ρ) <= V_sup = vf * V0
 # 
 
-function Main_Otim(arquivo::AbstractString,posfile=true; verbose=false,vf = 0.5, niter=100)
+# Parametrização SIMP 
+simp(ρ,p=3) = ρ^p
+
+# Derivada da parametrização 
+dsimp(ρ,p=3) = p*ρ^(p-1)
+
+#
+# Rotina principal
+#
+function Main_Otim(arquivo::AbstractString, fkparam::Function, fdkparam::Function, posfile=true; verbose=false,vf = 0.5, niter=100)
 
     # Chama o Analise3D com o nome do arquivo, para receber a estrutura de malha
     U0, malha = Analise3D(arquivo,posfile,verbose=verbose)
@@ -33,13 +42,12 @@ function Main_Otim(arquivo::AbstractString,posfile=true; verbose=false,vf = 0.5,
     for iter=1:niter
 
         # Calcula os deslocamentos
-        U, _ = Analise3D(malha,posfile,ρ0=ρ0)
-
+        U, _ = Analise3D(malha,posfile,ρ0=ρ0,kparam=[fkparam])
        
         @show iter, sum(ρ0.*dV), U[8]
 
         # Deriva da compliance
-        dC = dCompliance(malha,U,ρ0)    
+        dC = dCompliance(malha,U,ρ0,fdkparam)    
 
         # Atualiza as densidades relativas utilizando o OC
         ρ0 .= OC(ρ0,dC,dV,V_sup,ne)
@@ -143,7 +151,7 @@ function OC(ρ0::Vector, dC::Vector, dV::Vector, V_sup::Float64, ne::Int64, μ1=
 
 end
 
-function dCompliance(malha::LFrame.Malha,U::Vector,ρ::Vector)    
+function dCompliance(malha::LFrame.Malha,U::Vector,ρ::Vector,fdkparam::Function)    
 
     # Iniciando a derivada
     D = zeros(malha.ne)
@@ -178,7 +186,7 @@ function dCompliance(malha::LFrame.Malha,U::Vector,ρ::Vector)
         Ke = LFrame.Ke_portico3d(E,Iz,Iy,G,J0,L[ele],A)
 
         # Deriada da compliance C em relação ao elemento
-        D[ele]  =  -dot(ul,Ke,ul)
+        D[ele]  =  -dot(ul,Ke,ul)*fdkparam(ρ[ele])
 
     end
    
