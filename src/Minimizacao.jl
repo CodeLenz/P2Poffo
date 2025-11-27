@@ -5,27 +5,90 @@
 # V(ρ) <= V_sup = vf * V0
 # 
 
-function Criterio_Otimo(arquivo::AbstractString,posfile=true; verbose=false,ρ0=[],vf = 0.5, μ1=0.0, μ2=1E5, δ=0.1, tol=1E-6,ρ_min = 1E-3)
+function Main_Otim(arquivo::AbstractString,posfile=true; verbose=false,vf = 0.5, niter=100)
 
-    # Calcula os deslocamentos e propriedades da malha inicial
-    U, malha = LFrame.Analise3D(arquivo,posfile,verbose=verbose,ρ0=ρ0)
+    # Chama o Analise3D com o nome do arquivo, para receber a estrutura de malha
+    U0, malha = Analise3D(arquivo,posfile,verbose=verbose)
 
-    # Calcula o volume inicial da malha    
-    V = volumes(malha)
+    # Numero de elementos 
+    ne = malha.ne
+
+    # Estimativa inicial das densidades relativas
+    ρ0 = vf*ones(ne)
+
+    # Calcula o volume de cada elemento sem considerar a 
+    # parametrização 
+    V = Volumes(malha)
 
     # Volume total ta estrutura
     V0 = sum(V)
 
-    # Volume máximo
+    # Volume limite
     V_sup = vf * V0
+    
+    # Derivada do volume é fixa 
+    dV = V
+    
+    # Loop externo de otimização 
+    for iter=1:niter
+
+        # Calcula os deslocamentos
+        U, _ = Analise3D(malha,posfile,ρ0=ρ0)
+
+       
+        @show iter, sum(ρ0.*dV), U[8]
+
+        # Deriva da compliance
+        dC = dCompliance(malha,U,ρ0)    
+
+        # Atualiza as densidades relativas utilizando o OC
+        ρ0 .= OC(ρ0,dC,dV,V_sup,ne)
+        
+    end # loop externo
+    
+   return ρ0
+
+end
+
+#
+# Retorna um vetor com o volume de cada elemento da malha
+#
+function Volumes(malha::LFrame.Malha)
+
+    # Recupera os dados da malha
+    L = malha.L 
+    dados_ele = malha.dados_elementos
+    dicionario_mat = malha.dicionario_materiais
+    dicionario_geo = malha.dicionario_geometrias
+
+
+    # Inicializa o vetor de volumes
+    V = zeros(malha.ne)
+
+    # Loop pelos elementos
+    for ele = 1:malha.ne
+
+        Iz, Iy, J0, A, α, E, G, geo = LFrame.Dados_fundamentais(ele, dados_ele, dicionario_mat, dicionario_geo)
+
+        V[ele] = A * L[ele]
+    end
+
+    # Retorna o volume
+    return V
+
+end
+
+
+#
+# Critério de ótimo (loop local)
+#
+function OC(ρ0::Vector, dC::Vector, dV::Vector, V_sup::Float64, ne::Int64, μ1=0.0, μ2=1E5, δ=0.1, tol=1E-6,ρ_min = 1E-3)
 
     # Copia do ρ0
     ρ_estimado = copy(ρ0)
 
-    # iniciando as derivadas
-    dC = zeros(malha.ne)
-    dV = zeros(malha.ne)
-
+    # Aqui, V e dV são iguais
+    V = dV
 
     # Loop da bisseção
     for k=1:1000  
@@ -34,14 +97,8 @@ function Criterio_Otimo(arquivo::AbstractString,posfile=true; verbose=false,ρ0=
        μ = (μ1 + μ2)/2
           
         # Loop pelos elementos
-        for i in malha.ne     
-
-            # Derivada do compliance em relação ao ρ
-            dC[i] = dCompliance(malha, U, ρ_estimado)[i]
-
-            # Derivada do volume em relação ao ρ
-            dV[i] = V[i]
-
+        for i=1:ne     
+            
             # fator beta(aqui tinha um min)
             β = -dC[i]/(μ*dV[i])
         
@@ -59,6 +116,7 @@ function Criterio_Otimo(arquivo::AbstractString,posfile=true; verbose=false,ρ0=
             
             # Verificando os Limites
             ρ_estimado[i] = max( min( ρ_e, ρ_dir), ρ_esq)
+
         end 
 
        # Volume novo
@@ -81,66 +139,45 @@ function Criterio_Otimo(arquivo::AbstractString,posfile=true; verbose=false,ρ0=
  
     # Return o ρ_estimado
     return ρ_estimado
-    
+
+
 end
 
+function dCompliance(malha::LFrame.Malha,U::Vector,ρ::Vector)    
 
-function volumes(malha)
+    # Iniciando a derivada
+    D = zeros(malha.ne)
 
-    # Recupera os dados da malha
-    L = malha.L 
+    # Alias dos dados da estrutura de malha
     dados_ele = malha.dados_elementos
     dicionario_mat = malha.dicionario_materiais
     dicionario_geo = malha.dicionario_geometrias
-
-
-    V = zeros(malha.ne)
-    # Loop pelos elementos
-    for ele = 1:malha.ne
-
-        Iz, Iy, J0, A, α, E, G, geo = LFrame.Dados_fundamentais(ele, dados_ele, dicionario_mat, dicionario_geo)
-
-        V[ele] = A * L[ele]
-    end
-
-    # Retorna o volume
-    return V
-end
-
-
-function dCompliance(malha,U::Vector,ρ::Vector)    
-
-    # iniciando a derivada
-    D = zeros(malha.ne)
+    conect = malha.conect
+    coordenadas = malha.coord
+    L = malha.L
 
     # Loop pelos elementos
-    for ele in malha.ne
-        dados_ele = malha.dados_elementos
-        dicionario_mat = malha.dicionario_materiais
-        dicionario_geo = malha.dicionario_geometrias
-
+    for ele in 1:malha.ne
+        
+        # Recupera dados do elemento 
         Iz, Iy, J0, A, α, E, G, geo = LFrame.Dados_fundamentais(ele, dados_ele, dicionario_mat, dicionario_geo)
 
-        # gdls - 6 graus por nó
-        dofs = malha.nnos * 6   
+        # Graus de liberdade do elemento 
+        dofs = LFrame.Gls(ele,conect)
 
         # deslocamentos no global
         ug = U[dofs] 
-
-        # Recupera dados da malha
-        ij = malha.conect
-        coordenadas = malha.coord
-
+       
         # matriz de tranformação de coord(ver se é só rotacao ou translação)
-        T = LFrame.Rotacao3d(ele,ij,coordenadas,α)
+        T = LFrame.Rotacao3d(ele,conect,coordenadas,α)
 
         # Para o local
-        ul = T'ug
+        ul = T'*ug
         
-        # Rigidez
-        Ke = LFrame.Ke_portico3d(E,Iz,Iy,G,J0,malha.L[ele],A)
+        # Rigidez local do elemento 
+        Ke = LFrame.Ke_portico3d(E,Iz,Iy,G,J0,L[ele],A)
 
-        # Vetor das derivada
+        # Deriada da compliance C em relação ao elemento
         D[ele]  =  -dot(ul,Ke,ul)
 
     end

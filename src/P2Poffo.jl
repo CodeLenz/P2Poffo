@@ -27,6 +27,7 @@ module P2Poffo
 
     # rotinas OTM
     include("Minimizacao.jl")
+    
 	# Exporta a rotina principal de análise
 	export Pre_processamento, Pos_processamento, Exporta 
 
