@@ -7,6 +7,7 @@ module P2Poffo
     using Lgmsh
     using Gmsh
     using LFrame
+    using BMesh
 
     # Carrega as rotinas
     include("conversor.jl")
