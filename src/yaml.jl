@@ -11,7 +11,7 @@ mat - arquivo.mat com os dados do material (existe função que cria Exporta_mat
 """
 
 
-function criayaml(nome:: String, mesh::AbstractString, secao::AbstractString, mat::AbstractString)
+function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat::AbstractString)
 
     #   Ler o arquivo do portico
     Portic_mesh = readlines(mesh)
@@ -38,7 +38,7 @@ function criayaml(nome:: String, mesh::AbstractString, secao::AbstractString, ma
     # Nome que será salvo a malha
     arquivo = string(nome, ".yaml")
 
-    # Seção (já existe)
+    # Seção 
     geo = Exporta_sec(secao)
     geo_sec = geo * ".sec"
 
