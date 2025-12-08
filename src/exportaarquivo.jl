@@ -10,7 +10,7 @@
 # Iy
 # J0
 # α
-function Exporta(arquivo, gera_pos=false)
+function Exporta_sec(arquivo, gera_pos=false)
 
     # muda a terminação do arquivo para .sec
     if occursin(".msh",arquivo) 
@@ -40,6 +40,56 @@ function Exporta(arquivo, gera_pos=false)
     end
 
     # Fim da rotina
-    return nothing
+    return geo
+
+end
+
+
+# nome      = Nome que vai ser salvo o arquivo.yaml
+# Lx        = Tamanho em x
+# nx        = numero de divisões em x
+# Ly        = Tamanho em y
+# ny        = numero de divisões em y
+# Lz        = Tamanho em z
+# nz        = numero de divisões em z
+# origin    = coordenadas do nó de origem (nó 1)
+
+function Exporta_1d(nome::String,Lx::Float64,nx::Int64,Ly::Float64,ny::Int64,Lz::Float64,nz::Int64; origin=(0.0,0.0,0.0))
+
+    # Nome do arquivo com a malha do portico
+    nome_port = nome*".portic"
+
+    # Abre o arquivo para escrita e grava as informações uma por linha
+    open(nome_port, "w") do file
+        println(file, nome)
+        println(file, Lx)
+        println(file, nx)
+        println(file, Ly)
+        println(file, ny)
+        println(file, Lz)
+        println(file, nz)
+        println(file, origin)
+    end
+
+    # Fim da rotina
+    return nome
+
+end
+
+function Exporta_mat(nome::String,Ex::Float64,G::Float64,S_esc::Float64)
+
+    # Nome do arquivo com a malha do portico
+    nome_mat = nome*".mat"
+
+    # Abre o arquivo para escrita e grava as informações uma por linha
+    open(nome_mat, "w") do file
+        println(file, nome)
+        println(file, Ex)
+        println(file, G)
+        println(file, S_esc)
+    end
+
+    # Fim da rotina
+    return nome
 
 end
