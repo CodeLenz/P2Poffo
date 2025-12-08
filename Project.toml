@@ -1,9 +1,10 @@
 name = "P2Poffo"
 uuid = "15746f16-e5ef-480f-93b5-237a577d2332"
-version = "0.1.0"
 authors = ["PedroPoffo <pedrohenriquepoffo@gmail.com>"]
+version = "0.1.0"
 
 [deps]
+BMesh = "91fb467a-ecbd-11ec-0e64-1b9c3501232a"
 Gmsh = "705231aa-382f-11e9-3f0c-b7cb4346fdeb"
 LFrame = "ff7349aa-6be6-4087-9dfe-a9fea3953284"
 Lgmsh = "901517f6-ef86-4a80-bf35-2c5b8e720204"
@@ -17,6 +18,7 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
+BMesh = "1.0.0"
 Gmsh = "0.3.1"
 LFrame = "1.1.0"
 Revise = "3.12.2"
