@@ -93,3 +93,34 @@ function Exporta_mat(nome::String,Ex::Float64,G::Float64,S_esc::Float64)
     return nome
 
 end
+
+function Exporta_apoios(nome::String,coord::Vector,dofs::Vector{Vector{Int}},valor::Vector{Vector{Int}})
+
+    # Nome do arquivo com as coordenadas dos apoios
+    nome_apoio = nome*".ap"
+
+    # Abre o arquivo para escrita 
+    open(nome_apoio, "w") do file
+
+        # Para pelo vetor de coordenada
+        for i in eachindex(coord)
+
+            # Coordenada do apoio
+            c = coord[i]         
+
+            # gdl da coordenada
+            gdl_list = dofs[i]  
+
+            # Valor que da restrição do gdl na coordenada
+            val_list = valor[i]
+
+            # Escrita no arquivo: coord  gdl  valor
+            for j in eachindex(gdl_list)
+                g = gdl_list[j]
+                v = val_list[j]
+                write(file, "$(c[1]) $(c[2]) $(c[3])   $g   $v\n")
+            end
+        end
+    end
+    return nome
+end

@@ -8,10 +8,11 @@ nome - nome que vai ser salvo o arquivo yaml
 mesh - arquivo.portic com o dominio da malha do portico (existe função que cria "Exporta_1d")
 secao - arquivo.geo ou arquivo.msh com os dados do Gmsh
 mat - arquivo.mat com os dados do material (existe função que cria "Exporta_mat")
+ap - arquivo.ap com as coordenadas dos nós que queremos restrição(existe função que cria "Exporta_apoios")
 """
 
 
-function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat::AbstractString)
+function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat::AbstractString, ap::AbstractString)
 
     #   Ler o arquivo do portico
     Portic_mesh = readlines(mesh)
@@ -35,9 +36,6 @@ function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat
     coord   = bmesh.coord
     connect = bmesh.connect
 
-    # Nome que será salvo a malha
-    arquivo = string(nome, ".yaml")
-
     # Seção 
     geo = Exporta_sec(secao)
     geo_sec = geo * ".sec"
@@ -52,7 +50,7 @@ function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat
     J    = parse(Float64, linha[5])
     α    = parse(Float64, linha[6])
 
-  # Recupera os dados do material (todas as linhas)
+    # Recupera os dados do material (todas as linhas)
     material = readlines(mat)
 
     # Converter linhas para valores
@@ -61,6 +59,46 @@ function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat
     G        = parse(Float64, strip(material[3]))
     S_esc    = parse(Float64, strip(material[4]))
 
+    
+    # Ler todas as linhas
+    linhas = readlines(ap)
+
+    coord_apoios = []
+    gdl = Int[]
+    valor = Int[]
+
+    for lin in linhas
+        # Divide a linha por espaços
+        cols = split(lin)
+
+        # Converte cada coluna
+        x = parse(Float64, cols[1])
+        y = parse(Float64, cols[2])
+        z = parse(Float64, cols[3])
+        g = parse(Int, cols[4])
+        v = parse(Int, cols[5])
+
+        push!(coord_apoios, (x, y, z))
+        push!(gdl, g)
+        push!(valor, v)
+    end 
+
+    
+    nos = Int[]
+    # loop pelas quantidade de coordenadas 
+    for i in axes(coord_apoios, 1)
+
+        # coordenadas do arquivo
+        x, y, z = coord_apoios[i]
+
+        #encontra o nó mais perto
+        no = Find_node(bmesh, x, y, z)
+
+        push!(nos, no)
+    end
+
+    # Nome que será salvo o yaml
+    arquivo = string(nome, ".yaml")
 
     open(arquivo, "w") do io
 
@@ -102,9 +140,13 @@ function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat
         end
         write(io, "\n")
 
-        # Apoios — vazio por padrão
+        # Apoios 
         write(io, "apoios:\n")
-        write(io, "  # definir restrições depois\n\n")
+
+        for i in eachindex(nos)
+            write(io, "  $(nos[i]) $(gdl[i]) $(valor[i])\n")
+        end
+        
 
         # Dados dos elementos
         write(io, "dados_elementos:\n")
