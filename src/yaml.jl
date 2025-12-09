@@ -5,9 +5,9 @@
 
 """
 nome - nome que vai ser salvo o arquivo yaml
-mesh - arquivo.portic com o dominio da malha do portico (existe função que cria Exporta_1d)
-secao - arquivo.geo ou arquivo.msh com os dados da seção
-mat - arquivo.mat com os dados do material (existe função que cria Exporta_mat)
+mesh - arquivo.portic com o dominio da malha do portico (existe função que cria "Exporta_1d")
+secao - arquivo.geo ou arquivo.msh com os dados do Gmsh
+mat - arquivo.mat com os dados do material (existe função que cria "Exporta_mat")
 """
 
 

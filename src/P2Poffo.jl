@@ -33,6 +33,9 @@ module P2Poffo
     include("yaml.jl")
     
 	# Exporta a rotina principal de análise
-	export Pre_processamento, Pos_processamento, Exporta_sec, Exporta_1d, Exporta_mat,criayaml
+	export Pre_processamento, Pos_processamento
+    
+    # Rotinas auxiliares para a criação do yaml
+    export Exporta_sec, Exporta_1d, Exporta_mat, criayaml
 
 end
