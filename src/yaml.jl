@@ -60,7 +60,7 @@ function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat
     G        = parse(Float64, strip(material[3]))
     S_esc    = parse(Float64, strip(material[4]))
 
-    
+    # Para os apoios
     # Ler todas as linhas
     linhas = readlines(ap)
 
@@ -98,6 +98,33 @@ function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat
         push!(nos, no)
     end
 
+    # Para as forças 
+    ln = readlines(fc)
+
+    coord_fc = []
+    gdl_fc = Int[]
+    valor_fc = Int[]
+
+    for lin in ln
+        cols = split(lin)
+        x = parse(Float64, cols[1])
+        y = parse(Float64, cols[2])
+        z = parse(Float64, cols[3])
+        g = parse(Int, cols[4])
+        v = parse(Int, cols[5])
+
+        push!(coord_fc, (x, y, z))
+        push!(gdl_fc, g)
+        push!(valor_fc, v)
+    end 
+
+    nos_fc = Int[]
+    for i in axes(coord_fc, 1)
+        x, y, z = coord_fc[i]
+        no = Find_node(bmesh, x, y, z)
+        push!(nos_fc, no)
+    end
+    
     # Nome que será salvo o yaml
     arquivo = string(nome, ".yaml")
 
@@ -115,7 +142,10 @@ function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat
         write(io, "  # i FX FY FZ MX MY MZ\n\n")
 
         write(io, "loads:\n")
-        write(io, " \n")
+        for i in eachindex(nos_fc)
+            write(io, "  $(nos_fc[i]) $(gdl_fc[i]) $(valor_fc[i])\n")
+        end
+        
 
         write(io, "geometrias:\n")
         write(io, "  - Iz: $(Iz)\n")

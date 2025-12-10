@@ -5,7 +5,7 @@ materiais:
     S_esc: 5.0e8
 
 floads:
-   #2 FX FY FZ MX MY MZ
+  # i FX FY FZ MX MY MZ
 
 loads:
  
