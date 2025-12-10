@@ -8,7 +8,7 @@ floads:
   # i FX FY FZ MX MY MZ
 
 loads:
- 
+  0 2 -10000
 geometrias:
   - Iz: 2.865833333333452e-10
     A: 1.8999999999999998e-5
