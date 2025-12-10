@@ -29,6 +29,7 @@ function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat
 
     # Criação da malha usando o BMesh
     bmesh = Bmesh_truss_3D(Lx,nx,Ly,ny,Lz,nz,origin=origin) 
+    Lgmsh_export_init(nome*".pos",bmesh)
 
     # Recupera os dados da Malha
     ne      = bmesh.ne
