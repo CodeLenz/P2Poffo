@@ -12,7 +12,7 @@ ap - arquivo.ap com as coordenadas dos nós que queremos restrição(existe fun�
 """
 
 
-function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat::AbstractString, ap::AbstractString)
+function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat::AbstractString, ap::AbstractString, fc::AbstractString)
 
     #   Ler o arquivo do portico
     Portic_mesh = readlines(mesh)

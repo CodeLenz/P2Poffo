@@ -36,6 +36,6 @@ module P2Poffo
 	export Pre_processamento, Pos_processamento
     
     # Rotinas auxiliares para a criação do yaml
-    export Exporta_sec, Exporta_1d, Exporta_mat, Exporta_apoios, criayaml
+    export Exporta_sec, Exporta_1d, Exporta_mat, Exporta_apoios, Exporta_fc, criayaml
 
 end

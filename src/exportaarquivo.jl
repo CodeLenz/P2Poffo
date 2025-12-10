@@ -124,3 +124,35 @@ function Exporta_apoios(nome::String,coord::Vector,dofs::Vector{Vector{Int}},val
     end
     return nome
 end
+
+
+function Exporta_fc(nome::String,coord::Vector,dofs::Vector{Vector{Int}},valor::Vector{Vector{Int}})
+    
+     # Nome do arquivo com as coordenadas dos apoios
+    nome_fc = nome*".fc"
+
+    # Abre o arquivo para escrita 
+    open(nome_fc, "w") do file
+
+        # Para pelo vetor de coordenada
+        for i in eachindex(coord)
+
+            # Coordenada do apoio
+            c = coord[i]         
+
+            # gdl da coordenada
+            gdl_list = dofs[i]  
+
+            # Valor que da forca concentrada do gdl na coordenada
+            val_list = valor[i]
+
+            # Escrita no arquivo: coord  gdl  valor
+            for j in eachindex(gdl_list)
+                g = gdl_list[j]
+                v = val_list[j]
+                write(file, "$(c[1]) $(c[2]) $(c[3])   $g   $v\n")
+            end
+        end
+    end
+    return nome
+end
