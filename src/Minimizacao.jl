@@ -44,7 +44,7 @@ function Main_Otim(arquivo::AbstractString, fkparam::Function, fdkparam::Functio
         # Calcula os deslocamentos
         U, _ = Analise3D(malha,posfile,ρ0=ρ0,kparam=[fkparam])
        
-        @show iter, sum(ρ0.*dV), U[8]
+        # @show iter, sum(ρ0.*dV), U[8]
 
         # Deriva da compliance
         dC = dCompliance(malha,U,ρ0,fdkparam)    
