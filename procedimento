@@ -1,0 +1,44 @@
+#
+# Procedimento para utilizar o programa
+#
+
+1. Criar o arquivo de material (.mat)
+
+   Chamar a função 
+   
+                P2Poffo.Exporta_mat("teste_material_1",210E9,70E9,200E6)
+
+2. Criar o arquivo de malha (.portic)         
+
+   Chama a função 
+
+                P2Poffo.Exporta_1d("teste_malha_1",1.0,1,1.0,1,1.0,1)
+
+  que vai utilizar o BMesh
+
+3. Criar o arquivo de apoios (.ap)
+
+              coord = [ (0.0,0.0,0.0) ; (1.0,1.0,1.0) ]
+              dofs = [ [1;2;3;4;5;6] , [4;5] ]
+              valor = [ [0.0;0;0;0;0;0], [0.0, 0.0]]
+              P2Poffo.Exporta_apoios("teste_apoios_1",coord,dofs,valor)
+
+
+4. Criar o arquivo de forças concentradas (.fc)
+
+              coord2 = [(0.0,1.0,0.0)]
+              dofs2 = [ [1;3;6] ]
+              valor2 = [[-100.0;200;5]]
+              P2Poffo.Exporta_fc("teste_forca_1",coord2,dofs2,valor2)
+
+5. Utilizar o arquivo com os dados da seção (.geo ou .msh)    
+
+             por exemplo circular.geo
+
+6. Com isso pronto, podemos chamar a rotina 
+
+
+            P2Poffo.criayaml("teste_yaml_1","teste_malha_1.portic","malhas_pre/circular.geo","teste_material_1.mat","teste_apoios_1.ap","teste_forca_1.fc")
+
+
+

@@ -94,7 +94,7 @@ function Exporta_mat(nome::String,Ex::Float64,G::Float64,S_esc::Float64)
 
 end
 
-function Exporta_apoios(nome::String,coord::Vector,dofs::Vector{Vector{Int}},valor::Vector{Vector{Int}})
+function Exporta_apoios(nome::String,coord::Vector{Tuple{Float64,Float64,Float64}},dofs::Vector{Vector{Int}},valor::Vector{Vector{Float64}})
 
     # Nome do arquivo com as coordenadas dos apoios
     nome_apoio = nome*".ap"
@@ -122,11 +122,12 @@ function Exporta_apoios(nome::String,coord::Vector,dofs::Vector{Vector{Int}},val
             end
         end
     end
+
     return nome
 end
 
 
-function Exporta_fc(nome::String,coord::Vector,dofs::Vector{Vector{Int}},valor::Vector{Vector{Int}})
+function Exporta_fc(nome::String,coord::Vector{Tuple{Float64,Float64,Float64}},dofs::Vector{Vector{Int}},valor::Vector{Vector{Float64}})
     
      # Nome do arquivo com as coordenadas dos apoios
     nome_fc = nome*".fc"
@@ -154,5 +155,6 @@ function Exporta_fc(nome::String,coord::Vector,dofs::Vector{Vector{Int}},valor::
             end
         end
     end
+
     return nome
 end

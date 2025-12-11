@@ -54,6 +54,18 @@ function Main_Otim(arquivo::AbstractString, fkparam::Function, fdkparam::Functio
         
     end # loop externo
     
+    # Adiciona uma vista com as densidades relativas ao arquivo de saída
+    if posfile
+
+        # Nome do arquivo com .pos 
+        arquivo_pos =  replace(arquivo,".yaml"=>".pos")
+        
+        # Exporta a vista escalar 
+        Lgmsh.Lgmsh_export_element_scalar(arquivo_pos,ρ0,"ρ")
+
+    end
+
+   # Retorna as densidades relativas 
    return ρ0
 
 end

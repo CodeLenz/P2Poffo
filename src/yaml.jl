@@ -12,7 +12,7 @@ ap - arquivo.ap com as coordenadas dos nós que queremos restrição(existe fun�
 """
 
 
-function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat::AbstractString, ap::AbstractString, fc::AbstractString)
+function Criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat::AbstractString, ap::AbstractString, fc::AbstractString)
 
     #   Ler o arquivo do portico
     Portic_mesh = readlines(mesh)
@@ -39,7 +39,13 @@ function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat
 
     # Seção 
     geo = Exporta_sec(secao)
-    geo_sec = geo * ".sec"
+
+    # Nome do arquivo que foi gerado em Exporta_sec
+    if occursin(".msh",secao)
+       geo_sec = replace(secao,".msh"=>".sec")
+    else
+       geo_sec = replace(secao,".geo"=>".sec")
+    end
 
     #   Ler o arquivo da seção
     linha = readlines(geo_sec)
@@ -77,7 +83,7 @@ function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat
         y = parse(Float64, cols[2])
         z = parse(Float64, cols[3])
         g = parse(Int, cols[4])
-        v = parse(Int, cols[5])
+        v = parse(Float64, cols[5])
 
         push!(coord_apoios, (x, y, z))
         push!(gdl, g)
@@ -111,7 +117,7 @@ function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat
         y = parse(Float64, cols[2])
         z = parse(Float64, cols[3])
         g = parse(Int, cols[4])
-        v = parse(Int, cols[5])
+        v = parse(Float64, cols[5])
 
         push!(coord_fc, (x, y, z))
         push!(gdl_fc, g)
@@ -132,26 +138,28 @@ function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat
 
         # Materiais 
         write(io, "materiais:\n")
-        write(io, """  - nome: \"$(nome_mat)\"\n""")
-        write(io,   "    G: $(G)\n")
-        write(io,   "    Ex: $(Ex)\n")
-        write(io,   "    S_esc: $(S_esc)\n\n")
+        write(io, "  - nome: $(nome_mat) \n")
+        write(io, "    G: $(G)\n")
+        write(io, "    Ex: $(Ex)\n")
+        write(io, "    S_esc: $(S_esc)\n\n")
 
         # Carregamentos (vazio por enquanto)
         write(io, "floads:\n")
         write(io, "  # i FX FY FZ MX MY MZ\n\n")
+        println(io)
 
         write(io, "loads:\n")
         for i in eachindex(nos_fc)
             write(io, "  $(nos_fc[i]) $(gdl_fc[i]) $(valor_fc[i])\n")
         end
+        println(io)
         
 
         write(io, "geometrias:\n")
-        write(io, "  - Iz: $(Iz)\n")
+        write(io, "  - nome: $(geo)\n")
+        write(io, "    Iz: $(Iz)\n")
         write(io, "    A: $(A)\n")
-        write(io, "    Iy: $(Iy)\n")
-        write(io, "    nome: $(geo)\n")
+        write(io, "    Iy: $(Iy)\n")        
         write(io, "    α: $α\n")
         write(io, "    J0: $(J)\n\n")
 
@@ -177,7 +185,7 @@ function criayaml(nome::String, mesh::AbstractString, secao::AbstractString, mat
         for i in eachindex(nos)
             write(io, "  $(nos[i]) $(gdl[i]) $(valor[i])\n")
         end
-        
+        println(io)
 
         # Dados dos elementos
         write(io, "dados_elementos:\n")

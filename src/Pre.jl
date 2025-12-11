@@ -77,10 +77,10 @@ function Pre_processamento(arquivo, gera_pos=true)
     println("Jeq  ",Jeq)
     println("")
    
-
+    
     # Se o produto de inércia for nulo, não precisamos calcular a rotação do sistema 
     # de referência
-    if isapprox(Izy, 0.0) #, atol=1E-16)
+    if isapprox(Izy, 0.0,atol=1E-12) #, atol=1E-16)
  
        α = 0.0
        Izl = Iz
@@ -90,7 +90,7 @@ function Pre_processamento(arquivo, gera_pos=true)
  
        # Podemos calcular o α da direção principal;
        # Evitamos divisão por zero
-       if isapprox(Iz,Iy) #,atol=1E-15)
+       if isapprox(Iz,Iy) #,atol=1E-12)
           α = sign(Izy)*45.0
        else
           α = 0.5*atand( 2*Izy/(Iz-Iy) )
