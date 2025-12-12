@@ -238,3 +238,65 @@ Iyl   = 7.342543859648254e-11 [m^4]
 Jeq   = 6.178847989325534e-12 [m^4] 
 α     = 45.0                  [ ° ]
 ```
+
+## Pós-Processamento
+Para o pós-processamento deve-se utilizar um arquivo que informa os esforços internos de cada elemento. Para elementos de porticos podemos utilizar o LFrame para a gerar esse arquivo automaticamente, o detalhemento do uso da função está no README do LFrame. Lembrando que para realizar o Pós-Processamento, é necessario que seja uma geometria com malha realizada pelo Gmsh, se no local da pasta do arquivo de esforços não ter um arquivo.geo com a geometria da seção não irá funcionar.
+
+O arquivo de esforços deve estar na seguinte formatação "arquivo.esf". 
+
+A primeira linha precisa conter a String
+```bash
+Esforcos
+``` 
+As demais linhas contem a geometria da seção transversal com os esforços internos indo do primeiro ao sexto grau de liberdade no nó 1 e do primeiro ao sexto grau de liberdade no nó 2.
+```bash
+L  Nx1 Vy1 Vz1 Tx1 My1 Mz1 Nx2 Vy2 Vz2 Tx2 My2 Mz2
+``` 
+### Exemplo 
+Seja um portico engastado, com F e P com valores de 100N e T assumindo 50Nm e com comprimento de 2m.
+
+<p align="center">
+  <img src="Imagens/Exemplo 1.png " alt="Figura 2" width="60%">
+</p>
+
+Para obter os esforços internos utilizou-se o LFrame, Com as propriedades de seção convergidas e com as informações necessaria para a criação do yaml, obteve-se os esforços internos.
+
+Criango o arquivo L.esf
+```bash
+Esforcos
+L  -100.0 -70.7106781186547 70.71067811865474 -50.0 -14.142135623730956 -14.142135623730951 100.0 70.7106781186547 -70.71067811865474 50.0 1.2520473539146675e-14 1.0658141036401503e-14
+```
+
+Com o arquivo de esforços precisamos decidir qual elemento e nó vamos querer analisar a tensão, a função utilizada será
+```bash
+Pos_processamento(arquivo_esforcos, elemento, nó)
+```
+
+Para o nosso exemplo, temos somente um elemento e o nó mais solicitado será o 1, dessa forma,
+
+```bash
+cd Local arquivo
+```
+Inicie o julia
+```bash
+julia
+```
+Utilize o pacote e verifica as dependência
+```bash
+using P2Poffo
+```
+Rode o arquivo do exemplo
+```bash
+Pos_processamento("malhas_pre/L.esf", 1, 1)
+```
+
+Para o nosso exemplo, o arquivo .pos está com o seguinte nome: "L_1_1.pos". Pois ele salva a "geometria_elemento_nó.pos".
+
+### Visualisação no Gmsh
+O usuario deverá abrir o Gmsh, ir em File -> Open -> L_1_1.pos -> abrir. Se caso a visualização da malha estiver atrapalhando o pós processamento, pode desabilitar. Botão direito na malha -> Mesh Visibility - > desativar todas as opções.
+
+Para a visualização, temos todos as tensões no sistema central principal de inercia e com maior magnitude temos σxx devido ao momento em y, lembrando que aqui não está considerando sobreposição de efeitos.
+<p align="center">
+  <img src="Imagens/sigmaxx_MY.png" alt="Figura 2" width="60%">
+</p>
+
