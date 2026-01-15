@@ -37,4 +37,6 @@ module P2Poffo
     # Rotinas auxiliares para a criação do yaml
     export Exporta_sec, Exporta_1d, Exporta_mat, Exporta_apoios, Exporta_fc, Criayaml
 
+    # Rotinas de Otimização
+    export Main_Otim
 end

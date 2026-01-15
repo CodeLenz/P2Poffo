@@ -2,14 +2,14 @@
 # Rotinas de integração
 #
 #
-# V(ρ) <= V_sup = vf * V0
+# V(x) <= V_sup = vf * V0
 # 
 
 # Parametrização SIMP 
-simp(ρ,p=3) = ρ^p
+simp(x,p=3) = x^p
 
 # Derivada da parametrização 
-dsimp(ρ,p=3) = p*ρ^(p-1)
+dsimp(x,p=3) = p*x^(p-1)
 
 #
 # Rotina principal
@@ -23,7 +23,7 @@ function Main_Otim(arquivo::AbstractString, fkparam::Function, fdkparam::Functio
     ne = malha.ne
 
     # Estimativa inicial das densidades relativas
-    ρ0 = vf*ones(ne)
+    x0 = vf*ones(ne)
 
     # Calcula o volume de cada elemento sem considerar a 
     # parametrização 
@@ -42,15 +42,15 @@ function Main_Otim(arquivo::AbstractString, fkparam::Function, fdkparam::Functio
     for iter=1:niter
 
         # Calcula os deslocamentos
-        U, _ = Analise3D(malha,posfile,ρ0=ρ0,kparam=[fkparam])
+        U, _ = Analise3D(malha,posfile,x0=x0,kparam=[fkparam])
        
-        # @show iter, sum(ρ0.*dV), U[8]
+        # @show iter, sum(x0.*dV), U[8]
 
         # Deriva da compliance
-        dC = dCompliance(malha,U,ρ0,fdkparam)    
+        dC = dCompliance(malha,U,x0,fdkparam)    
 
         # Atualiza as densidades relativas utilizando o OC
-        ρ0 .= OC(ρ0,dC,dV,V_sup,ne)
+        x0 .= OC(x0,dC,dV,V_sup,ne)
         
     end # loop externo
     
@@ -61,12 +61,12 @@ function Main_Otim(arquivo::AbstractString, fkparam::Function, fdkparam::Functio
         arquivo_pos =  replace(arquivo,".yaml"=>".pos")
         
         # Exporta a vista escalar 
-        Lgmsh.Lgmsh_export_element_scalar(arquivo_pos,ρ0,"ρ")
+        Lgmsh.Lgmsh_export_element_scalar(arquivo_pos,x0,"x")
 
     end
 
    # Retorna as densidades relativas 
-   return ρ0
+   return x0
 
 end
 
@@ -102,10 +102,10 @@ end
 #
 # Critério de ótimo (loop local)
 #
-function OC(ρ0::Vector, dC::Vector, dV::Vector, V_sup::Float64, ne::Int64, μ1=0.0, μ2=1E5, δ=0.1, tol=1E-6,ρ_min = 1E-3)
+function OC(x0::Vector, dC::Vector, dV::Vector, V_sup::Float64, ne::Int64, μ1=0.0, μ2=1E5, δ=0.1, tol=1E-6,x_min = 1E-3)
 
-    # Copia do ρ0
-    ρ_estimado = copy(ρ0)
+    # Copia do x0
+    x_estimado = copy(x0)
 
     # Aqui, V e dV são iguais
     V = dV
@@ -122,12 +122,12 @@ function OC(ρ0::Vector, dC::Vector, dV::Vector, V_sup::Float64, ne::Int64, μ1=
             # fator beta(aqui tinha um min)
             β = -dC[i]/(μ*dV[i])
         
-            # Novo valor ρ estimado 
-            ρ_e = ρ0[i] * (β^0.5)
+            # Novo valor x estimado 
+            x_e = x0[i] * (β^0.5)
             
             # Limites
-            ρ_dir = min(ρ0[i] + δ, 1.0) 
-            ρ_esq = max(ρ0[i] - δ, ρ_min) 
+            x_dir = min(x0[i] + δ, 1.0) 
+            x_esq = max(x0[i] - δ, x_min) 
            
             # 
             #-------0[----|--x--|----]1---------  
@@ -135,12 +135,12 @@ function OC(ρ0::Vector, dC::Vector, dV::Vector, V_sup::Float64, ne::Int64, μ1=
             #
             
             # Verificando os Limites
-            ρ_estimado[i] = max( min( ρ_e, ρ_dir), ρ_esq)
+            x_estimado[i] = max( min( x_e, x_dir), x_esq)
 
         end 
 
        # Volume novo
-       V_atual = sum(ρ_estimado .* V)
+       V_atual = sum(x_estimado .* V)
  
        # Testando se atingiu a tolerancia
        if abs(μ2 - μ1)<=tol
@@ -157,13 +157,13 @@ function OC(ρ0::Vector, dC::Vector, dV::Vector, V_sup::Float64, ne::Int64, μ1=
         
     end # k
  
-    # Return o ρ_estimado
-    return ρ_estimado
+    # Return o x_estimado
+    return x_estimado
 
 
 end
 
-function dCompliance(malha::LFrame.Malha,U::Vector,ρ::Vector,fdkparam::Function)    
+function dCompliance(malha::LFrame.Malha,U::Vector,x::Vector,fdkparam::Function)    
 
     # Iniciando a derivada
     D = zeros(malha.ne)
@@ -198,7 +198,7 @@ function dCompliance(malha::LFrame.Malha,U::Vector,ρ::Vector,fdkparam::Function
         Ke = LFrame.Ke_portico3d(E,Iz,Iy,G,J0,L[ele],A)
 
         # Deriada da compliance C em relação ao elemento
-        D[ele]  =  -dot(ul,Ke,ul)*fdkparam(ρ[ele])
+        D[ele]  =  -dot(ul,Ke,ul)*fdkparam(x[ele])
 
     end
    
