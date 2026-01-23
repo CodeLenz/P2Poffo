@@ -26,7 +26,7 @@ module P2Poffo
     include("exportaarquivo.jl")
     
     # rotinas OTM
-    include("Minimizacao.jl")
+    include("Compliance.jl")
 
     #Rotina de malha
     include("yaml.jl")
