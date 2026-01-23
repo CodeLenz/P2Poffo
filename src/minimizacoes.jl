@@ -11,6 +11,12 @@ simp(x,p=3) = x^p
 # Derivada da parametrização 
 dsimp(x,p=3) = p*x^(p-1)
 
+# Parametrização SIMP 
+gimp(x,p=1) = x^p
+
+# Derivada da parametrização 
+dgimp(x,p=1) = p*x^(p-1)
+
 #
 # Rotina principal
 #
