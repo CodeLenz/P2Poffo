@@ -73,7 +73,7 @@ function dω(ωn::Float64,U0::Vector,malha::LFrame.Malha,x::Vector,fdkparam::Fun
     ϕg = zeros(nos*6)
 
     # Descobre quais gdls são livres
-    dofs_l = dofs_livres(nos,apoios)
+    dofs_l = LFrame.dofs_livres(nos,apoios)
 
     # Associa o gdl livre ao vetor de modos
     ϕg[dofs_l] .= U0
