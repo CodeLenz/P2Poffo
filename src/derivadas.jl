@@ -72,15 +72,12 @@ function dω(ωn::Float64,U0::Vector,malha::LFrame.Malha,x::Vector,fdkparam::Fun
     # Inicializa o vetor com os modos globais
     ϕg = zeros(nos*6)
 
-    # Matriz Diagonal com 1 
-    KG = Diagonal(ones(nos*6))
-    MG = Diagonal(ones(nos*6))
-
     # Descobre quais gdls são livres
-    Kr,Mr,Livres = LFrame.Condition(malha, KG, MG)
+    dofs_l = dofs_livres(nos,apoios)
 
     # Associa o gdl livre ao vetor de modos
-    ϕg[Livres] .= U0
+    ϕg[dofs_l] .= U0
+
 
     # Loop pelos elementos
     for ele in 1:malha.ne
