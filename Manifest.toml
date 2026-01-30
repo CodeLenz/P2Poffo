@@ -379,7 +379,7 @@ version = "0.10.5"
 
 [[deps.LFrame]]
 deps = ["Lgmsh", "LinearAlgebra", "LinearSolve", "OrderedCollections", "RecursiveArrayTools", "Revise", "SciMLOperators", "SparseArrays", "YAML"]
-git-tree-sha1 = "f31801b2a31bbe9dae3c3512e517684b90406dfd"
+git-tree-sha1 = "86faa15c1c232417c87f69c39967dfadfeef5496"
 repo-rev = "main"
 repo-url = "https://github.com/CodeLenz/LFrame"
 uuid = "ff7349aa-6be6-4087-9dfe-a9fea3953284"
