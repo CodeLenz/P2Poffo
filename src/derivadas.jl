@@ -125,3 +125,43 @@ function dω(ωn::Float64,U0::Vector,malha::LFrame.Malha,x::Vector,fdkparam::Fun
     # Retorna a derivada
     return d
 end
+
+# ω é um valor de referencia 
+function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam::Function,fdmparam::Function)
+
+    # valor para a norma
+    p = 5
+
+    # frequência de referência
+    ω = 200.0   
+
+    # Inicializa o somatorio
+    sum1 = 0.0
+    sum2 = 0.0
+
+    # loop pelas frequências
+    for i in eachindex(ωn)
+
+        # ∑ (ωi/ω)^(-p)
+        sum1 += (ωn[i] / ω)^(-p)
+    end
+
+    # fator global
+    S = sum1^((-1/p) - 1)
+
+    # vetor derivada
+    D = zeros(length(ωn))
+
+    for i in eachindex(ωn)
+
+        # dωi/dx
+        dωi = dω(ωn[i],U0[:, i],malha,x,fdkparam,fdmparam)
+
+        # derivada normalizada
+        D[i] .+= S * (ωn[i] / ω)^(-p - 1) * dωi / ω
+    end
+
+    return D
+end
+
+    
