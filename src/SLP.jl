@@ -5,13 +5,11 @@
 #
 #   Função que lineariza o problema
 #
-function Lineariza(x::Vector, δ::Vector, x_inf::Vector,x_sup::Vector,
-                   Objetivo::Function, Restricoes::Function,
-                   dObjetivo::Function, dRestricoes::Function)
+function Lineariza(x, δ, dω,dV,V_sup,ne)
 
 
     # Calcula as restrições no ponto e já descobre o número de restrições
-    g_real = Restricoes(x)
+    g_real = dV
 
     # número de restrições
     m = length(g_real)
@@ -23,14 +21,12 @@ function Lineariza(x::Vector, δ::Vector, x_inf::Vector,x_sup::Vector,
     c = zeros(n)
     A = zeros(m,n)
     b = zeros(m)
-    xi = zeros(n)
-    xs = zeros(n)
 
     # Coeficientes da função objetivo linearizada
-    c = dObjetivo(x)
+    c = dω
 
     # Gradiente das restrições linearizadas
-    A = dRestricoes(x)
+    A = dV
 
     # rhs das restrições linearizadas
     for i=1:m
@@ -55,14 +51,14 @@ function Lineariza(x::Vector, δ::Vector, x_inf::Vector,x_sup::Vector,
     end # for i
 
     # Retorna os Coeficientes do problema linearizado
-    return c,A,b,xi,xs,n,m
+    return c,A,b,n,m
 
 end
 
 #
 #   Soluciona o LP (interno)
 #
-function LP(c,A,b,xi,xs,n,m)
+function LP(c,A,b,n,m)
 
     
     # Aloca vetor de soluções atuais
@@ -114,7 +110,7 @@ end
 #
 #   Otimização sequencial
 #
-function OtimizaSLP(x0::Vector, x_inf::Vector, x_sup::Vector)
+function OtimizaSLP(x0,dω,dV,V_sup,ne)
 
     # Inicializa os vetores de iterações anteriores
     x1 = copy(x0)
@@ -156,18 +152,18 @@ function OtimizaSLP(x0::Vector, x_inf::Vector, x_sup::Vector)
                     # aumenta o multiplicador do limite móvel
                     δ[i] = min(δ[i]*1.2, δ_max)
 
-                end # if
-            end # for i
-        end # if iter > 2
+                end 
+            end 
+        end 
 
         # Lineariza o problema 
-        c,A,b,xi,xs,n,m = Lineariza(x0, δ, x_inf, x_sup, Objetivo, Restricoes,dObjetivo, dRestricoes)
+        c,A,b,n,m = Lineariza(x0, δ, dω,dV,V_sup,ne)
  
         # Chama a solução interna do problema
         xn, gs_lin = LP(c,A,b,xi,xs,n,m)
 
         # Define as tolerâncias
-        tol_f = 1E-4 # se tol_f menor que 1E-3 para por limite de iterações
+        tol_f = 1E-4
         tol_g = 1E-4
 
         # Calcula o valor da função objetivo em x0 e xn
@@ -175,12 +171,15 @@ function OtimizaSLP(x0::Vector, x_inf::Vector, x_sup::Vector)
         f_xn = Objetivo(xn)
 
         # Calcula a diferença relativa das variáveis de projeto
-        # Calcula a diferença relativa da função objetivo
         dif_x = (norm(xn - x0))/(norm(x0) + 1E-6)
+
+        # Calcula a diferença relativa da função objetivo
         dif_fx = (abs(f_xn - f_x0))/(abs(f_x0) + 1E-6)
 
-        # Calcula g_real e o termo violation
+        # Calcula g_real
         g_real = Restricoes(xn)
+
+        # Calcula o termo violation
         violation = max(0.0, minimum(g_real))
 
         # Verifica as tolerâncias
@@ -222,7 +221,7 @@ function OtimizaSLP(x0::Vector, x_inf::Vector, x_sup::Vector)
         println(fd,"violação   ",violation)
         println(fd,"------------------------------")
 
-    end # loop for iter
+    end 
     
     # Fecha o arquivo de saída
     close(fd)

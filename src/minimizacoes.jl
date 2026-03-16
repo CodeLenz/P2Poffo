@@ -76,6 +76,48 @@ function Main_Otim_OC(arquivo::AbstractString, fkparam::Function, fdkparam::Func
 
 end
 
+function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::Function, posfile=true; verbose=false, vf = 0.5 , niter=100)
+
+    # analise modal
+    ωn,U0,malha = Modal3D(arquivo,posfile,verbose=verbose)
+
+    # Numero de elementos 
+    ne = malha.ne
+
+    # Estimativa inicial das densidades relativas
+    x0 = vf*ones(ne)
+
+    # Calcula o volume de cada elemento sem considerar a 
+    # parametrização 
+    V = Volumes(malha)
+
+    # Volume total ta estrutura
+    V0 = sum(V)
+
+    # Volume limite
+    V_sup = vf * V0
+    
+    # Derivada do volume é fixa 
+    dV = V
+
+    # Loop externo de otimização 
+    for iter=1:niter
+
+        # Calcula os deslocamentos
+        ωn,U0,_ = Modal3D(malha,posfile,x0=x0,kparam=[fkparam])
+       
+        # Deriva da frequencia
+        dω = norma_dω(ωn,U0,malha,x0,fdkparam,fdmparam)   
+
+        # Restricoes 
+
+        # Atualiza as densidades relativas utilizando o SLP
+        x0 .= OtimizaSLP(x0,dω,dV,V_sup,ne)
+        
+    end # loop externo
+    
+end
+    
 
 
 
