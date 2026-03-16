@@ -4,6 +4,7 @@ module P2Poffo
     using SparseArrays
     using StaticArrays
     using Statistics
+    using LinearSolve
     using Lgmsh
     using Gmsh
     using LFrame

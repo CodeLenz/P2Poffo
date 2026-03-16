@@ -1,9 +1,3 @@
-using JuMP
-using HiGHS
-using LinearAlgebra
-include("problema.jl")
-
-
 ###########################################################################
 #            PROCEDIMENTO DE SOLUÇÂO PROBLEMA-AGNÓSTICO 
 ###########################################################################
@@ -235,9 +229,3 @@ function OtimizaSLP(x0::Vector, x_inf::Vector, x_sup::Vector)
 
     return x0
 end
-
-
-
-# Roda a otimização
-x_inf, x_sup = Laterais()
-x_opt = OtimizaSLP([3.0;4.0], x_inf, x_sup)
