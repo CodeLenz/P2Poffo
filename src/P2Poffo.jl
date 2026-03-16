@@ -9,6 +9,10 @@ module P2Poffo
     using LFrame
     using BMesh
 
+    # otimização
+    using JuMP
+    using HiGHS
+
     # Carrega as rotinas
     include("conversor.jl")
     include("elemento.jl")
@@ -29,6 +33,7 @@ module P2Poffo
     include("minimizacoes.jl")
     include("derivadas.jl")
     include("auxiliares.jl")
+    include("SLP.jl")
 
     #Rotina de malha
     include("yaml.jl")
