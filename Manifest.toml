@@ -799,7 +799,7 @@ uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 version = "1.8.1"
 
 [[deps.P2Poffo]]
-deps = ["BMesh", "Gmsh", "JuMP", "LFrame", "Lgmsh", "LinearAlgebra", "OrderedCollections", "RecursiveArrayTools", "Revise", "SparseArrays", "StaticArrays", "Statistics", "Test"]
+deps = ["BMesh", "Gmsh", "HiGHS", "JuMP", "LFrame", "Lgmsh", "LinearAlgebra", "OrderedCollections", "RecursiveArrayTools", "Revise", "SparseArrays", "StaticArrays", "Statistics", "Test"]
 path = "."
 uuid = "15746f16-e5ef-480f-93b5-237a577d2332"
 version = "0.1.0"
