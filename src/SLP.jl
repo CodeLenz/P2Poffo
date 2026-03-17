@@ -26,7 +26,7 @@ function Lineariza(x, δ, dω,dV,V_sup,ne)
     c = dω
 
     # Gradiente das restrições linearizadas
-    A = dV
+    A = [dV']
 
     # rhs das restrições linearizadas
     for i=1:m
@@ -51,14 +51,14 @@ function Lineariza(x, δ, dω,dV,V_sup,ne)
     end # for i
 
     # Retorna os Coeficientes do problema linearizado
-    return c,A,b,n,m
+    return c,A,b,xi,xs,n,m
 
 end
 
 #
 #   Soluciona o LP (interno)
 #
-function LP(c,A,b,n,m)
+function LP(c,A,b,xi,xs,n,m)
 
     
     # Aloca vetor de soluções atuais
@@ -128,39 +128,90 @@ function OtimizaSLP(x0,dω,dV,V_sup,ne)
     δ_min = 0.01
 
     # Abre arquivo para gravar o histórico
-    fd = open("convergencia_LP.txt","w")
+    # fd = open("convergencia_LP.txt","w")
 
     # Loop de otimização sequencial
     for iter = 1:100
-
+ 
+        # Os Δs teriam que ser recalculadados aqui (a cada iteração)
+        # usando os valores das 3 ultimas iterações
+ 
+         
         # Determina os limites móveis, baseados nas variações das
         # variáveis de projeto. Isso só faz sentido para iter > 2
-
-        if iter > 2
-
-            # Loop pelas variáveis de projeto
-            for i = 1:length(x0)
-
-                # identifica o zig-zag
-                if Δ1[i]*Δ2[i] < 0 
-
-                    # Diminui o multiplicador do limite móvel
-                    δ[i] = max(δ[i]*0.7, δ_min)
-
-                else
-
-                    # aumenta o multiplicador do limite móvel
-                    δ[i] = min(δ[i]*1.2, δ_max)
-
-                end 
-            end 
-        end 
+        atualiza_δ!(iter,δ,Δ1,Δ2,δ_min,δ_max)
 
         # Lineariza o problema 
-        c,A,b,n,m = Lineariza(x0, δ, dω,dV,V_sup,ne)
+        c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω,dV,V_sup,ne)
  
         # Chama a solução interna do problema
         xn, gs_lin = LP(c,A,b,xi,xs,n,m)
+
+
+        # Teste de convergência do problema 
+
+
+        # Roda e apita
+        x2 .= x1
+        x1 .= x0
+        x0 .= xn
+
+        # Escreve no arquivo de saída
+        println(fd,"iter $iter")
+        println(fd,"x   ",xn)
+        println(fd,"δ   ",δ)
+       # println(fd,"gs_lin   ",gs_lin)
+       # println(fd,"dif_x   ",dif_x)
+       # println(fd,"dif_fx   ",dif_fx)
+       # println(fd,"g_real   ",g_real)
+       # println(fd,"violação   ",violation)
+        println(fd,"------------------------------")
+
+    end 
+    
+    # Fecha o arquivo de saída
+    # close(fd)
+
+    return x0
+end
+
+
+#
+# Calcula o ajuste de limites móveis para a iteração
+#
+function atualiza_δ!(iter::Int,δ::Vector{T},Δ1::Vector{T},Δ2::Vector{T},δ_min::T,δ_max::T) where T
+
+    # Determina os limites móveis, baseados nas variações das
+    # variáveis de projeto. Isso só faz sentido para iter > 2
+
+    if iter > 2
+
+        # Loop pelas variáveis de projeto
+        for i in eachindex(δ)
+
+            # identifica o zig-zag
+            if Δ1[i]*Δ2[i] < 0 
+
+                # Diminui o multiplicador do limite móvel
+                δ[i] = max(δ[i]*0.7, δ_min)
+
+            else
+
+                # aumenta o multiplicador do limite móvel
+                δ[i] = min(δ[i]*1.2, δ_max)
+
+            end 
+        end 
+        
+    end 
+
+
+end
+
+
+function OLHAR()
+
+    
 
         # Define as tolerâncias
         tol_f = 1E-4
@@ -205,26 +256,5 @@ function OtimizaSLP(x0,dω,dV,V_sup,ne)
 
         end
 
-        # Roda e apita
-        x2 .= x1
-        x1 .= xn
-        x0 .= xn
 
-        # Escreve no arquivo de saída
-        println(fd,"iter $iter")
-        println(fd,"x   ",xn)
-        println(fd,"δ   ",δ)
-        println(fd,"gs_lin   ",gs_lin)
-        println(fd,"dif_x   ",dif_x)
-        println(fd,"dif_fx   ",dif_fx)
-        println(fd,"g_real   ",g_real)
-        println(fd,"violação   ",violation)
-        println(fd,"------------------------------")
-
-    end 
-    
-    # Fecha o arquivo de saída
-    close(fd)
-
-    return x0
-end
+    end

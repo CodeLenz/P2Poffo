@@ -76,6 +76,11 @@ function Main_Otim_OC(arquivo::AbstractString, fkparam::Function, fdkparam::Func
 
 end
 
+
+#
+# Isso aqui vai ter que juntar com o OtimizaSLP(x0,dω,dV,V_sup,ne) <- recebe as coisas gerais, 
+# pois tu vais ter que calcular as derivadas e funções a cada iteração externa do SLP
+#
 function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::Function, posfile=true; verbose=false, vf = 0.5 , niter=100)
 
     # analise modal
@@ -103,10 +108,10 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     # Loop externo de otimização 
     for iter=1:niter
 
-        # Calcula os deslocamentos
+        # Calcula frequências e modos
         ωn,U0,_ = Modal3D(malha,posfile,x0=x0,kparam=[fkparam])
        
-        # Deriva da frequencia
+        # Deriva da norma da frequencia - vamor mínimo
         dω = norma_dω(ωn,U0,malha,x0,fdkparam,fdmparam)   
 
         # Restricoes 
