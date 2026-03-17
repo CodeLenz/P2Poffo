@@ -468,7 +468,7 @@ version = "0.10.6"
 
 [[deps.LFrame]]
 deps = ["Lgmsh", "LinearAlgebra", "LinearSolve", "OrderedCollections", "RecursiveArrayTools", "Revise", "SciMLOperators", "SparseArrays", "YAML"]
-git-tree-sha1 = "7cc75df6485c9a0daf0fca8c2ae2e3cdd6065608"
+git-tree-sha1 = "d832487fd5eac7eb0a6b4c8787594ce002212a3d"
 repo-rev = "main"
 repo-url = "https://github.com/CodeLenz/LFrame"
 uuid = "ff7349aa-6be6-4087-9dfe-a9fea3953284"
@@ -931,9 +931,9 @@ version = "1.3.1"
 
 [[deps.Revise]]
 deps = ["CodeTracking", "FileWatching", "InteractiveUtils", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "Preferences", "REPL", "UUIDs"]
-git-tree-sha1 = "14d1bfb0a30317edc77e11094607ace3c800f193"
+git-tree-sha1 = "d97d78d4fc5f858d8ce44f6b88bc972f2023f51d"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.13.2"
+version = "3.14.0"
 weakdeps = ["Distributed"]
 
     [deps.Revise.extensions]
@@ -957,9 +957,9 @@ version = "0.7.0"
 
 [[deps.SciMLBase]]
 deps = ["ADTypes", "Accessors", "Adapt", "ArrayInterface", "CommonSolve", "ConstructionBase", "Distributed", "DocStringExtensions", "EnumX", "FunctionWrappersWrappers", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "Markdown", "Moshi", "PreallocationTools", "PrecompileTools", "Preferences", "Printf", "RecipesBase", "RecursiveArrayTools", "Reexport", "RuntimeGeneratedFunctions", "SciMLLogging", "SciMLOperators", "SciMLPublic", "SciMLStructures", "StaticArraysCore", "Statistics", "SymbolicIndexingInterface"]
-git-tree-sha1 = "8787e28326c99b0c9c706b51da525ad09d03c56f"
+git-tree-sha1 = "0be0208add9b6836a701e0ac3ad30bda72fee51d"
 uuid = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
-version = "2.149.0"
+version = "2.150.0"
 
     [deps.SciMLBase.extensions]
     SciMLBaseChainRulesCoreExt = "ChainRulesCore"
@@ -1097,16 +1097,18 @@ version = "0.3.7"
 
 [[deps.StructUtils]]
 deps = ["Dates", "UUIDs"]
-git-tree-sha1 = "28145feabf717c5d65c1d5e09747ee7b1ff3ed13"
+git-tree-sha1 = "b4075a491f3cb24e3beea0c192959292f80e1ad8"
 uuid = "ec057cc2-7a8d-4b58-b3b3-92acb9f63b42"
-version = "2.6.3"
+version = "2.7.0"
 
     [deps.StructUtils.extensions]
     StructUtilsMeasurementsExt = ["Measurements"]
+    StructUtilsStaticArraysCoreExt = ["StaticArraysCore"]
     StructUtilsTablesExt = ["Tables"]
 
     [deps.StructUtils.weakdeps]
     Measurements = "eff96d63-e80a-5855-80a2-b1b0885c5ab7"
+    StaticArraysCore = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
     Tables = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
 
 [[deps.StyledStrings]]

@@ -5,17 +5,13 @@
 #
 #   Função que lineariza o problema
 #
-function Lineariza(x, δ, dω,dV,V_sup,ne)
+function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup)
 
-
-    # Calcula as restrições no ponto e já descobre o número de restrições
-    g_real = dV
-
-    # número de restrições
-    m = length(g_real)
+    # número de restrições por enquanto 1 só dv
+    m = 1
     
     # número de variáveis de projeto
-    n = length(x)
+    n = length(x0)
 
     # Aloca os arrays do LP
     c = zeros(n)
@@ -26,29 +22,28 @@ function Lineariza(x, δ, dω,dV,V_sup,ne)
     c = dω
 
     # Gradiente das restrições linearizadas
-    A = [dV']
+    A = dV'
 
     # rhs das restrições linearizadas
-    for i=1:m
-        b[i] = dot(A[i,:],x) - g_real[i]
-    end
+    #for i=1:m
+        #b[i] = V_sup - dV[i] + dot(A[i,:],x0) 
+    #end
+
+    # como tem só uma restrição e ela já é linear (adaptar para quando não for usando o for acima)
+    b[1] = V_sup
+
+    # inicializa xs e xi
+    xi = zeros(n)
+    xs = zeros(n)
 
     # Limites móveis do problema
     for i = 1:n
 
-        if x[i]>0
+        # sempre será maior que 0 , pois x : [0,1]
+        xi[i] = max((1 - δ[i])*x0[i], x_inf[i])
+        xs[i] = min((1 + δ[i])*x0[i], x_sup[i])
 
-            xi[i] = max((1 - δ[i])*x[i], x_inf[i])
-            xs[i] = min((1 + δ[i])*x[i], x_sup[i])
-
-        else
-
-            xi[i] = max(x[i] - δ[i], x_inf[i])
-            xs[i] = min(x[i] + δ[i], x_sup[i])
-
-        end # if
-
-    end # for i
+    end
 
     # Retorna os Coeficientes do problema linearizado
     return c,A,b,xi,xs,n,m
@@ -100,82 +95,6 @@ function LP(c,A,b,xi,xs,n,m)
 end
 
 
-
-
-###########################################################################
-#            PROGRAMA PRINCIPAL - RECEBE AS DEFINIÇÕES DO PROBLEMA 
-#                  E EXECUTA TODOS OS PASSOS DE SOLUÇÃO
-###########################################################################
-
-#
-#   Otimização sequencial
-#
-function OtimizaSLP(x0,dω,dV,V_sup,ne)
-
-    # Inicializa os vetores de iterações anteriores
-    x1 = copy(x0)
-    x2 = copy(x1)
-
-    # Só inicializa aqui...
-    Δ1 = x0 .- x1
-    Δ2 = x1 .- x2
-
-    # Vamos inicializar o veltor de deltas
-    δ = 0.1*ones(2)
-
-    # Limites máximos e mínimos para os deltas
-    δ_max = 0.2
-    δ_min = 0.01
-
-    # Abre arquivo para gravar o histórico
-    # fd = open("convergencia_LP.txt","w")
-
-    # Loop de otimização sequencial
-    for iter = 1:100
- 
-        # Os Δs teriam que ser recalculadados aqui (a cada iteração)
-        # usando os valores das 3 ultimas iterações
- 
-         
-        # Determina os limites móveis, baseados nas variações das
-        # variáveis de projeto. Isso só faz sentido para iter > 2
-        atualiza_δ!(iter,δ,Δ1,Δ2,δ_min,δ_max)
-
-        # Lineariza o problema 
-        c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω,dV,V_sup,ne)
- 
-        # Chama a solução interna do problema
-        xn, gs_lin = LP(c,A,b,xi,xs,n,m)
-
-
-        # Teste de convergência do problema 
-
-
-        # Roda e apita
-        x2 .= x1
-        x1 .= x0
-        x0 .= xn
-
-        # Escreve no arquivo de saída
-        println(fd,"iter $iter")
-        println(fd,"x   ",xn)
-        println(fd,"δ   ",δ)
-       # println(fd,"gs_lin   ",gs_lin)
-       # println(fd,"dif_x   ",dif_x)
-       # println(fd,"dif_fx   ",dif_fx)
-       # println(fd,"g_real   ",g_real)
-       # println(fd,"violação   ",violation)
-        println(fd,"------------------------------")
-
-    end 
-    
-    # Fecha o arquivo de saída
-    # close(fd)
-
-    return x0
-end
-
-
 #
 # Calcula o ajuste de limites móveis para a iteração
 #
@@ -209,52 +128,27 @@ function atualiza_δ!(iter::Int,δ::Vector{T},Δ1::Vector{T},Δ2::Vector{T},δ_m
 end
 
 
-function OLHAR()
+function convergencia(x0,xn,dω,dω_xn,dV)
 
-    
+    # Define as tolerâncias
+    tol_f = 1E-4
+    tol_g = 1E-4
 
-        # Define as tolerâncias
-        tol_f = 1E-4
-        tol_g = 1E-4
+    # Calcula a diferença relativa das variáveis de projeto
+    dif_x = (norm(xn - x0))/(norm(x0) + 1E-6)
 
-        # Calcula o valor da função objetivo em x0 e xn
-        f_x0 = Objetivo(x0)
-        f_xn = Objetivo(xn)
+    # Calcula a diferença relativa da função objetivo
+    dif_fx = norm(dω_xn - dω)/(norm(dω) + 1E-6)
 
-        # Calcula a diferença relativa das variáveis de projeto
-        dif_x = (norm(xn - x0))/(norm(x0) + 1E-6)
+    # Calcula o termo violation
+    violation = max(0.0, dot(dV, xn) - V_sup)
 
-        # Calcula a diferença relativa da função objetivo
-        dif_fx = (abs(f_xn - f_x0))/(abs(f_x0) + 1E-6)
-
-        # Calcula g_real
-        g_real = Restricoes(xn)
-
-        # Calcula o termo violation
-        violation = max(0.0, minimum(g_real))
-
-        # Verifica as tolerâncias
-        if dif_fx < tol_f && violation < tol_g
-
-            # Avisa convergencia
-            println(fd,"Convergiu")
-            println(fd,"iter $iter")
-            println(fd,"x   ",xn)
-            println(fd,"δ   ",δ)
-            println(fd,"gs_lin   ",gs_lin)
-            println(fd,"dif_x   ",dif_x)
-            println(fd,"dif_fx   ",dif_fx)
-            println(fd,"g_real   ",g_real)
-            println(fd,"violação   ",violation)
-            println(fd,"------------------------------")
-
-            close(fd)
-
-            x0 .= xn
-
-            break
-
-        end
-
-
+    # Verifica as tolerâncias
+    if dif_fx < tol_f && violation < tol_g
+        return true
+    else 
+        return false
     end
+
+
+end
