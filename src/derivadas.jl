@@ -146,7 +146,7 @@ function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam
     S = sum1^((-1/P) - 1)
 
     # vetor derivada
-    D = zeros(length(ωn))
+    D = zeros(length(x))
 
     for i in eachindex(ωn)
 
@@ -154,7 +154,7 @@ function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam
         dωi = dω(ωn[i],U0[:, i],malha,x,fdkparam,fdmparam)
 
         # derivada normalizada
-        D[i] .+= S * (ωn[i] / ω)^(-P - 1) * (dωi / ω)
+        D .+= S * (ωn[i] / ω)^(-P - 1) * (dωi / ω)
 
     end
 

@@ -81,17 +81,20 @@ end
 # Isso aqui vai ter que juntar com o OtimizaSLP(x0,dω,dV,V_sup,ne) <- recebe as coisas gerais, 
 # pois tu vais ter que calcular as derivadas e funções a cada iteração externa do SLP
 #
-function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::Function, posfile=true; verbose=false, vf = 0.5 , niter=100)
+function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::Function,fmparam::Function, fdmparam::Function, posfile=true; verbose=false, vf = 0.5 , niter=100)
 
     # analise modal somente para a malha
     ωn,U0,malha = Modal3D(arquivo,posfile,verbose=verbose)
+
+    println("a primeira frequencia antes ", ωn[1])
+    
 
     # Numero de elementos 
     ne = malha.ne
 
     # Estimativa inicial das densidades relativas
     x0 = vf*ones(ne)
-
+    println("com $x0 de densidades elementos")
     # Calcula o volume de cada elemento sem considerar a 
     # parametrização 
     V = Volumes(malha)
@@ -117,7 +120,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     δ_min = 0.01
 
     # calcula a derivada no ponto x0 para copiar depois
-    dω = norma_dω(ωn,U0,malha,x0,fdkparam,fdkparam)   
+    dω = norma_dω(ωn,U0,malha,x0,fdkparam,fdmparam)   
 
     # inicializando derivada normalizada no ponto xn
     dω_xn = copy(dω)
@@ -127,8 +130,8 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     Δ2 = x1 .- x2
 
     # inicializa os valores inferiores e superiores de densidades relativas
-    x_inf = zeros(x0)
-    x_sup = ones(x0)
+    x_inf = zeros(length(x0))
+    x_sup = ones(length(x0))        
 
     # Loop externo de otimização 
     for iter=1:niter
@@ -137,7 +140,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         ωn,U0,_ = Modal3D(malha,posfile,x0=x0,kparam=[fkparam])
        
         # Deriva da norma da frequencia - valor mínimo
-        dω = norma_dω(ωn,U0,malha,x0,fdkparam,fdkparam)   
+        dω = norma_dω(ωn,U0,malha,x0,fdkparam,fdmparam)   
          
         # Determina os limites móveis, baseados nas variações das
         # variáveis de projeto. Isso só faz sentido para iter > 2
@@ -150,8 +153,10 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         xn, gs_lin = LP(c,A,b,xi,xs,n,m)
 
         # Teste de convergência do problema 
-        if convergencia(x0,xn,dω,dω_xn,dV)
-            break
+        if iter > 2
+            if convergencia(x0,xn,dω,dω_xn,dV,V_sup)
+                break
+            end
         end
 
         # Roda e apita
@@ -182,7 +187,10 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
 
         
     end # loop externo
-    
+
+    println("a primeira frequencia depois ", ωn[1])
+    println("com x   ",x0)  
+
     # print convergenciu 
     print("Convergiu")
 end

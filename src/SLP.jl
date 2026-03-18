@@ -78,7 +78,7 @@ function LP(c,A,b,xi,xs,n,m)
     @objective(modelo, Min, c'*x + r*sum(s))
 
     # Agora com a restrição nl linearizada com variáveis de folga
-    @constraint(modelo, g1, A*x + s .<= b)
+    @constraint(modelo, [i=1:m], dot(A[i,:], x) + s[i] <= b[i])
 
     # Soluciona o sub-problema
     optimize!(modelo)
@@ -128,7 +128,7 @@ function atualiza_δ!(iter::Int,δ::Vector{T},Δ1::Vector{T},Δ2::Vector{T},δ_m
 end
 
 
-function convergencia(x0,xn,dω,dω_xn,dV)
+function convergencia(x0,xn,dω,dω_xn,dV,V_sup)
 
     # Define as tolerâncias
     tol_f = 1E-4
