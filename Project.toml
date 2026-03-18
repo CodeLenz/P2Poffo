@@ -22,7 +22,6 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [sources]
 BMesh = {rev = "main", url = "https://github.com/CodeLenz/BMesh"}
-LFrame = {rev = "main", url = "https://github.com/CodeLenz/LFrame"}
 Lgmsh = {rev = "main", url = "https://github.com/CodeLenz/Lgmsh"}
 
 [compat]
@@ -30,7 +29,6 @@ BMesh = "1.0.0"
 Gmsh = "0.3.1"
 HiGHS = "1.22.2"
 JuMP = "1.30.0"
-LFrame = "1.1.0"
 LinearSolve = "3.66.0"
 Revise = "3.12.2"
 Statistics = "1.11.1"
