@@ -113,7 +113,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     x2 = copy(x1)    
 
     # Vamos inicializar o veltor de deltas
-    δ = 0.9*ones(ne)
+    δ = 0.5*ones(ne)
 
     # Limites máximos e mínimos para os deltas
     δ_max = 1.0
@@ -141,7 +141,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
        
         # Deriva da norma da frequencia - valor mínimo
         dω = norma_dω(ωn,U0,malha,x0,fdkparam,fdmparam)
-        println("dw ", dω[1])   
+        println("dw ", dω)   
          
         # Determina os limites móveis, baseados nas variações das
         # variáveis de projeto. Isso só faz sentido para iter > 2
