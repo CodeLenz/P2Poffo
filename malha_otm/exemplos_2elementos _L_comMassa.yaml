@@ -18,8 +18,8 @@ geometrias:
 
 coordenadas:
   0.0 0.0 0.0
-  1 0.0 0.0
-  1 -1 0.0
+  0.15 0.0 0.0
+  0.15 -0.15 0.0
 
 conectividades: 
   1 2 
@@ -45,4 +45,4 @@ dados_elementos:
   aco tubo1 
   
 mass:
-  2 1.0
+  2 50.0

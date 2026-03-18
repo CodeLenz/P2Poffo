@@ -130,7 +130,8 @@ end
 function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam::Function,fdmparam::Function, P=8.0)
 
     # frequência de referência
-    ω = mean(ωn)
+    ω = 20
+    
 
     # Inicializa o somatorio
     sum1 = 0.0
@@ -152,10 +153,12 @@ function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam
 
         # dωi/dx
         dωi = dω(ωn[i],U0[:, i],malha,x,fdkparam,fdmparam)
+        println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        println(dωi)
 
         # derivada normalizada
-        D .+= S * (ωn[i] / ω)^(-P - 1) * (dωi / ω)
-
+        D += S * (ωn[i] / ω)^(-P - 1) * (dωi / ω)
+        println(D)
     end
 
     return D

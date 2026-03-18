@@ -113,14 +113,14 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     x2 = copy(x1)    
 
     # Vamos inicializar o veltor de deltas
-    δ = 0.1*ones(ne)
+    δ = 0.9*ones(ne)
 
     # Limites máximos e mínimos para os deltas
-    δ_max = 0.2
+    δ_max = 1.0
     δ_min = 0.01
 
     # calcula a derivada no ponto x0 para copiar depois
-    dω = norma_dω(ωn,U0,malha,x0,fdkparam,fdmparam)   
+    dω = norma_dω(ωn,U0,malha,x0,fkparam,fmparam)   
 
     # inicializando derivada normalizada no ponto xn
     dω_xn = copy(dω)
@@ -137,10 +137,11 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     for iter=1:niter
 
         # Calcula frequências e modos
-        ωn,U0,_ = Modal3D(malha,posfile,x0=x0,kparam=[fkparam])
+        ωn,U0,_ = Modal3D(malha,posfile,x0=x0,kparam=[fkparam],mparam=[fmparam])
        
         # Deriva da norma da frequencia - valor mínimo
-        dω = norma_dω(ωn,U0,malha,x0,fdkparam,fdmparam)   
+        dω = norma_dω(ωn,U0,malha,x0,fdkparam,fdmparam)
+        println("dw ", dω[1])   
          
         # Determina os limites móveis, baseados nas variações das
         # variáveis de projeto. Isso só faz sentido para iter > 2
@@ -176,6 +177,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
 
         # Escreve no arquivo de saída
         println("iter $iter")
+        println("frequencia ", ωn[1])
         println("x   ",xn)
         println("δ   ",δ)
         # println(fd,"gs_lin   ",gs_lin)
