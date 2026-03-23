@@ -78,7 +78,6 @@ function dω(ωn::Float64,U0::Vector,malha::LFrame.Malha,x::Vector,fdkparam::Fun
     # Associa o gdl livre ao vetor de modos
     ϕg[dofs_l] .= U0
 
-
     # Loop pelos elementos
     for ele in 1:malha.ne
         
@@ -130,9 +129,8 @@ end
 function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam::Function,fdmparam::Function, P=8.0)
 
     # frequência de referência
-    ω = mean(ωn[1:3])
+    ω = mean(ωn)
     
-
     # Inicializa o somatorio
     sum1 = 0.0
 
@@ -146,6 +144,7 @@ function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam
     # fator global
     S = sum1^((-1/P) - 1)
 
+
     # vetor derivada
     D = zeros(length(x))
 
@@ -153,8 +152,9 @@ function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam
 
         # dωi/dx
         dωi = dω(ωn[i],U0[:, i],malha,x,fdkparam,fdmparam)
+
         #println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        #println(dωi)
+        println(dωi)
 
         # derivada normalizada
         D += S * (ωn[i] / ω)^(-P - 1) * (dωi / ω)

@@ -19,7 +19,9 @@ function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup)
     b = zeros(m)
 
     # Coeficientes da função objetivo linearizada
-    c = dω
+    # Lembrando que queremos MAXIMIZAR a menor 
+    # frequência (obtida pela norma)
+    c = -dω
 
     # Gradiente das restrições linearizadas
     A = dV'
@@ -127,7 +129,9 @@ function atualiza_δ!(iter::Int,δ::Vector{T},Δ1::Vector{T},Δ2::Vector{T},δ_m
 
 end
 
-
+#
+# Usar a norma P da frequência - objetivo
+#
 function convergencia(x0,xn,dω,dω_xn,dV,V_sup)
 
     # Define as tolerâncias
@@ -138,7 +142,7 @@ function convergencia(x0,xn,dω,dω_xn,dV,V_sup)
     dif_x = (norm(xn - x0))/(norm(x0) + 1E-6)
 
     # Calcula a diferença relativa da função objetivo
-    dif_fx = norm(dω_xn - dω)/(norm(dω) + 1E-6)
+    #dif_fx = norm(dω_xn - dω)/(norm(dω) + 1E-6)
 
     # Calcula o termo violation
     violation = max(0.0, dot(dV, xn) - V_sup)

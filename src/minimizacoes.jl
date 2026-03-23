@@ -86,8 +86,8 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     # analise modal somente para a malha
     ωn,U0,malha = Modal3D(arquivo,posfile,verbose=verbose)
 
-    println("a primeira frequencia antes ", ωn[1])
-    
+    # Número de modos a considerar na norma
+    n_modos = 3
 
     # Numero de elementos 
     ne = malha.ne
@@ -95,6 +95,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     # Estimativa inicial das densidades relativas
     x0 = vf*ones(ne)
     println("com $x0 de densidades elementos")
+
     # Calcula o volume de cada elemento sem considerar a 
     # parametrização 
     V = Volumes(malha)
@@ -112,25 +113,20 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     x1 = copy(x0)
     x2 = copy(x1)    
 
-    # Vamos inicializar o veltor de deltas
-    δ = 0.5*ones(ne)
-
     # Limites máximos e mínimos para os deltas
-    δ_max = 1.0
+    δ_max = 0.1
     δ_min = 0.01
 
-    # calcula a derivada no ponto x0 para copiar depois
-    dω = norma_dω(ωn,U0,malha,x0,fkparam,fmparam)   
 
-    # inicializando derivada normalizada no ponto xn
-    dω_xn = copy(dω)
+    # Vamos inicializar o veltor de deltas
+    δ = δ_min*ones(ne)
 
     # inicializa os deltas
     Δ1 = x0 .- x1
     Δ2 = x1 .- x2
 
     # inicializa os valores inferiores e superiores de densidades relativas
-    x_inf = zeros(length(x0))
+    x_inf = 1e-3*ones(length(x0))
     x_sup = ones(length(x0))        
 
     # Loop externo de otimização 
@@ -138,9 +134,15 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
 
         # Calcula frequências e modos
         ωn,U0,_ = Modal3D(malha,posfile,x0=x0,kparam=[fkparam],mparam=[fmparam])
-       
+    
+        # Extrai somente  os modos de interesse 
+        ωnn = ωn[1:n_modos]
+        U0n = U0[:,1:n_modos]
+
+        @show norm(ωnn,-8.0)
+
         # Deriva da norma da frequencia - valor mínimo
-        dω = norma_dω(ωn,U0,malha,x0,fdkparam,fdmparam)
+        dω = norma_dω(ωnn,U0n,malha,x0,fdkparam,fdmparam)
         println("dw ", dω)   
          
         # Determina os limites móveis, baseados nas variações das
@@ -148,17 +150,17 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         atualiza_δ!(iter,δ,Δ1,Δ2,δ_min,δ_max)
 
         # Lineariza o problema 
-        c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup)
+        c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup)
 
         # Chama a solução interna do problema
         xn, gs_lin = LP(c,A,b,xi,xs,n,m)
 
         # Teste de convergência do problema 
-        if iter > 2
-            if convergencia(x0,xn,dω,dω_xn,dV,V_sup)
-                break
-            end
-        end
+        #if iter > 2
+        #    if convergencia(x0,xn,dω,dω_xn,dV,V_sup)
+        #        break
+        #    end
+        #end
 
         # Roda e apita
         x2 .= x1
@@ -168,12 +170,6 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         # usando os valores das 3 ultimas iterações
         Δ2 = x1 .- x2
         Δ1 = x0 .- x1
-
-        # Atualiza os limites 
-        x_inf = xi 
-        x_sup = xs
-
-        dω_xn = dω
 
         # Escreve no arquivo de saída
         println("iter $iter")
