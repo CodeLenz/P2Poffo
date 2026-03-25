@@ -132,21 +132,14 @@ end
 #
 # Usar a norma P da frequência - objetivo
 #
-function convergencia(x0,xn,dω,dω_xn,dV,V_sup)
-
-    # Define as tolerâncias
-    tol_f = 1E-4
-    tol_g = 1E-4
-
-    # Calcula a diferença relativa das variáveis de projeto
-    dif_x = (norm(xn - x0))/(norm(x0) + 1E-6)
+function convergencia(x0,xn,ωx0,ωxn,dV,V_sup,tol_f,tol_g)
 
     # Calcula a diferença relativa da função objetivo
-    #dif_fx = norm(dω_xn - dω)/(norm(dω) + 1E-6)
+    dif_fx = norm(ωxn - ωx0)/(norm(ωx0))
 
     # Calcula o termo violation
     violation = max(0.0, dot(dV, xn) - V_sup)
-
+     
     # Verifica as tolerâncias
     if dif_fx < tol_f && violation < tol_g
         return true
@@ -154,5 +147,6 @@ function convergencia(x0,xn,dω,dω_xn,dV,V_sup)
         return false
     end
 
+    
 
 end
