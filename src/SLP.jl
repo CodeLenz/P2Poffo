@@ -147,6 +147,4 @@ function convergencia(x0,xn,ωx0,ωxn,dV,V_sup,tol_f,tol_g)
         return false
     end
 
-    
-
 end
