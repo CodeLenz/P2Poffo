@@ -77,17 +77,51 @@ function Main_Otim_OC(arquivo::AbstractString, fkparam::Function, fdkparam::Func
 end
 
 
-#
-# Isso aqui vai ter que juntar com o OtimizaSLP(x0,dω,dV,V_sup,ne) <- recebe as coisas gerais, 
-# pois tu vais ter que calcular as derivadas e funções a cada iteração externa do SLP
-#
-function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::Function,fmparam::Function, fdmparam::Function, posfile=true; verbose=false, vf = 0.5 , niter=100)
+"""
+    Main_Otim_Modal("arquivo.yaml",P2Poffo.simp,P2Poffo.dsimp,P2Poffo.gimp,P2Poffo.dgimp,n_modos=3,vf=0.5,P=8.0,niter=100)
+
+Rotina para calcular a maior frequência natural de uma estrutura,
+minimizando o volume de uma malha.
+
+# Descrição
+Esta função realiza um processo de otimização topológica com o objetivo
+de maximizar a frequência natural da estrutura, sujeito a uma restrição
+de volume. A malha e os parâmetros do problema são fornecidos por meio
+de um arquivo `.yaml`.
+
+# Argumentos
+- `arquivo_yaml`: Arquivo contendo os dados da malha e propriedades do problema.
+
+# Parâmetros Nomeados
+- `vf`: Fração de volume utilizada para definir o volume máximo permitido.
+- `P`: Parâmetro da norma `-P` usada na agregação das frequências.
+       Valores maiores tornam a aproximação mais precisa, porém aumentam o custo computacional.
+- `niter`: Número máximo de iterações caso o critério de convergência não seja atingido.
+
+# Modelos de Material (SIMP)
+- Rigidez:
+    - Penalização com `p = 3`
+    - Função: `P2Poffo.simp`
+    - Derivada: `P2Poffo.dsimp`
+
+- Massa:
+    - Penalização com `p = 1`
+    - Função: `P2Poffo.gimp`
+    - Derivada: `P2Poffo.dgimp`
+
+# Observações
+- As funções SIMP não estão exportadas diretamente, sendo necessário acessá-las
+  via o módulo `P2Poffo`.
+- O desempenho da otimização depende da escolha de `P`, podendo impactar
+  significativamente o tempo de execução.
+
+# Retorno
+Retorna os parâmetros otimizados da malha e as frequências naturais associadas.
+"""
+function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::Function,fmparam::Function, fdmparam::Function, posfile=true; verbose=false,n_modos=3, vf = 0.5 ,P=8.0, niter=100)
 
     # analise modal somente para a malha
     ωn,U0,malha = Modal3D(arquivo,posfile,verbose=verbose)
-
-    # Número de modos a considerar na norma
-    n_modos = 3
 
     # Numero de elementos 
     ne = malha.ne
@@ -142,7 +176,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         @show norm(ωnn,-8.0)
 
         # Deriva da norma da frequencia - valor mínimo
-        dω = norma_dω(ωnn,U0n,malha,x0,fdkparam,fdmparam)
+        dω = norma_dω(ωnn,U0n,malha,x0,fdkparam,fdmparam,P)
         println("dw ", dω)   
          
         # Determina os limites móveis, baseados nas variações das

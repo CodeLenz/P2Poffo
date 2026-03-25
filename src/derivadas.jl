@@ -126,7 +126,7 @@ function dω(ωn::Float64,U0::Vector,malha::LFrame.Malha,x::Vector,fdkparam::Fun
 end
 
 # ω é um valor de referencia 
-function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam::Function,fdmparam::Function, P=8.0)
+function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam::Function,fdmparam::Function, P::Float64)
 
     # frequência de referência
     ω = mean(ωn)
@@ -153,12 +153,8 @@ function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam
         # dωi/dx
         dωi = dω(ωn[i],U0[:, i],malha,x,fdkparam,fdmparam)
 
-        #println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        println(dωi)
-
         # derivada normalizada
         D += S * (ωn[i] / ω)^(-P - 1) * (dωi / ω)
-        #println(D)
     end
 
     return D

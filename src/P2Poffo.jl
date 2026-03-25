@@ -46,5 +46,5 @@ module P2Poffo
     export Exporta_sec, Exporta_1d, Exporta_mat, Exporta_apoios, Exporta_fc, Criayaml
 
     # Rotinas de Otimização
-    export Main_Otim
+    export Main_Otim_Modal,Main_Otim_OC  
 end
