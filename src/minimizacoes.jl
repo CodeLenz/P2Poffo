@@ -228,9 +228,10 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         println("δ   ",δ)
         println("------------------------------")
 
-        push!(hist_x1, xn[1])
-        push!(hist_x2, xn[2])
-        push!(hist_w, ωxn)
+        # Salvando só para o plot
+        #push!(hist_x1, xn[1])
+        #push!(hist_x2, xn[2])
+        #push!(hist_w, ωxn)
     end # loop externo
 
     # Volume da estrutura final
