@@ -165,6 +165,12 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     # inicializa o vetor 
     ωx0 = ωn[1]
     ω1 = 0
+
+    # Histórico para gráfico
+    hist_x1 = Float64[]
+    hist_x2 = Float64[]
+    hist_w  = Float64[]
+
     # Loop externo de otimização 
     for iter=1:niter
 
@@ -222,7 +228,9 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         println("δ   ",δ)
         println("------------------------------")
 
-        
+        push!(hist_x1, xn[1])
+        push!(hist_x2, xn[2])
+        push!(hist_w, ωxn)
     end # loop externo
 
     # Volume da estrutura final
@@ -235,7 +243,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     println("A primeira frequência foi ", ω1, " [rad/s]")
     println("A priemira frequência da estrutura otimizada é ",ωx0[1], " [rad/s]")
     println("Densidade relativa dos elementos ",xn)
-    
+    return hist_x1, hist_x2, hist_w
 end
     
 
