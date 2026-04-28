@@ -2,7 +2,7 @@
 # Programa principal
 #
 
-function Pre_processamento(arquivo, gera_pos=true)
+function Pre_processamento(arquivo, gera_pos=true; grava_airy=false)
 
 
     # Se o arquivo for um .geo, geramos um .msh utilizando a biblioteca
@@ -41,10 +41,20 @@ function Pre_processamento(arquivo, gera_pos=true)
     VFB = ForcabGlobal(nn,ne,XY,IJ)
 
     # Aplica as condições de contorno essenciais homogêneas
-    K,VFB = AplicaCCH(nn,na,AP,K,VFB)
+    AplicaCCH!(nn,na,AP,K,VFB)
 
     # Solução do sistema linear de Equações 
     Φ = K\VFB
+
+    # Se grava_airy==true exportamos um arquivo com 
+    #
+    # x y Φ 
+    #
+    # para todos os nós da malha
+    if grava_airy
+       writedlm("solucao_airy_nodal.txt",[XY Φ])
+    end
+    
 
     # Calcula as propriedaes da seção em relação a origem do 
     # sistema de referência e também o vetor A com a área de cada elemento da malha

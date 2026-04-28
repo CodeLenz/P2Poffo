@@ -1,8 +1,8 @@
 #
 # Aplica as condições de contorno essenciais
-# Homogêneas
+# Homogêneas, modificando K e F no processo 
 #
-function AplicaCCH(nn,na,AP,K,F)
+function AplicaCCH!(nn,na,AP,K,F)
 
     # Laço sobre as linhas de AP
     for l = 1:na
@@ -14,22 +14,20 @@ function AplicaCCH(nn,na,AP,K,F)
         for i=1:nn
             
             # Zera a linha glg
-            K[no,i] = 0
+            K[no,i] = 0.0
 
             # Zera a coluna glg
-            K[i,no] = 0
+            K[i,no] = 0.0
 
         end
 
         # Coloca 1 na diagonal da matriz
-        K[no,no] = 1
+        K[no,no] = 1.0
 
         # Zera a linha em F
-        F[no] = 0
+        F[no] = 0.0
 
     end #l
-
-    return K,F
 
 end
 
