@@ -1,10 +1,11 @@
 name = "P2Poffo"
 uuid = "15746f16-e5ef-480f-93b5-237a577d2332"
-version = "0.1.0"
 authors = ["PedroPoffo <pedrohenriquepoffo@gmail.com>"]
+version = "0.1.0"
 
 [deps]
 BMesh = "91fb467a-ecbd-11ec-0e64-1b9c3501232a"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 Gmsh = "705231aa-382f-11e9-3f0c-b7cb4346fdeb"
 HiGHS = "87dc4568-4c63-4d18-b0c0-bb2238e4078b"
@@ -28,6 +29,7 @@ Lgmsh = {rev = "main", url = "https://github.com/CodeLenz/Lgmsh"}
 
 [compat]
 BMesh = "1.0.0"
+DelimitedFiles = "1.9.1"
 GLMakie = "0.13.9"
 Gmsh = "0.3.1"
 HiGHS = "1.22.2"

@@ -9,6 +9,7 @@ module P2Poffo
     using Gmsh
     using LFrame
     using BMesh
+    using DelimitedFiles
 
     # otimização
     using JuMP
