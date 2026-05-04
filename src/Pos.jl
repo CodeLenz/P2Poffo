@@ -4,7 +4,7 @@
 #
 # arquivo_esforcos é gerado pelo LFrame
 #
-function Pos_processamento(arquivo_esforcos, ele, no)
+function Pos_processamento(arquivo_esforcos, ele, no, posfile=false)
 
     # Testa se nó é válido
     no in [1;2] || error("Pos_processamento:: nó inválido $no")
@@ -118,19 +118,22 @@ function Pos_processamento(arquivo_esforcos, ele, no)
 
     end
 
-    # Caminho para a pasta POS
-    pos_file_node = joinpath(path_base,nome_secao*"_$(ele)_$(no).pos")
+    if posfile 
+        # Caminho para a pasta POS
+        pos_file_node = joinpath(path_base,nome_secao*"_$(ele)_$(no).pos")
 
-    # Inicializa o arquivo de saída
-    Lgmsh_export_init(pos_file_node,nn,ne,XY,etypes,IJ) 
+        # Inicializa o arquivo de saída
+        Lgmsh_export_init(pos_file_node,nn,ne,XY,etypes,IJ) 
 
-    # Exporta o campo σ (falta "somar as tensões")
-    Lgmsh_export_nodal_scalar(pos_file_node, σ[:,1],"σxxN")
-    Lgmsh_export_nodal_scalar(pos_file_node, σ[:,2],"σxxMY")
-    Lgmsh_export_nodal_scalar(pos_file_node, σ[:,3],"σxxMz")
-    Lgmsh_export_nodal_scalar(pos_file_node, σ[:,4],"σzyT")
-    Lgmsh_export_nodal_scalar(pos_file_node, σ[:,5],"σzxT")
-    
+        # Exporta o campo σ (falta "somar as tensões")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,1],"σxxN")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,2],"σxxMY")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,3],"σxxMz")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,4],"σzyT")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,5],"σzxT")
+    end
+
+
     # Retorna a matriz com as tensões
     return σ
 
