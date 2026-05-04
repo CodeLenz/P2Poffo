@@ -23,6 +23,7 @@ module P2Poffo
     include("corpo.jl")
     include("gradiente.jl")
     include("rotacao.jl")
+    include("tensaoEquivalente.jl")
 
     # Rotinas "principais"
     include("Pre.jl" )

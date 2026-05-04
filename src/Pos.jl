@@ -117,6 +117,28 @@ function Pos_processamento(arquivo_esforcos, ele, no, posfile=false)
 
 
     end
+    
+    # matriz V para o produto quadratico 
+    V = [1 0;
+         0 3]
+
+    #tensao em cada elemento
+    σxx  = σ[:,1] + σ[:,2] + σ[:,3]
+    σxy  =  σ[:,4] + σ[:,5]
+
+    # vetor de tensao
+    σ_vm = [σxx σxy]
+
+    nn = size(σ_vm, 1)
+    σeq = zeros(nn)
+
+    # loop por todos os nos e calcula a tensao eqv
+    for i in 1:nn
+        σeq[i] = sqrt(σ_vm[i,:]' * V * σ_vm[i,:])
+    end
+
+    # tira o maximo
+    σeq_max = maximum(σeq)
 
     if posfile 
         # Caminho para a pasta POS
@@ -135,8 +157,7 @@ function Pos_processamento(arquivo_esforcos, ele, no, posfile=false)
 
 
     # Retorna a matriz com as tensões
-    return σ
-
+    return σeq_max
 end
 
 #
