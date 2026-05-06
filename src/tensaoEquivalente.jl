@@ -1,4 +1,4 @@
-function tensoes(arquivo::AbstractString)
+function tensoes(arquivo::AbstractString,p=8)
 
     # Recupera os dados da malha 
     U,malha = LFrame.Analise3D(arquivo, true; verbose=false)
@@ -9,12 +9,12 @@ function tensoes(arquivo::AbstractString)
     tensao = zeros(2 * malha.ne)
 
     contador = 1
-    # loop pelos elementos
+    # loops pelos elementos
     for ele in 1:malha.ne
 
         ## tensao do elemento no nó 1
-        tensao[contador] = Pos_processamento(arquivoEsf,ele,1)
-        tensao[contador+1] = Pos_processamento(arquivoEsf,ele,2)
+        tensao[contador] = Pos_processamento(arquivoEsf,ele,1,p,true)
+        tensao[contador+1] = Pos_processamento(arquivoEsf,ele,2,p,true)
         
         contador += 2
     end

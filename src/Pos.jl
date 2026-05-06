@@ -4,7 +4,7 @@
 #
 # arquivo_esforcos é gerado pelo LFrame
 #
-function Pos_processamento(arquivo_esforcos, ele, no, posfile=false)
+function Pos_processamento(arquivo_esforcos, ele, no,p, posfile=false)
 
     # Testa se nó é válido
     no in [1;2] || error("Pos_processamento:: nó inválido $no")
@@ -95,7 +95,7 @@ function Pos_processamento(arquivo_esforcos, ele, no, posfile=false)
     # Calcula a cte αμ
     αμ = T/Jeq
 
-    # Loop pelos nós 
+    # Loop pelos nós da malha da seção
     for no = 1:nn
 
         # Coordenadas do nó 
@@ -105,7 +105,7 @@ function Pos_processamento(arquivo_esforcos, ele, no, posfile=false)
         zl,yl = Muda_coordenada(x,y,α,centroide[1],centroide[2])
         
         # Agora podemos fazer as médias nodais SIMPLES das tensões 
-        # tangenciais para cada nó 
+        # tangenciais para cada nó (tentar colocar fora do loop, gerar um dicionario para reaproveitar)
         vizinhos =  Vizinhos_no(no,IJ)
 
         # Calcula a média nodal SIMPLES do gradiente
@@ -124,21 +124,21 @@ function Pos_processamento(arquivo_esforcos, ele, no, posfile=false)
 
     #tensao em cada elemento
     σxx  = σ[:,1] + σ[:,2] + σ[:,3]
-    σxy  =  σ[:,4] + σ[:,5]
+    σxy  =  sqrt.(σ[:,4].^2 + σ[:,5].^2)
 
-    # vetor de tensao
-    σ_vm = [σxx σxy]
+    # matriz de tensao
+    σe = [σxx σxy]
 
-    nn = size(σ_vm, 1)
+    nn = size(σ, 1)
     σeq = zeros(nn)
 
     # loop por todos os nos e calcula a tensao eqv
     for i in 1:nn
-        σeq[i] = sqrt(σ_vm[i,:]' * V * σ_vm[i,:])
+        σeq[i] = sqrt(σe[i,:]' * V * σe[i,:])
     end
 
     # tira o maximo
-    σeq_max = maximum(σeq)
+    σeq_max = norm(σeq,p)
 
     if posfile 
         # Caminho para a pasta POS
@@ -153,10 +153,12 @@ function Pos_processamento(arquivo_esforcos, ele, no, posfile=false)
         Lgmsh_export_nodal_scalar(pos_file_node, σ[:,3],"σxxMz")
         Lgmsh_export_nodal_scalar(pos_file_node, σ[:,4],"σzyT")
         Lgmsh_export_nodal_scalar(pos_file_node, σ[:,5],"σzxT")
+        Lgmsh_export_nodal_scalar(pos_file_node, σeq,"σvon-Mises")
+
     end
 
 
-    # Retorna a matriz com as tensões
+    # Retorna o valor maximo na seção e elemento
     return σeq_max
 end
 
