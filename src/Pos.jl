@@ -81,6 +81,10 @@ function Pos_processamento(arquivo_esforcos, ele, no,p, posfile=false)
     # Vamos precisar dos dados da malha
     nn,XY,ne,IJ,MAT,na,AP,etypes,centroides = ConversorFEM(arquivo_malha)
 
+    # Cria um vetor de vetores com os elementos que 
+    # são vizinhos de cada nó da malha
+    vizinhos = Vizinhos_no(nn,IJ)
+
     # Agora podemos alocar a matriz de saída
     # (σN σMy σMz σxy σxz)
     σ = zeros(nn,5)
@@ -106,11 +110,12 @@ function Pos_processamento(arquivo_esforcos, ele, no,p, posfile=false)
         
         # Agora podemos fazer as médias nodais SIMPLES das tensões 
         # tangenciais para cada nó (tentar colocar fora do loop, gerar um dicionario para reaproveitar)
-        vizinhos =  Vizinhos_no(no,IJ)
+        # vizinhos =  Vizinhos_no(no,IJ)
+        vizi = vizinhos[no]
 
         # Calcula a média nodal SIMPLES do gradiente
-        ∇xΦ = mean(∇Φ[vizinhos,1])
-        ∇yΦ = mean(∇Φ[vizinhos,2])
+        ∇xΦ = mean(∇Φ[vizi,1])
+        ∇yΦ = mean(∇Φ[vizi,2])
 
         # Guarda nas colunas 
         σ[no,:] = [σN cteMy*zl cteMz*yl αμ*∇xΦ αμ*∇yΦ]
@@ -162,10 +167,32 @@ function Pos_processamento(arquivo_esforcos, ele, no,p, posfile=false)
     return σeq_max
 end
 
+
+#
+# Retorna um vetor de vetores com os elementos vizinhos a cada nó
+#
+function Vizinhos_no(nn,IJ)
+
+    # Aloca um vetor de vetores 
+    vizinhos = Vector{Vector{Int64}}(undef,nn)
+
+    # Loop pelos nós da malha, chamando Vizinhos_no(no,IJ)
+    for no=1:nn
+
+        vizinhos[no] = _Vizinhos_no(no,IJ)
+
+    end
+
+    # Retorna os vizinhos 
+    return vizinhos
+
+end
+
+
 #
 # Dado um nó, devolve uma lista com todos os elementos que o contem 
 #
-function Vizinhos_no(no,IJ)
+function _Vizinhos_no(no,IJ)
 
     # Aloca um vetor para armazenar os vizinhos 
     vizinhos = Int64[]
