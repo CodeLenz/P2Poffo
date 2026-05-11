@@ -162,64 +162,67 @@ end
 
 
 ### Tensoes
-function norma_dσ(σeq,malha,U,x0,fkparam,fdkparam,P)
+function norma_dσ(σeq::Vector,S::Matrix,Pi::Matrix,malha::LFrame.Malha,U::Vector,x::Vector,fkparam::Function,fdkparam::Function,P::Int)
 
-    ## termo constante
-    T0 = (sum(σeq.^P))^(1/P - 1)
-
-    # Monta a matriz K global
-    KG = LFrame.Monta_Kg(malha,x0,fkparam)
-
-    # inicializando T1
-    T1 = 0.0
-    
     # Dados da estrutura de malha
     dados_ele = malha.dados_elementos
     dicionario_mat = malha.dicionario_materiais
     dicionario_geo = malha.dicionario_geometrias
     conect = malha.conect
-    coordenadas = malha.coord
-    apoios = malha.apoios
+    coordenadas    = malha.coord
+    ndof           = 6 * malha.nnos
+    ne = malha.ne
     L = malha.L
-    nos = malha.nnos
 
+    ## termo constante
+    T0 = (sum(σeq.^P))^(1/P - 1)
 
-    # inicializa 
-    dσ = zeros(ne)
+    # Monta a matriz K global e pega o numero de graus de liberdade
+    KG = LFrame.Monta_Kg(malha,x,fkparam)
+
+    # inicializando T1
+    T1 = zeros(ndof)
+
+    V = [1 0;
+         0 3]
 
     # loop pelos elementos
     for ele in 1:ne
 
-        ## Descobre o gdls do elemento
-        gls = LFrame.Gls(ele,conect)
-
-        # deslocamento do ele
-        Ue = U[gls]
-
         # dados do elemento  nao estao no central principal
         Iz, Iy, J0, A, α, E, G, geo, ρ = LFrame.Dados_fundamentais(ele, dados_ele, dicionario_mat, dicionario_geo)
+
+        # Descobre o gdls do elemento
+        #gls = LFrame.Gls(ele,conect)
+
+        # Deslocamento do ele
+        #Ue = U[gls]
+
+        # transformação de coordenadas
+        T = LFrame.Rotacao3d(ele,conect,coordenadas,α)
+    
+        # Deslocamento do ele no local
+        #Ul = T'*Ue
 
         # Rigidez do elemento 
         Ke = LFrame.Ke_portico3d(E,Iz,Iy,G,J0,L[ele],A)
 
         # derivada da rigidez 
-        dKe = Ke*fdkparam(x[ele])
+        #dKe = Ke*fdkparam(x[ele])
 
         ## loop pelos nos
         for no in 1:2
-            
-            ## indice da tensão
+
+            ## indice do vetor de tensões equivalente
             idx = 2*(ele-1) + no
-
-            ## derivada da tensao em relacao a uma variavel
-            dσdx = dσ_dx(ele,no,malha,U,x0,σeq[idx],fdkparam)
-
-            T1 += σ[idx]^(P-1) * dσdx
-
-            dσ = T0*T1 
+            
+            T1 += ((σeq[idx]^(P - 1)) / (σeq[idx])) * (σeq'*V*Pi*S*Ke*T)
         end
     end
 
+    aux = T0 * T1
+    λ = KG/aux
+    @show λ 
     return  
 end
 

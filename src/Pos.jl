@@ -63,20 +63,18 @@ function Pos_processamento(arquivo_esforcos, ele, no,P,iter, posfile=false)
 
     # Dependendo do nó, pegamos os esforços internos
     if no==1
-       
-        N  = -1*parse(Float64,dados[2])
-        My = -1*parse(Float64,dados[6])
-        Mz = -1*parse(Float64,dados[7])
-        T  = -1*parse(Float64,dados[5])
+        S = [-1.0 0.0 0.0 0.0 -1.0 -1.0 0 0 0 0 0 0;
+             0.0 0.0 0.0 -1.0 0.0 0.0 0 0 0 0 0 0]
 
     else
-
-        N  = parse(Float64,dados[8])
-        My = parse(Float64,dados[12])
-        Mz = parse(Float64,dados[13])
-        T  = parse(Float64,dados[11])
-
+        S = [0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 1.0;
+             0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0]
     end
+
+    F =  parse.(Float64, dados[2:13])
+
+    E = S*F 
+
 
     # Vamos precisar dos dados da malha
     nn,XY,ne,IJ,MAT,na,AP,etypes,centroides = ConversorFEM(arquivo_malha)
@@ -90,14 +88,14 @@ function Pos_processamento(arquivo_esforcos, ele, no,P,iter, posfile=false)
     σ = zeros(nn,5)
 
     # A tensão normal devido a teoria de barra é cte
-    σN = N/area
+    σN = E[1]/area
 
     # Podemos calcular as constantes de proporcionalidade
-    cteMy =  My/Iyl
-    cteMz = -Mz/Izl
+    cteMy =  E[3]/Iyl
+    cteMz = -E[2]/Izl
 
     # Calcula a cte αμ
-    αμ = T/Jeq
+    αμ = E[4]/Jeq
 
     # Loop pelos nós da malha da seção
     for no = 1:nn
@@ -162,9 +160,11 @@ function Pos_processamento(arquivo_esforcos, ele, no,P,iter, posfile=false)
 
     end
 
+    Pi = [1/area   0   -yl/Izl   zl/Iyl;
+    0   (1/Jeq)*sqrt(∇xΦ^2 + ∇yΦ^2)   0   0]
 
     # Retorna o valor maximo na seção e elemento
-    return σeq_max
+    return σeq_max,S,Pi
 end
 
 

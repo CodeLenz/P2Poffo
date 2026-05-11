@@ -187,7 +187,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         arquivoEsf = nomeEsf * "_iter$(iter).esf"
 
         # tensão equivalente dos nos e elementos 
-        σeq = tensoes(arquivoEsf,malha.ne,P,iter,posfile)
+        σeq,S,Pi = tensoes(arquivoEsf,malha.ne,P,iter,posfile)
 
         # so para armenazar a primeira frequencia da primeira iteração
         if iter == 1
@@ -202,7 +202,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         dω = norma_dω(ωnn,U0n,malha,x0,fdkparam,fdmparam,P)
         
         # derivada da tensao, valor máximo
-        dσ = norma_dσ(σeq,ne,malha,x0,fdkparam)
+        dσ = norma_dσ(σeq,S,Pi,ne,malha,x0,fdkparam)
          
         # Determina os limites móveis, baseados nas variações das
         # variáveis de projeto. Isso só faz sentido para iter > 2
