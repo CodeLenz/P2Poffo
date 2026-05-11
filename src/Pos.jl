@@ -4,7 +4,7 @@
 #
 # arquivo_esforcos é gerado pelo LFrame
 #
-function Pos_processamento(arquivo_esforcos, ele, no,P, posfile=false)
+function Pos_processamento(arquivo_esforcos, ele, no,P,iter, posfile=false)
 
     # Testa se nó é válido
     no in [1;2] || error("Pos_processamento:: nó inválido $no")
@@ -147,7 +147,7 @@ function Pos_processamento(arquivo_esforcos, ele, no,P, posfile=false)
 
     if posfile 
         # Caminho para a pasta POS
-        pos_file_node = joinpath(path_base,nome_secao*"_$(ele)_$(no).pos")
+        pos_file_node = joinpath(path_base,nome_secao*"_iter$(iter)_ele$(ele)_No$(no).pos")
 
         # Inicializa o arquivo de saída
         Lgmsh_export_init(pos_file_node,nn,ne,XY,etypes,IJ) 

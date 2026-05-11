@@ -118,7 +118,7 @@ de um arquivo `.yaml`.
 # Retorno
 Retorna os parâmetros otimizados da malha e as frequências naturais associadas.
 """
-function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::Function,fmparam::Function, fdmparam::Function, posfile=true; verbose=false,n_modos=3, vf = 0.5 ,P=8.0, niter=100,tol_f=1E-4,tol_g=1E-4)
+function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::Function,fmparam::Function, fdmparam::Function, posfile=true; verbose=false,n_modos=3, vf = 0.5 ,P=8.0, niter=3,tol_f=1E-4,tol_g=1E-4)
 
     # analise modal somente para a malha
     ωn,U0,malha = Modal3D(arquivo,posfile,verbose=verbose)
@@ -187,9 +187,8 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         arquivoEsf = nomeEsf * "_iter$(iter).esf"
 
         # tensão equivalente dos nos e elementos 
-        σ = tensoes(arquivoEsf,malha.ne,P)
+        σ = tensoes(arquivoEsf,malha.ne,P,iter,posfile)
         @show σ
-        
         # so para armenazar a primeira frequencia da primeira iteração
         if iter == 1
             ω1 = ωn[1]
