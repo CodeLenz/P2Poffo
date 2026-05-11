@@ -13,5 +13,6 @@ function tensoes(arquivoEsf,ne,P,iter,posfile)
         
         contador += 2
     end
+    # Tensao_ele1_no1,Tensao_ele1_no2...
     return tensao
 end

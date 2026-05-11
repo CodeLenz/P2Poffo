@@ -160,4 +160,66 @@ function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam
     return D
 end
 
+
+### Tensoes
+function norma_dσ(σeq,malha,U,x0,fkparam,fdkparam,P)
+
+    ## termo constante
+    T0 = (sum(σeq.^P))^(1/P - 1)
+
+    # Monta a matriz K global
+    KG = LFrame.Monta_Kg(malha,x0,fkparam)
+
+    # inicializando T1
+    T1 = 0.0
     
+    # Dados da estrutura de malha
+    dados_ele = malha.dados_elementos
+    dicionario_mat = malha.dicionario_materiais
+    dicionario_geo = malha.dicionario_geometrias
+    conect = malha.conect
+    coordenadas = malha.coord
+    apoios = malha.apoios
+    L = malha.L
+    nos = malha.nnos
+
+
+    # inicializa 
+    dσ = zeros(ne)
+
+    # loop pelos elementos
+    for ele in 1:ne
+
+        ## Descobre o gdls do elemento
+        gls = LFrame.Gls(ele,conect)
+
+        # deslocamento do ele
+        Ue = U[gls]
+
+        # dados do elemento  nao estao no central principal
+        Iz, Iy, J0, A, α, E, G, geo, ρ = LFrame.Dados_fundamentais(ele, dados_ele, dicionario_mat, dicionario_geo)
+
+        # Rigidez do elemento 
+        Ke = LFrame.Ke_portico3d(E,Iz,Iy,G,J0,L[ele],A)
+
+        # derivada da rigidez 
+        dKe = Ke*fdkparam(x[ele])
+
+        ## loop pelos nos
+        for no in 1:2
+            
+            ## indice da tensão
+            idx = 2*(ele-1) + no
+
+            ## derivada da tensao em relacao a uma variavel
+            dσdx = dσ_dx(ele,no,malha,U,x0,σeq[idx],fdkparam)
+
+            T1 += σ[idx]^(P-1) * dσdx
+
+            dσ = T0*T1 
+        end
+    end
+
+    return  
+end
+
