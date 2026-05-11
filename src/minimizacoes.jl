@@ -20,7 +20,7 @@ dgimp(x,p=1) = p*x^(p-1)
 #
 # Rotina principal
 #
-function Main_Otim_OC(arquivo::AbstractString, fkparam::Function, fdkparam::Function, posfile=true; verbose=false,vf = 0.5, niter=100)
+function Main_Otim_OC(arquivo::AbstractString, fkparam::Function, fdkparam::Function, posfile=true; verbose=false,vf = 0.5, niter=3)
 
     # Chama o Analise3D com o nome do arquivo, para receber a estrutura de malha
     U0, malha = Analise3D(arquivo,posfile,verbose=verbose)
@@ -171,11 +171,24 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     hist_x2 = Float64[]
     hist_w  = Float64[]
 
+    # nome do arquivo
+    nomeEsf = malha.nome_arquivo
+
     # Loop externo de otimização 
     for iter=1:niter
 
         # Calcula frequências e modos
         ωn,U0,_ = Modal3D(malha,posfile,x0=x0,kparam=[fkparam],mparam=[fmparam])
+        
+        # Deslocamentos da malha 1
+        U, = Analise3D(malha, posfile, x0=x0, kparam=[fkparam],iter=iter)
+
+        ## arquivo de esforços da iteracao
+        arquivoEsf = nomeEsf * "_iter$(iter).esf"
+
+        # tensão equivalente dos nos e elementos 
+        σ = tensoes(arquivoEsf,malha.ne,P)
+        @show σ
         
         # so para armenazar a primeira frequencia da primeira iteração
         if iter == 1
@@ -188,6 +201,9 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
 
         # Deriva da norma da frequencia - valor mínimo
         dω = norma_dω(ωnn,U0n,malha,x0,fdkparam,fdmparam,P)
+        
+        # derivada da tensao, valor máximo
+        ##dσ = norma_dσ(ωnn,U0n,malha,x0,fdkparam,fdmparam,P)
          
         # Determina os limites móveis, baseados nas variações das
         # variáveis de projeto. Isso só faz sentido para iter > 2
@@ -227,11 +243,6 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         println("x   ",xn)
         println("δ   ",δ)
         println("------------------------------")
-
-        # Salvando só para o plot
-        push!(hist_x1, xn[1])
-        push!(hist_x2, xn[2])
-        push!(hist_w, ωxn)
     end # loop externo
 
     # Volume da estrutura final
@@ -244,7 +255,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     println("A primeira frequência foi ", ω1, " [rad/s]")
     println("A priemira frequência da estrutura otimizada é ",ωx0[1], " [rad/s]")
     println("Densidade relativa dos elementos ",xn)
-    return hist_x1, hist_x2, hist_w
+    return 
 end
     
 

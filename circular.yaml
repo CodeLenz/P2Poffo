@@ -20,9 +20,11 @@ geometrias:
 coordenadas:
   0.0 0.0 0.0
   1.0 0.0 0.0
+  0.0 1.0 0.0
 
 conectividades: 
-  1 2 
+  1 2
+  2 3
 
 apoios: 
   1 1 0.0
@@ -37,3 +39,4 @@ dados_elementos:
   
 # massa concentrada mesmo se não existe precisa add
 mass: 
+  2 50.0

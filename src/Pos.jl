@@ -4,7 +4,7 @@
 #
 # arquivo_esforcos é gerado pelo LFrame
 #
-function Pos_processamento(arquivo_esforcos, ele, no,p, posfile=false)
+function Pos_processamento(arquivo_esforcos, ele, no,P, posfile=false)
 
     # Testa se nó é válido
     no in [1;2] || error("Pos_processamento:: nó inválido $no")
@@ -143,7 +143,7 @@ function Pos_processamento(arquivo_esforcos, ele, no,p, posfile=false)
     end
 
     # tira o maximo
-    σeq_max = norm(σeq,p)
+    σeq_max = norm(σeq,P)
 
     if posfile 
         # Caminho para a pasta POS
