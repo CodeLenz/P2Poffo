@@ -193,7 +193,7 @@ function norma_dσ(σeq::Vector,S::Vector{Matrix{Float64}},Pi::Vector{Matrix{Flo
         Iz, Iy, J0, A, α, E, G, geo, ρ = LFrame.Dados_fundamentais(ele, dados_ele, dicionario_mat, dicionario_geo)
 
         # Descobre o gdls do elemento
-        #gls = LFrame.Gls(ele,conect)
+        gls = LFrame.Gls(ele,conect)
 
         # Deslocamento do ele
         #Ue = U[gls]
@@ -222,12 +222,12 @@ function norma_dσ(σeq::Vector,S::Vector{Matrix{Float64}},Pi::Vector{Matrix{Flo
             @show S[idx]
             
             
-            T1 += ((σeq[idx]^(P - 1)) / σeq[idx]) * (σeq' * (V * Pi[idx] * S[idx] * Ke * T))
+            T1[gls] .+= ((σeq[idx]^(P - 1)) / σeq[idx]) * (σeq' * (V * Pi[idx] * S[idx] * Ke * T))
         end
     end
 
     aux = T0 * T1
-    λ = KG/aux
+    λ = KG\aux
     @show λ 
     return  
 end
