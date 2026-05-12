@@ -4,7 +4,7 @@
 #
 # arquivo_esforcos é gerado pelo LFrame
 #
-function Pos_processamento(arquivo_esforcos, ele, no,P,iter, posfile=false)
+function Pos_processamento(arquivo_esforcos, ele, no,P,posfile=false)
 
     # Testa se nó é válido
     no in [1;2] || error("Pos_processamento:: nó inválido $no")
@@ -69,19 +69,13 @@ function Pos_processamento(arquivo_esforcos, ele, no,P,iter, posfile=false)
         My = -parse(Float64, dados[6])
         Mz = -parse(Float64, dados[7])
 
-
-        S = [-1.0 0.0 0.0 0.0 -1.0 -1.0 0 0 0 0 0 0;
-             0.0 0.0 0.0 -1.0 0.0 0.0 0 0 0 0 0 0]
-
     else
 
         N  = parse(Float64, dados[8])
         T  = parse(Float64, dados[11])
         My = parse(Float64, dados[12])
         Mz = parse(Float64, dados[13])
-
-        S = [0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 1.0;
-             0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0]
+    
     end
 
     # Vamos precisar dos dados da malha
@@ -105,8 +99,6 @@ function Pos_processamento(arquivo_esforcos, ele, no,P,iter, posfile=false)
     # Calcula a cte αμ
     αμ = T/Jeq
 
-    ∇ = zeros(nn)
-    Pi = Vector{Matrix{Float64}}(undef, nn)
     # Loop pelos nós da malha da seção
     for no = 1:nn
 
@@ -125,16 +117,9 @@ function Pos_processamento(arquivo_esforcos, ele, no,P,iter, posfile=false)
         ∇xΦ = mean(∇Φ[vizi,1])
         ∇yΦ = mean(∇Φ[vizi,2])
 
-        ∇[no] = sqrt(∇xΦ^2 + ∇yΦ^2)
         # Guarda nas colunas 
         σ[no,:] = [σN cteMy*zl cteMz*yl αμ*∇xΦ αμ*∇yΦ]
-
-        Pi[no] = [1/area-yl/Izl+zl/Iyl   0;
-                    0   (1/Jeq)*∇[no]]
     end
-
-    ## retornando uma media da secao inteira
-    Pi_secao = sum(Pi) / length(Pi)
     
     # matriz V para o produto quadratico 
     V = [1 0;
@@ -155,15 +140,13 @@ function Pos_processamento(arquivo_esforcos, ele, no,P,iter, posfile=false)
         σeq[i] = sqrt(σe[i,:]' * V * σe[i,:])
     end
 
-    idx_max = argmax(σeq)
-    Pi_max = Pi[idx_max]
 
     # tira o maximo
     σeq_max = norm(σeq,P)
 
     if posfile 
         # Caminho para a pasta POS
-        pos_file_node = joinpath(path_base,nome_secao*"_iter$(iter)_ele$(ele)_No$(no).pos")
+        pos_file_node = joinpath(path_base,nome_secao*"_ele$(ele)_No$(no).pos")
 
         # Inicializa o arquivo de saída
         Lgmsh_export_init(pos_file_node,nn,ne,XY,etypes,IJ) 
@@ -181,7 +164,7 @@ function Pos_processamento(arquivo_esforcos, ele, no,P,iter, posfile=false)
     
 
     # Retorna o valor maximo na seção e elemento
-    return σeq_max,S,Pi_secao
+    return σeq_max
 end
 
 

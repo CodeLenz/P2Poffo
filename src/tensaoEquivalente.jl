@@ -10,11 +10,247 @@ function tensoes(arquivoEsf,ne,P,iter,posfile)
     for ele in 1:ne
 
         ## tensao do elemento no nó 1
-        tensao[contador],SS[contador],Pi[contador] = Pos_processamento(arquivoEsf,ele,1,P,iter,posfile)
-        tensao[contador+1],SS[contador+1],Pi[contador+1] = Pos_processamento(arquivoEsf,ele,2,P,iter,posfile)
+        tensao[contador],SS[contador],Pi[contador] = tensao_vonMises(arquivoEsf,ele,1,P,iter,posfile)
+        tensao[contador+1],SS[contador+1],Pi[contador+1] = tensao_vonMises(arquivoEsf,ele,2,P,iter,posfile)
         
         contador += 2
     end
     # Tensao_ele1_no1,Tensao_ele1_no2...
     return tensao,SS,Pi
+end
+
+
+#
+# Calcula as tensões em todos os pontos (nós) de um elemento <ele> e nó <1/2>
+# devolvendo a tesão equivalente máxima na seção transversal, a matriz S e a matriz Pi associada a esse ponto
+#
+# arquivo_esforcos é gerado pelo LFrame
+#
+function tensao_vonMises(arquivo_esforcos, ele, no,P,iter, posfile=false)
+
+    # Testa se nó é válido
+    no in [1;2] || error("Pos_processamento:: nó inválido $no")
+    
+    # Testa se elemento é maior ou igual a 1
+    ele >=1 || error("Pos_processamento:: elemento deve ser >=1")
+
+    # Path base do arquivo de esforços
+    path_base = dirname(arquivo_esforcos)
+
+    # Abre o arquivo de esforços e lê a linha relativa ao elemento 
+    fd = open(arquivo_esforcos,"r")
+
+    # Verifica se o arquivo é válido
+    linha = readline(fd)
+    occursin("Esforcos",linha) || error("Pos_processamento:: arquivo de esforços inválido")
+
+    # Le a linha associada ao elemento ele
+    contador_linha = 1
+    while !eof(fd) && contador_linha<=ele
+
+        # Lê a linha 
+        linha = readline(fd)
+
+        # Incrementa o contador 
+        contador_linha += 1
+
+    end
+
+    # Se contador_linha-1 for menor do que ele, então não temos o elemento no arquivo
+    if contador_linha-1 < ele 
+       error("Pos_processamento:: elemento $ele não existe no arquivo de esforços")
+    end
+
+    # Separa a linha por tokens
+    dados = split(linha)
+
+    # Testa para ver se temos 13 informações na linha
+    length(dados)==13 || error("Pos_processamento:: Dados para o elemento $ele não tem a dimensão correta")
+
+
+    # Agora que lemos os esforços do elemento, podemos processar a malha de elementos finitos 
+    # associada a essa seção transversal
+
+    # O nome da seção transversal é a primeira informação da linha 
+    nome_secao = dados[1]
+
+    # O nome da seção será
+    arquivo_secao = joinpath(path_base,nome_secao*".geo")
+
+    # O nome do arquivo da malha será
+    arquivo_malha = joinpath(path_base,nome_secao*".msh")
+
+    # Roda o pré-processamento e obtem todos os dados da seção transversal
+    centroide, area, Izl, Iyl, Jeq, α, ∇Φ = Pre_processamento(arquivo_secao, false)
+
+    # Dependendo do nó, pegamos os esforços internos
+    if no==1
+        
+        N  = -parse(Float64, dados[2])
+        T  = -parse(Float64, dados[5])
+        My = -parse(Float64, dados[6])
+        Mz = -parse(Float64, dados[7])
+
+
+        S = [-1.0 0.0 0.0 0.0 -1.0 -1.0 0 0 0 0 0 0;
+             0.0 0.0 0.0 -1.0 0.0 0.0 0 0 0 0 0 0]
+
+    else
+
+        N  = parse(Float64, dados[8])
+        T  = parse(Float64, dados[11])
+        My = parse(Float64, dados[12])
+        Mz = parse(Float64, dados[13])
+
+        S = [0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 1.0;
+             0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0]
+    end
+
+    # Vamos precisar dos dados da malha
+    nn,XY,ne,IJ,MAT,na,AP,etypes,centroides = ConversorFEM(arquivo_malha)
+
+    # Cria um vetor de vetores com os elementos que 
+    # são vizinhos de cada nó da malha
+    vizinhos = Vizinhos_no(nn,IJ)
+
+    # Agora podemos alocar a matriz de saída
+    # (σN σMy σMz σxy σxz)
+    σ = zeros(nn,5)
+
+    # A tensão normal devido a teoria de barra é cte
+    σN = N/area
+
+    # Podemos calcular as constantes de proporcionalidade
+    cteMy =  My/Iyl
+    cteMz = -Mz/Izl
+
+    # Calcula a cte αμ
+    αμ = T/Jeq
+
+    ∇ = zeros(nn)
+    Pi = Vector{Matrix{Float64}}(undef, nn)
+    # Loop pelos nós da malha da seção
+    for no = 1:nn
+
+        # Coordenadas do nó 
+        x,y = XY[no,1:2]
+
+        # Converte para (z',y')
+        zl,yl = Muda_coordenada(x,y,α,centroide[1],centroide[2])
+        
+        # Agora podemos fazer as médias nodais SIMPLES das tensões 
+        # tangenciais para cada nó (tentar colocar fora do loop, gerar um dicionario para reaproveitar)
+        # vizinhos =  Vizinhos_no(no,IJ)
+        vizi = vizinhos[no]
+
+        # Calcula a média nodal SIMPLES do gradiente
+        ∇xΦ = mean(∇Φ[vizi,1])
+        ∇yΦ = mean(∇Φ[vizi,2])
+
+        ∇[no] = sqrt(∇xΦ^2 + ∇yΦ^2)
+        # Guarda nas colunas 
+        σ[no,:] = [σN cteMy*zl cteMz*yl αμ*∇xΦ αμ*∇yΦ]
+
+        Pi[no] = [1/area-yl/Izl+zl/Iyl   0;
+                    0   (1/Jeq)*∇[no]]
+    end
+
+    ## retornando uma media da secao inteira
+    Pi_secao = sum(Pi) / length(Pi)
+    
+    # matriz V para o produto quadratico 
+    V = [1 0;
+         0 3]
+
+    #tensao em cada elemento
+    σxx  = σ[:,1] + σ[:,2] + σ[:,3]
+    σxy  =  sqrt.(σ[:,4].^2 + σ[:,5].^2)
+
+    # matriz de tensao
+    σe = [σxx σxy]
+
+    nn = size(σ, 1)
+    σeq = zeros(nn)
+
+    # loop por todos os nos e calcula a tensao eqv
+    for i in 1:nn
+        σeq[i] = sqrt(σe[i,:]' * V * σe[i,:])
+    end
+
+    idx_max = argmax(σeq)
+    Pi_max = Pi[idx_max]
+
+    # tira o maximo
+    σeq_max = norm(σeq,P)
+
+    if posfile 
+        # Caminho para a pasta POS
+        pos_file_node = joinpath(path_base,nome_secao*"_iter$(iter)_ele$(ele)_No$(no).pos")
+
+        # Inicializa o arquivo de saída
+        Lgmsh_export_init(pos_file_node,nn,ne,XY,etypes,IJ) 
+
+        # Exporta o campo σ (falta "somar as tensões")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,1],"σxxN")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,2],"σxxMY")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,3],"σxxMz")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,4],"σzyT")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,5],"σzxT")
+        Lgmsh_export_nodal_scalar(pos_file_node, σeq,"σvon-Mises")
+
+    end
+
+    
+
+    # Retorna o valor maximo na seção e elemento
+    return σeq_max,S,Pi_secao
+end
+
+
+#
+# Retorna um vetor de vetores com os elementos vizinhos a cada nó
+#
+function Vizinhos_no(nn,IJ)
+
+    # Aloca um vetor de vetores 
+    vizinhos = Vector{Vector{Int64}}(undef,nn)
+
+    # Loop pelos nós da malha, chamando Vizinhos_no(no,IJ)
+    for no=1:nn
+
+        vizinhos[no] = _Vizinhos_no(no,IJ)
+
+    end
+
+    # Retorna os vizinhos 
+    return vizinhos
+
+end
+
+
+#
+# Dado um nó, devolve uma lista com todos os elementos que o contem 
+#
+function _Vizinhos_no(no,IJ)
+
+    # Aloca um vetor para armazenar os vizinhos 
+    vizinhos = Int64[]
+
+    # Loop por todos os elementos da malha 
+    ele = 1
+    for nos in eachrow(IJ)
+
+        # Ve se a conectividade do elemento contém o nó
+        if no in nos
+           push!(vizinhos,ele) 
+        end
+
+        # Incrementa o contador de elementos 
+        ele += 1
+
+    end
+
+    # Retorna os vizinhos 
+    return vizinhos
+
 end
