@@ -162,7 +162,7 @@ end
 
 
 ### Tensoes
-function norma_dσ(σeq::Vector,S::Matrix,Pi::Matrix,malha::LFrame.Malha,U::Vector,x::Vector,fkparam::Function,fdkparam::Function,P::Int)
+function norma_dσ(σeq::Vector,S::Vector{Matrix{Float64}},Pi::Vector{Matrix{Float64}},malha::LFrame.Malha,U::Vector,x::Vector,fkparam::Function,fdkparam::Function,P::Float64)
 
     # Dados da estrutura de malha
     dados_ele = malha.dados_elementos
@@ -200,7 +200,7 @@ function norma_dσ(σeq::Vector,S::Matrix,Pi::Matrix,malha::LFrame.Malha,U::Vect
 
         # transformação de coordenadas
         T = LFrame.Rotacao3d(ele,conect,coordenadas,α)
-    
+        @show T
         # Deslocamento do ele no local
         #Ul = T'*Ue
 
@@ -215,8 +215,14 @@ function norma_dσ(σeq::Vector,S::Matrix,Pi::Matrix,malha::LFrame.Malha,U::Vect
 
             ## indice do vetor de tensões equivalente
             idx = 2*(ele-1) + no
+
+            @show Ke
+            @show V
+            @show Pi[idx]
+            @show S[idx]
             
-            T1 += ((σeq[idx]^(P - 1)) / (σeq[idx])) * (σeq'*V*Pi*S*Ke*T)
+            
+            T1 += ((σeq[idx]^(P - 1)) / σeq[idx]) * (σeq' * (V * Pi[idx] * S[idx] * Ke * T))
         end
     end
 
