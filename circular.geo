@@ -3,7 +3,7 @@
 //
 
 // Raio da seção 
-R = 1E-2;
+R = 2E-1;
 
 // tamanho do elemento
 lc = R/30;
