@@ -5,10 +5,10 @@
 #
 #   Função que lineariza o problema
 #
-function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup)
+function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,σeqMaxima,σesc,P)
 
-    # número de restrições por enquanto 1 só dv
-    m = 1
+    # número de restrições 
+    m = 2
     
     # número de variáveis de projeto
     n = length(x0)
@@ -24,15 +24,15 @@ function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup)
     c = -dω
 
     # Gradiente das restrições linearizadas
-    A = dV'
+    A[1,:] = dV'
+    A[2,:] = dσ'
 
-    # rhs das restrições linearizadas
-    #for i=1:m
-        #b[i] = V_sup - dV[i] + dot(A[i,:],x0) 
-    #end
-
-    # como tem só uma restrição e ela já é linear (adaptar para quando não for usando o for acima)
+    # rhs das restrições linearizadas - a restrição de volume é linear e já tem o rhs definido como V_sup
     b[1] = V_sup
+
+    # para a restrição de tensão, o rhs é a tensão de escoamento menos a tensão atual (linearizada)
+    σmaxi = norm(σeqMaxima, P)
+    b[2] = σesc - σmaxi + dot(A[2,:], x0)
 
     # inicializa xs e xi
     xi = zeros(n)
@@ -57,6 +57,29 @@ end
 #
 function LP(c,A,b,xi,xs,n,m)
 
+    # Checa antes de passar pro solver
+    @assert all(isfinite, c)  "c tem valor não-finito: $c"
+    @assert all(isfinite, A)  "A tem valor não-finito"
+    @assert all(isfinite, b)  "b tem valor não-finito: $b"
+    @assert all(isfinite, xi) "xi tem valor não-finito: $xi"
+    @assert all(isfinite, xs) "xs tem valor não-finito: $xs"
+
+    # Checa bounds invertidos
+    for i in 1:n
+        if xi[i] > xs[i]
+            error("Bounds invertidos na variável $i: xi=$(xi[i]) > xs=$(xs[i]), x0 provavelmente é zero")
+        end
+    end
+
+    println("=== DEBUG LP ===")
+    println("n=$n, m=$m")
+    println("c = ", c)
+    println("b = ", b)
+    println("xi = ", xi)
+    println("xs = ", xs)
+    println("A = ", A)
+    println("================")
+
     
     # Aloca vetor de soluções atuais
     xn = zeros(n)
@@ -74,7 +97,7 @@ function LP(c,A,b,xi,xs,n,m)
     @variable(modelo, s[1:m] >= 0)
 
     # Define a penalização
-    r = 1E3
+    r = 1E-3
 
     # Define a função objetivo
     @objective(modelo, Min, c'*x + r*sum(s))
@@ -132,13 +155,20 @@ end
 #
 # Usar a norma P da frequência - objetivo
 #
-function convergencia(x0,xn,ωx0,ωxn,dV,V_sup,tol_f,tol_g)
+function convergencia(x0,xn,ωx0,ωxn,dV,V_sup,tol_f,tol_g,σeqMaxima,σesc,P)
 
     # Calcula a diferença relativa da função objetivo
     dif_fx = norm(ωxn - ωx0)/(norm(ωx0))
 
     # Calcula o termo violation
-    violation = max(0.0, dot(dV, xn) - V_sup)
+    viol_vol = max(0.0, dot(dV, xn) - V_sup)
+
+    # violação da restrição de tensão
+    σagg = norm(σeqMaxima, P)
+    viol_sig = max(0.0, σagg - σesc)
+
+    # violação total
+    violation = max(viol_vol, viol_sig)
      
     # Verifica as tolerâncias
     if dif_fx < tol_f && violation < tol_g

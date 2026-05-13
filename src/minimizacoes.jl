@@ -122,6 +122,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
 
     # analise modal somente para a malha
     ωn,U0,malha = Modal3D(arquivo,posfile,verbose=verbose)
+    σesc = malha.dicionario_materiais[malha.dados_elementos[1,1]]["S_esc"]
 
     # Numero de elementos 
     ne = malha.ne
@@ -189,7 +190,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         # tensão equivalente dos nos e elementos 
         # σeqMaxima - valor máximo da tensão equivalente em cada nó 1D
         # σe estado de tensão local crítico (σxx, σxy) para cada nó 1D
-        σeqMaxima,SS,Pi,σe = tensoes(arquivoEsf,malha.ne,P,iter,posfile)
+        σeqMaxima,SS,Pi,σe = tensoes(arquivoEsf,malha,P,iter,posfile)
 
         # so para armenazar a primeira frequencia da primeira iteração
         if iter == 1
@@ -211,7 +212,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         atualiza_δ!(iter,δ,Δ1,Δ2,δ_min,δ_max)
 
         # Lineariza o problema 
-        c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup)
+        c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup,dσ,σeqMaxima,σesc,P)
 
         # Chama a solução interna do problema
         xn, gs_lin = LP(c,A,b,xi,xs,n,m)
@@ -221,7 +222,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     
         # Teste de convergência do problema 
         if iter > 2
-            if convergencia(x0,xn,ωx0,ωxn,dV,V_sup,tol_f,tol_g)
+            if convergencia(x0,xn,ωx0,ωxn,dV,V_sup,tol_f,tol_g,σeqMaxima,σesc,P)
                 break
             end
         end

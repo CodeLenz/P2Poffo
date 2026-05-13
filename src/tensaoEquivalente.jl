@@ -1,5 +1,8 @@
 # rotina para o calculo da tensao equivalente 
-function tensoes(arquivoEsf,ne,P,iter,posfile)
+function tensoes(arquivoEsf,malha,P,iter,posfile)
+
+    # numero de elementos 
+    ne = malha.ne 
 
     # tensao eqv maxima de cada no 
     tensao = zeros(2 * ne)
@@ -26,6 +29,7 @@ function tensoes(arquivoEsf,ne,P,iter,posfile)
         ## tensao do elemento no nó 1
         tensao[contador],SS[contador],Pi[contador],σe[contador] = tensao_vonMises(linhas,path_base,ele,1,P,iter,cache_secoes,posfile)
         tensao[contador+1],SS[contador+1],Pi[contador+1],σe[contador+1] = tensao_vonMises(linhas,path_base,ele,2,P,iter,cache_secoes,posfile)
+
         
         contador += 2
     end
@@ -209,6 +213,7 @@ function tensao_vonMises(linhas, path_base, ele, no, P, iter, cache_secoes, posf
 
     # tira o maximo
     σeq_max = norm(σeq,P)
+    @show σeq_max 
 
     # Recupera a matriz Pi associada a pior tensao, pois esse P * S * F = tensao equivalente máxima no 2d
     idx_max = argmax(σeq)
@@ -234,8 +239,6 @@ function tensao_vonMises(linhas, path_base, ele, no, P, iter, cache_secoes, posf
 
     end
 
-    # para evitar divisão por zero na função objetivo, caso a tensão equivalente seja zero (o que pode acontecer no início da otimização)
-    σeq_max = σeq_max
 
     # Retorna o valor maximo na seção e elemento
     return σeq_max,S,Pi_critico,σe_critico
