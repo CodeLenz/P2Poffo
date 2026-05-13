@@ -210,11 +210,11 @@ function tensao_vonMises(linhas, path_base, ele, no, P, iter, cache_secoes, posf
 
     # loop por todos os nos e calcula a tensao eqv
     for i in 1:nn
-        σeq[i] = sqrt(σe[i,:]' * V * σe[i,:] + ϵ^2)
+        σeq[i] = sqrt.(σe[i,:]' * V * σe[i,:] + ϵ^2)
     end
 
     # tira o maximo
-    σeq_max = norm(σeq,P)
+    σeq_max = maximum(σeq)
     @show σeq_max 
 
     # Recupera a matriz Pi associada a pior tensao, pois esse P * S * F = tensao equivalente máxima no 2d
