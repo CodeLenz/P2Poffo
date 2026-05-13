@@ -182,6 +182,8 @@ function norma_dσ(σeq::Vector,σe::Vector{Vector{Float64}},S::Vector{Matrix{Fl
     ## termo constante
     T0 = (sum(σeq.^P))^((1/P) - 1)
 
+    @show T0
+
     # Monta a matriz K global e pega o numero de graus de liberdade
     KG = LFrame.Monta_Kg(malha,x,fkparam)
 
@@ -216,6 +218,7 @@ function norma_dσ(σeq::Vector,σe::Vector{Vector{Float64}},S::Vector{Matrix{Fl
             
             # Parte T1 para o problema adjunto
             T1[gls] .+= (σeq[idx]^(P - 2)) *vec(σe[idx]' * (V * Pi[idx] * S[idx] * Ke * T))
+
         end
     end
 
@@ -225,15 +228,18 @@ function norma_dσ(σeq::Vector,σe::Vector{Vector{Float64}},S::Vector{Matrix{Fl
     # resolvendo o problema adjunto
     λ = Kg\aux
 
-    # vetor de multiplicadores de lagrange no global
+    @show λ
+
+    # vetor de multiplicadores de Lagrange no global
     λg = zeros(ndof)
-    # associando os multiplicadores de lagrange aos gdls livres
-    λg[dofs_l] = λ
+
+    # associando os multiplicadores de Lagrange aos gdls livres
+    λg[dofs_l] .= λ
 
     ## derivada da tensão equivalente em relação a cada elemento
     dσ = zeros(ne)
 
-    
+    # Loop pelos elementos 
     for ele in 1:ne
 
         # dados do elemento  nao estao no central principal
@@ -245,13 +251,19 @@ function norma_dσ(σeq::Vector,σe::Vector{Vector{Float64}},S::Vector{Matrix{Fl
         # transformação de coordenadas
         T = LFrame.Rotacao3d(ele,conect,coordenadas,α)
 
-        # Rigidez do elemento 
+        # Rigidez do elemento no sistema local 
         Ke = LFrame.Ke_portico3d(E,Iz,Iy,G,J0,L[ele],A)
 
-        # derivada da rigidez 
+        # derivada da rigidez no sistema local 
         dKe = Ke*fdkparam(x[ele])
 
+        # Converte o deslocamento para o sistema local 
+        # T H U
         Ue = T' * U[gls]
+
+        # Converte o vetor adjunto  para o sistema local 
+        # T H λ
+        λe = T' * λg[gls]
 
         ## loop pelos nos
         for no in 1:2
@@ -262,10 +274,13 @@ function norma_dσ(σeq::Vector,σe::Vector{Vector{Float64}},S::Vector{Matrix{Fl
             # termo direto da derivada da tensão equivalente em relação a cada elemento
             termo_direto = (σeq[idx]^(P - 2)) * (σe[idx]' * V * Pi[idx] * S[idx] * dKe * Ue)[1]
 
+            @show termo_direto, σeq[idx], σeq[idx]^(P - 2)
+
             # termo indireto da derivada da tensão equivalente em relação a cada elemento
-            termo_indireto = (λg[gls]' * T' * dKe * U[gls])[1]
+            termo_indireto = (λe' * dKe * Ue)[1]
 
             dσ[ele] += termo_direto + termo_indireto
+
         end
     end
 

@@ -35,6 +35,7 @@ function tensoes(arquivoEsf,malha,P,iter,posfile)
     end
     # Tensao_ele1_no1,Tensao_ele1_no2...
     return tensao,SS,Pi,σe
+
 end
 
 
@@ -44,7 +45,7 @@ end
 #
 # arquivo_esforcos é gerado pelo LFrame
 #
-function tensao_vonMises(linhas, path_base, ele, no, P, iter, cache_secoes, posfile=false)
+function tensao_vonMises(linhas, path_base, ele, no, P, iter, cache_secoes, posfile=false, ϵ=1E-6)
 
     # Testa se nó é válido
     no in [1;2] || error("Pos_processamento:: nó inválido $no")
@@ -129,9 +130,9 @@ function tensao_vonMises(linhas, path_base, ele, no, P, iter, cache_secoes, posf
 
 
         S = -1*[1 0 0 0 0 0 0 0 0 0 0 0;
-            0 0 0 1 0 0 0 0 0 0 0 0;
-            0 0 0 0 0 1 0 0 0 0 0 0;
-            0 0 0 0 1 0 0 0 0 0 0 0]
+                0 0 0 1 0 0 0 0 0 0 0 0;
+                0 0 0 0 0 1 0 0 0 0 0 0;
+                0 0 0 0 1 0 0 0 0 0 0 0]
 
     else
 
@@ -141,9 +142,9 @@ function tensao_vonMises(linhas, path_base, ele, no, P, iter, cache_secoes, posf
         Mz = parse(Float64, dados[13])
 
         S = [0 0 0 0 0 1 0 0 0 0 0 0;
-            0 0 0 0 0 0 0 0 0 1 0 0;
-            0 0 0 0 0 0 0 0 0 0 0 1;
-            0 0 0 0 0 0 0 0 0 0 1 0]
+             0 0 0 0 0 0 0 0 0 1 0 0;
+             0 0 0 0 0 0 0 0 0 0 0 1;
+             0 0 0 0 0 0 0 0 0 0 1 0]
     end
 
    
@@ -164,6 +165,7 @@ function tensao_vonMises(linhas, path_base, ele, no, P, iter, cache_secoes, posf
 
     ∇ = zeros(nn)
     Pi = Vector{Matrix{Float64}}(undef, nn)
+    
     # Loop pelos nós da malha da seção
     for ino = 1:nn
 
@@ -208,7 +210,7 @@ function tensao_vonMises(linhas, path_base, ele, no, P, iter, cache_secoes, posf
 
     # loop por todos os nos e calcula a tensao eqv
     for i in 1:nn
-        σeq[i] = sqrt(σe[i,:]' * V * σe[i,:])
+        σeq[i] = sqrt(σe[i,:]' * V * σe[i,:] + ϵ^2)
     end
 
     # tira o maximo

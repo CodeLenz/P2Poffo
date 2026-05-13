@@ -5,7 +5,7 @@
 #
 #   Função que lineariza o problema
 #
-function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,σeqMaxima,σesc,P)
+function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,σeqMaxima,σesc,P,s=1.0)
 
     # número de restrições 
     m = 2
@@ -24,15 +24,20 @@ function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,σeqMaxima,σesc,P)
     c = -dω
 
     # Gradiente das restrições linearizadas
-    A[1,:] = dV'
-    A[2,:] = dσ'
+    A[1,:] = dV'/V_sup
+    A[2,:] = s*dσ'./σesc
 
     # rhs das restrições linearizadas - a restrição de volume é linear e já tem o rhs definido como V_sup
-    b[1] = V_sup
+    b[1] = sum(x0.*dV)/V_sup - 1.0
 
     # para a restrição de tensão, o rhs é a tensão de escoamento menos a tensão atual (linearizada)
     σmaxi = norm(σeqMaxima, P)
-    b[2] = σesc - σmaxi + dot(A[2,:], x0)
+
+    # Valor da restrição de tensão máxima
+    valor_g_σ = s*σmaxi/σesc - 1
+
+    # Limite linearizado 
+    b[2] = -valor_g_σ + dot(A[2,:], x0)
 
     # inicializa xs e xi
     xi = zeros(n)
@@ -88,7 +93,9 @@ function LP(c,A,b,xi,xs,n,m)
     modelo = Model(HiGHS.Optimizer)
 
     # cale-se cale-se cale-se
-    set_silent(modelo)
+    #set_silent(modelo)
+
+    set_attribute(modelo, "log_file", "meleca")
 
     # Define as variáveis de projeto
     @variable(modelo, xi[i] <= x[i = 1:n] <= xs[i])

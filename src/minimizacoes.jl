@@ -160,7 +160,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     Δ2 = x1 .- x2
 
     # inicializa os valores inferiores e superiores de densidades relativas
-    x_inf = 1e-3*ones(length(x0))
+    x_inf = 1E-3*ones(length(x0))
     x_sup = ones(length(x0))        
 
     # inicializa o vetor 
@@ -192,7 +192,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         # σe estado de tensão local crítico (σxx, σxy) para cada nó 1D
         σeqMaxima,SS,Pi,σe = tensoes(arquivoEsf,malha,P,iter,posfile)
 
-        # so para armenazar a primeira frequencia da primeira iteração
+        # so para armanezar a primeira frequencia da primeira iteração
         if iter == 1
             ω1 = ωn[1]
         end
@@ -213,6 +213,8 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
 
         # Lineariza o problema 
         c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup,dσ,σeqMaxima,σesc,P)
+
+        #return c,A,b,xi,xs,n,m, σeqMaxima,SS,Pi,σe
 
         # Chama a solução interna do problema
         xn, gs_lin = LP(c,A,b,xi,xs,n,m)
