@@ -4,7 +4,7 @@
 #
 # arquivo_esforcos é gerado pelo LFrame
 #
-function Pos_processamento(arquivo_esforcos, ele, no,P,posfile=false)
+function Pos_processamento(arquivo_esforcos, ele, no,P=8,posfile=false)
 
     # Testa se nó é válido
     no in [1;2] || error("Pos_processamento:: nó inválido $no")
