@@ -222,7 +222,7 @@ function tensao_vonMises(linhas, path_base, ele, no, P, iter, cache_secoes, posf
     Pi_critico = Pi[idx_max]
     
     # tensão equivalente crítica 
-    σe_critico = [σxx[idx_max], σxy[idx_max]]
+    σe_critico = [σxx[idx_max], σxy[idx_max]] #.+ϵ
 
     if posfile 
         # Caminho para a pasta POS

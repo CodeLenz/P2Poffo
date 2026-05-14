@@ -3,3 +3,235 @@ Using BLAS: blastrampoline-5
 Rows:           1 upper bounds greater than or equal to        1e+20 are treated as +Infinity
 ERROR:   LP matrix packed vector contains 1 |value| in [1.1877e+36, 1.1877e+36] greater than 1e+15
 WARNING: LP matrix packed vector contains 1 |value| in [2.28977e-18, 2.28977e-18] less than or equal to 1e-09: ignored
+Running HiGHS 1.14.0 (git hash: 7df0786de3): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: blastrampoline-5 
+Rows:           1 upper bounds greater than or equal to        1e+20 are treated as +Infinity
+ERROR:   LP matrix packed vector contains 1 |value| in [1.97484e+34, 1.97484e+34] greater than 1e+15
+WARNING: LP matrix packed vector contains 1 |value| in [7.19237e-18, 7.19237e-18] less than or equal to 1e-09: ignored
+Running HiGHS 1.14.0 (git hash: 7df0786de3): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: blastrampoline-5 
+Rows:           1 upper bounds greater than or equal to        1e+20 are treated as +Infinity
+ERROR:   LP matrix packed vector contains 1 |value| in [1.97484e+34, 1.97484e+34] greater than 1e+15
+WARNING: LP matrix packed vector contains 1 |value| in [7.19237e-18, 7.19237e-18] less than or equal to 1e-09: ignored
+Running HiGHS 1.14.0 (git hash: 7df0786de3): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: blastrampoline-5 
+Rows:           1 upper bounds greater than or equal to        1e+20 are treated as +Infinity
+ERROR:   LP matrix packed vector contains 1 |value| in [1.97484e+34, 1.97484e+34] greater than 1e+15
+WARNING: LP matrix packed vector contains 1 |value| in [7.19237e-18, 7.19237e-18] less than or equal to 1e-09: ignored
+Running HiGHS 1.14.0 (git hash: 7df0786de3): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: blastrampoline-5 
+LP has 2 rows; 4 cols; 4 nonzeros
+Coefficient ranges:
+  Matrix  [8e-01, 1e+00]
+  Cost    [1e-03, 8e-01]
+  Bound   [5e-01, 5e-01]
+  RHS     [1e+00, 1e+00]
+Presolving model
+Problem status detected on presolve: Infeasible
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+HiGHS run time      :          0.00
+Solving LP to try to compute dual ray
+LP has 2 rows; 4 cols; 4 nonzeros
+Coefficient ranges:
+  Matrix  [8e-01, 1e+00]
+  Cost    [0e+00, 0e+00]
+  Bound   [5e-01, 5e-01]
+  RHS     [1e+00, 1e+00]
+Solving LP without presolve or useful basis
+Using dual simplex solver
+  Iteration        Objective     Infeasibilities num(sum)
+          0     6.0469943933e-07 Pr: 1(0.99) 0.0s
+          0     6.0469943933e-07 0.0s
+
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+P-D objective error :  6.0469907367e-07
+HiGHS run time      :          0.00
+Solving linear system to compute dual ray
+Running HiGHS 1.14.0 (git hash: 7df0786de3): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: blastrampoline-5 
+LP has 2 rows; 4 cols; 4 nonzeros
+Coefficient ranges:
+  Matrix  [8e-01, 1e+00]
+  Cost    [1e-03, 8e-01]
+  Bound   [5e-01, 5e-01]
+  RHS     [1e+00, 1e+00]
+Presolving model
+Problem status detected on presolve: Infeasible
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+HiGHS run time      :          0.00
+Solving LP to try to compute dual ray
+LP has 2 rows; 4 cols; 4 nonzeros
+Coefficient ranges:
+  Matrix  [8e-01, 1e+00]
+  Cost    [0e+00, 0e+00]
+  Bound   [5e-01, 5e-01]
+  RHS     [1e+00, 1e+00]
+Solving LP without presolve or useful basis
+Using dual simplex solver
+  Iteration        Objective     Infeasibilities num(sum)
+          0     6.0469943933e-07 Pr: 1(0.99) 0.0s
+          0     6.0469943933e-07 0.0s
+
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+P-D objective error :  6.0469907367e-07
+HiGHS run time      :          0.00
+Solving linear system to compute dual ray
+Running HiGHS 1.14.0 (git hash: 7df0786de3): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: blastrampoline-5 
+LP has 2 rows; 4 cols; 4 nonzeros
+Coefficient ranges:
+  Matrix  [8e-01, 1e+00]
+  Cost    [1e-03, 8e-01]
+  Bound   [3e-01, 3e-01]
+  RHS     [4e-01, 1e+00]
+Presolving model
+Problem status detected on presolve: Infeasible
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+HiGHS run time      :          0.00
+Solving LP to try to compute dual ray
+LP has 2 rows; 4 cols; 4 nonzeros
+Coefficient ranges:
+  Matrix  [8e-01, 1e+00]
+  Cost    [0e+00, 0e+00]
+  Bound   [3e-01, 3e-01]
+  RHS     [4e-01, 1e+00]
+Solving LP without presolve or useful basis
+Using dual simplex solver
+  Iteration        Objective     Infeasibilities num(sum)
+          0     3.4704525882e-07 Pr: 1(0.99428) 0.0s
+          0     3.4704525882e-07 0.0s
+
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+P-D objective error :  3.4704513838e-07
+HiGHS run time      :          0.00
+Solving linear system to compute dual ray
+Running HiGHS 1.14.0 (git hash: 7df0786de3): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: blastrampoline-5 
+LP has 2 rows; 4 cols; 4 nonzeros
+Coefficient ranges:
+  Matrix  [8e-01, 1e+00]
+  Cost    [1e-03, 8e-01]
+  Bound   [5e-01, 5e-01]
+  RHS     [1e+00, 1e+00]
+Presolving model
+Problem status detected on presolve: Infeasible
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+HiGHS run time      :          0.00
+Solving LP to try to compute dual ray
+LP has 2 rows; 4 cols; 4 nonzeros
+Coefficient ranges:
+  Matrix  [8e-01, 1e+00]
+  Cost    [0e+00, 0e+00]
+  Bound   [5e-01, 5e-01]
+  RHS     [1e+00, 1e+00]
+Solving LP without presolve or useful basis
+Using dual simplex solver
+  Iteration        Objective     Infeasibilities num(sum)
+          0     6.0469943933e-07 Pr: 1(0.99) 0.0s
+          0     6.0469943933e-07 0.0s
+
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+P-D objective error :  6.0469907367e-07
+HiGHS run time      :          0.01
+Solving linear system to compute dual ray
+Running HiGHS 1.14.0 (git hash: 7df0786de3): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: blastrampoline-5 
+LP has 2 rows; 4 cols; 4 nonzeros
+Coefficient ranges:
+  Matrix  [8e-01, 1e+00]
+  Cost    [1e-03, 8e-01]
+  Bound   [5e-01, 5e-01]
+  RHS     [1e+00, 1e+00]
+Presolving model
+Problem status detected on presolve: Infeasible
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+HiGHS run time      :          0.00
+Solving LP to try to compute dual ray
+LP has 2 rows; 4 cols; 4 nonzeros
+Coefficient ranges:
+  Matrix  [8e-01, 1e+00]
+  Cost    [0e+00, 0e+00]
+  Bound   [5e-01, 5e-01]
+  RHS     [1e+00, 1e+00]
+Solving LP without presolve or useful basis
+Using dual simplex solver
+  Iteration        Objective     Infeasibilities num(sum)
+          0     6.0469943933e-07 Pr: 1(0.99) 0.0s
+          0     6.0469943933e-07 0.0s
+
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+P-D objective error :  6.0469907367e-07
+HiGHS run time      :          0.00
+Solving linear system to compute dual ray
+Running HiGHS 1.14.0 (git hash: 7df0786de3): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: blastrampoline-5 
+LP has 2 rows; 4 cols; 4 nonzeros
+Coefficient ranges:
+  Matrix  [8e-01, 1e+00]
+  Cost    [1e-03, 8e-01]
+  Bound   [9e-02, 3e-01]
+  RHS     [5e-01, 1e+00]
+Presolving model
+Problem status detected on presolve: Infeasible
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+HiGHS run time      :          0.00
+Solving LP to try to compute dual ray
+LP has 2 rows; 4 cols; 4 nonzeros
+Coefficient ranges:
+  Matrix  [8e-01, 1e+00]
+  Cost    [0e+00, 0e+00]
+  Bound   [9e-02, 3e-01]
+  RHS     [5e-01, 1e+00]
+Solving LP without presolve or useful basis
+Using dual simplex solver
+  Iteration        Objective     Infeasibilities num(sum)
+          0     2.3735463337e-07 Pr: 1(0.995355) 0.0s
+          0     2.3735463337e-07 0.0s
+
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+P-D objective error :  2.3735457703e-07
+HiGHS run time      :          0.01
+Solving linear system to compute dual ray
+Running HiGHS 1.14.0 (git hash: 7df0786de3): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: blastrampoline-5 
+LP has 2 rows; 4 cols; 4 nonzeros
+Coefficient ranges:
+  Matrix  [8e-01, 1e+00]
+  Cost    [1e-03, 8e-01]
+  Bound   [2e-01, 2e-01]
+  RHS     [6e-01, 1e+00]
+Presolving model
+Problem status detected on presolve: Infeasible
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+HiGHS run time      :          0.00
+Solving LP to try to compute dual ray
+LP has 2 rows; 4 cols; 4 nonzeros
+Coefficient ranges:
+  Matrix  [8e-01, 1e+00]
+  Cost    [0e+00, 0e+00]
+  Bound   [2e-01, 2e-01]
+  RHS     [6e-01, 1e+00]
+Solving LP without presolve or useful basis
+Using dual simplex solver
+  Iteration        Objective     Infeasibilities num(sum)
+          0     2.2393707911e-07 Pr: 1(0.995829) 0.0s
+          0     2.2393707911e-07 0.0s
+
+Model status        : Infeasible
+Objective value     :  0.0000000000e+00
+P-D objective error :  2.2393702896e-07
+HiGHS run time      :          0.01
+Solving linear system to compute dual ray

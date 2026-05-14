@@ -178,6 +178,8 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     # Loop externo de otimização 
     for iter=1:niter
 
+        @show x0
+
         # Calcula frequências e modos
         ωn,U0,_ = Modal3D(malha,posfile,x0=x0,kparam=[fkparam],mparam=[fmparam])
         

@@ -1,5 +1,5 @@
-# 
-# circular engastado com 100 N e momento na ponta 
+#
+# Exemplo Hibbeler 8.6, 10° ed.
 #
 
 materiais:
@@ -11,6 +11,8 @@ materiais:
     
 loads:
   2 2 100
+  2 4 100
+  2 3 100
 
 geometrias:
   - File: circular.sec
@@ -18,9 +20,11 @@ geometrias:
 coordenadas:
   0.0 0.0 0.0
   1.0 0.0 0.0
+  0.0 1.0 0.0
 
 conectividades: 
   1 2
+  2 3
 
 apoios: 
   1 1 0.0
@@ -29,6 +33,13 @@ apoios:
   1 4 0.0
   1 5 0.0
   1 6 0.0
+  2 1 0.0
+  2 2 0.0
+  2 3 0.0
+  2 4 0.0
+  2 5 0.0
+  2 6 0.0
+
 
 dados_elementos:
   aluminio circular

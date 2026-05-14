@@ -226,7 +226,7 @@ function norma_dσ(σeq::Vector,σe::Vector{Vector{Float64}},S::Vector{Matrix{Fl
     aux = (T0 * T1)[dofs_l]
 
     # resolvendo o problema adjunto
-    λ = Kg\aux
+    λ = -(Kg\aux)
 
     @show λ
 
