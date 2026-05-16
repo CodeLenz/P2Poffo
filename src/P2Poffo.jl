@@ -15,6 +15,8 @@ module P2Poffo
     using JuMP
     using HiGHS
 
+    using Printf
+
     # Carrega as rotinas
     include("conversor.jl")
     include("elemento.jl")
