@@ -1,7 +1,7 @@
 name = "P2Poffo"
 uuid = "15746f16-e5ef-480f-93b5-237a577d2332"
-authors = ["PedroPoffo <pedrohenriquepoffo@gmail.com>"]
 version = "0.1.0"
+authors = ["PedroPoffo <pedrohenriquepoffo@gmail.com>"]
 
 [deps]
 BMesh = "91fb467a-ecbd-11ec-0e64-1b9c3501232a"
@@ -16,6 +16,7 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 LinearSolve = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
 OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
@@ -37,5 +38,6 @@ JuMP = "1.30.0"
 LFrame = "1.1.0"
 LinearSolve = "3.66.0"
 Plots = "1.41.6"
+Printf = "1.11.0"
 Revise = "3.12.2"
 Statistics = "1.11.1"

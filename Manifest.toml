@@ -2,7 +2,7 @@
 
 julia_version = "1.12.6"
 manifest_format = "2.0"
-project_hash = "4673200de9b5b85ec50447704deac0d7f8a723a2"
+project_hash = "1c829bc6df8dd31a2e527e3afa1d12a2e33a6e1d"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "bbc22a9a08a0ef6460041086d8a7b27940ed4ffd"
@@ -1521,7 +1521,7 @@ uuid = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 version = "1.8.1"
 
 [[deps.P2Poffo]]
-deps = ["BMesh", "DelimitedFiles", "GLMakie", "Gmsh", "HiGHS", "JuMP", "LFrame", "Lgmsh", "LinearAlgebra", "LinearSolve", "OrderedCollections", "Plots", "RecursiveArrayTools", "Revise", "SparseArrays", "StaticArrays", "Statistics", "Test"]
+deps = ["BMesh", "DelimitedFiles", "GLMakie", "Gmsh", "HiGHS", "JuMP", "LFrame", "Lgmsh", "LinearAlgebra", "LinearSolve", "OrderedCollections", "Plots", "Printf", "RecursiveArrayTools", "Revise", "SparseArrays", "StaticArrays", "Statistics", "Test"]
 path = "."
 uuid = "15746f16-e5ef-480f-93b5-237a577d2332"
 version = "0.1.0"
