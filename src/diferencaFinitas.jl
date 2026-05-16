@@ -7,46 +7,62 @@ Valida a derivada analítica `norma_dσ` usando diferenças finitas centrais.
 function valida_dσ_FD(malha, x0, fkparam, fdkparam, P, iter;
                       h=1e-6, posfile=true)
 
+    # Dimensão do vetor de variáveis de projeto
     ne = length(x0)
 
     # Solução no ponto base
     U, = Analise3D(malha, posfile, x0=x0,kparam=[fkparam], iter=iter)
 
+    # Carrega arquivo de esforços
     nomeEsf = malha.nome_arquivo
     arquivoEsf = nomeEsf * "_iter$(iter).esf"
 
+    # Calcula as tensões de referência 
     σeqMaxima, SS, Pi, σe = tensoes(arquivoEsf, malha, P, iter, posfile)
     @show σeqMaxima, SS, Pi, σe
+
     # Derivada analítica
     dσ_analitica = norma_dσ(σeqMaxima, σe, SS, Pi,malha, U, x0,fkparam, fdkparam, P)
 
     # Diferenças finitas centrais
     dσ_fd = zeros(Float64, ne)
 
-    for i in 1:ne
+    # Loop pelas variáveis de projeto
+    for i in LinearIndices(x0)
 
-        x_plus  = copy(x0)
-        x_minus = copy(x0)
+        # Backup do valor atual 
+        xb = x0[i]
 
-        x_plus[i]  += h
-        x_minus[i] -= h
-
+        # Perturba para frente
+        x0[i] += h
+       
         # f(x+h)
-        U_p, = Analise3D(malha, posfile,x0=x_plus,kparam=[fkparam],iter=iter)
+        U_p, = Analise3D(malha, posfile,x0=x0,kparam=[fkparam],iter=iter)
 
+        # Calcula as tensões com a perturbação para frente
         σeqMaxima_p, _, _, _ = tensoes(arquivoEsf, malha, P, iter, posfile)
 
+        # Objetivo para frente
         f_plus = norm(σeqMaxima_p, P)
 
-        # f(x-h)
-        U_m, = Analise3D(malha, posfile,x0=x_minus,kparam=[fkparam],iter=iter)
+        # Perturba para trás 
+        x0[i] = xb - h
 
+        # Análise para trás
+        U_m, = Analise3D(malha, posfile,x0=x0,kparam=[fkparam],iter=iter)
+
+        # Tensões para trás
         σeqMaxima_m, _, _, _ = tensoes(arquivoEsf, malha, P, iter, posfile)
 
+        # Função objetivo para trás
         f_minus = norm(σeqMaxima_m, P)
 
         # Diferença finita central
         dσ_fd[i] = (f_plus - f_minus) / (2h)
+
+        # Restaura a posição i 
+        x0[i] = xb
+
     end
 
     println("\n=== Validação de norma_dσ (Diferenças Finitas Centrais) ===")
@@ -70,6 +86,7 @@ end
 
 function valida_dω_FD(malha, x0,fkparam, fdkparam,fmparam, fdmparam,n_modos, P;h=1e-4, posfile=false)
 
+    # Número de variáveis de projeto 
     ne = length(x0)
 
     # Solução base
@@ -85,28 +102,36 @@ function valida_dω_FD(malha, x0,fkparam, fdkparam,fmparam, fdmparam,n_modos, P;
     # Diferenças finitas centrais
     dω_fd = zeros(Float64, ne)
 
-    for i in 1:ne
+    # Loop pelas variáveis de projeto 
+    for i in LinearIndices(x0)
 
-        x_plus  = copy(x0)
-        x_minus = copy(x0)
+        # Backup do valor atual 
+        xb = x0[i]
 
-        x_plus[i]  += h
-        x_minus[i] -= h
+        # Perturba para frente
+        x0[i] += h
 
-        # f(x+h)
-        ωn_p, _, _ = Modal3D(malha, posfile,x0=x_plus,kparam=[fkparam],mparam=[fmparam])
+        # Calcula o problema para frente
+        ωn_p, _, _ = Modal3D(malha, posfile,x0=x0,kparam=[fkparam],mparam=[fmparam])
 
         # frequência inferior dos modos no ponto a frente 
         f_plus = norm(ωn_p[1:n_modos], -P)
 
-        # f(x-h)
-        ωn_m, _, _ = Modal3D(malha, posfile,x0=x_minus,kparam=[fkparam],mparam=[fmparam])
+        # Perturba para trás 
+        x0[i] = xb - h
+
+        # frequências para trás
+        ωn_m, _, _ = Modal3D(malha, posfile,x0=x0,kparam=[fkparam],mparam=[fmparam])
 
         # frequência inferior dos modos no ponto a trás
         f_minus = norm(ωn_m[1:n_modos], -P)
 
         # Diferença finita central
         dω_fd[i] = (f_plus - f_minus) / (2h)
+
+        # Restaura a posição i 
+        x0[i] = xb
+
     end
 
     println("\n=== Validação de norma_dω (Diferenças Finitas Centrais) ===")
@@ -115,6 +140,7 @@ function valida_dω_FD(malha, x0,fkparam, fdkparam,fmparam, fdmparam,n_modos, P;
     println("-" ^ 58)
 
     for i in 1:ne
+        
         a  = dω_analitica[i]
         fd = dω_fd[i]
 

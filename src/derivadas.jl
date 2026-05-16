@@ -79,7 +79,7 @@ function dω(ωn::Float64,U0::Vector,malha::LFrame.Malha,x::Vector,fdkparam::Fun
     ϕg[dofs_l] .= U0
 
     # Loop pelos elementos
-    for ele in 1:malha.ne
+    for ele in LinearIndices(x)
         
         # Recupera dados do elemento 
         Iz, Iy, J0, A, α, E, G, geo, ρ = LFrame.Dados_fundamentais(ele, dados_ele, dicionario_mat, dicionario_geo)
@@ -108,7 +108,7 @@ function dω(ωn::Float64,U0::Vector,malha::LFrame.Malha,x::Vector,fdkparam::Fun
         # Para o local
         ϕ0l = T'*ϕ0g
     
-        # variavel auxialiar para facilitar
+        # variavel auxiliar para facilitar
         aux = dK - (ωn^2)*dM
 
         # Denominador
@@ -116,10 +116,11 @@ function dω(ωn::Float64,U0::Vector,malha::LFrame.Malha,x::Vector,fdkparam::Fun
 
         # Derivada do elemento
         D[ele] = dot(ϕ0l,aux,ϕ0l)/(2*ωn)
+
     end
 
     # Deriadas da frequencia ωn em relação a todos os elemento
-    d = D / pm
+    d = D #./ pm
 
     # Retorna a derivada
     return d
@@ -129,9 +130,9 @@ end
 function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam::Function,fdmparam::Function, P::Float64)
 
     # frequência de referência
-    ω = mean(ωn)
+    ω = 1.0 #mean(ωn)
     
-    # Inicializa o somatorio
+    # Inicializa o somatório
     sum1 = 0.0
 
     # loop pelas frequências
@@ -139,11 +140,11 @@ function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam
 
         # ∑ (ωi/ω)^(-p)
         sum1 += (ωn[i] / ω)^(-P)
+
     end
 
     # fator global
     S = sum1^((-1/P) - 1)
-
 
     # vetor derivada
     D = zeros(length(x))
@@ -154,7 +155,8 @@ function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam
         dωi = dω(ωn[i],U0[:, i],malha,x,fdkparam,fdmparam)
 
         # derivada normalizada
-        D += S * (ωn[i] / ω)^(-P - 1) * (dωi / ω)
+        D .+= S * (ωn[i] / ω)^(-P - 1) * (dωi ./ ω)
+
     end
 
     return D
