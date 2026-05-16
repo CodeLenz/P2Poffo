@@ -40,6 +40,9 @@ module P2Poffo
 
     #Rotina de malha
     include("yaml.jl")
+
+    # rotinas auxiliares de validação
+    include("diferencaFinitas.jl")
     
 	# Exporta a rotina principal de análise
 	export Pre_processamento, Pos_processamento

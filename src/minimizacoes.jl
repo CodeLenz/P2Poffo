@@ -204,11 +204,11 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         U0n = U0[:,1:n_modos]
 
         # Deriva da norma da frequencia - valor mínimo
-        dω = norma_dω(ωnn,U0n,malha,x0,fdkparam,fdmparam,P)
+        dω = norma_dω(ωnn,U0n,malha,x0,fdkparam,fdmparam,P) 
         
         # derivada da tensao em relacao as variaveis de projeto
         dσ = norma_dσ(σeqMaxima,σe,SS,Pi,malha,U,x0,fkparam,fdkparam,P)
-         
+    
         # Determina os limites móveis, baseados nas variações das
         # variáveis de projeto. Isso só faz sentido para iter > 2
         atualiza_δ!(iter,δ,Δ1,Δ2,δ_min,δ_max)
