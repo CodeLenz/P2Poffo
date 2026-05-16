@@ -226,15 +226,15 @@ function norma_dσ(σeq::Vector,σe::Vector{Vector{Float64}},S::Vector{Matrix{Fl
     aux = (T0 * T1)[dofs_l]
 
     # resolvendo o problema adjunto
-    λ = -(Kg\aux)
+    γ = -(Kg\aux)
 
-    @show λ
+    @show γ
 
     # vetor de multiplicadores de Lagrange no global
-    λg = zeros(ndof)
+    γg = zeros(ndof)
 
     # associando os multiplicadores de Lagrange aos gdls livres
-    λg[dofs_l] .= λ
+    γg[dofs_l] .= γ
 
     ## derivada da tensão equivalente em relação a cada elemento
     dσ = zeros(ne)
@@ -262,8 +262,8 @@ function norma_dσ(σeq::Vector,σe::Vector{Vector{Float64}},S::Vector{Matrix{Fl
         Ue = T' * U[gls]
 
         # Converte o vetor adjunto  para o sistema local 
-        # T H λ
-        λe = T' * λg[gls]
+        # T H γ
+        γe = T' * γg[gls]
 
         ## loop pelos nos
         for no in 1:2
@@ -277,7 +277,7 @@ function norma_dσ(σeq::Vector,σe::Vector{Vector{Float64}},S::Vector{Matrix{Fl
             @show termo_direto, σeq[idx], σeq[idx]^(P - 2)
 
             # termo indireto da derivada da tensão equivalente em relação a cada elemento
-            termo_indireto = (λe' * dKe * Ue)[1]
+            termo_indireto = (γe' * dKe * Ue)[1]
 
             dσ[ele] += termo_direto + termo_indireto
 
