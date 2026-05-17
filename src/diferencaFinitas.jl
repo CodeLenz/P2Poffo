@@ -19,8 +19,8 @@ function valida_dσ_FD(malha, x0, fkparam, fdkparam, P, iter;
 
     # Calcula as tensões de referência 
     σeqMaxima, SS, Pi, σe = tensoes(arquivoEsf, malha, P, iter, posfile)
-    @show σeqMaxima, SS, Pi, σe
 
+    #return typeof(σeqMaxima),typeof(σe),typeof(SS),typeof(Pi),typeof(malha),typeof(U),typeof(x0),typeof(fkparam),typeof(fdkparam),typeof(P)
     # Derivada analítica
     dσ_analitica = norma_dσ(σeqMaxima, σe, SS, Pi,malha, U, x0,fkparam, fdkparam, P)
 
@@ -36,11 +36,13 @@ function valida_dσ_FD(malha, x0, fkparam, fdkparam, P, iter;
         # Perturba para frente
         x0[i] += h
        
-        # f(x+h)
-        U_p, = Analise3D(malha, posfile,x0=x0,kparam=[fkparam],iter=iter)
+        # f(x+h) aq iteraçao 2 é um maneira de ele ler o arquivo de esforços gerado na frente
+        U_p, = Analise3D(malha, posfile,x0=x0,kparam=[fkparam],iter=2)
+
+        arquivoEsf_p = nomeEsf * "_iter2.esf"
 
         # Calcula as tensões com a perturbação para frente
-        σeqMaxima_p, _, _, _ = tensoes(arquivoEsf, malha, P, iter, posfile)
+        σeqMaxima_p, _, _, _ = tensoes(arquivoEsf_p, malha, P, iter, posfile)
 
         # Objetivo para frente
         f_plus = norm(σeqMaxima_p, P)
@@ -49,10 +51,12 @@ function valida_dσ_FD(malha, x0, fkparam, fdkparam, P, iter;
         x0[i] = xb - h
 
         # Análise para trás
-        U_m, = Analise3D(malha, posfile,x0=x0,kparam=[fkparam],iter=iter)
+        U_m, = Analise3D(malha, posfile,x0=x0,kparam=[fkparam],iter=3)
+
+        arquivoEsf_m = nomeEsf * "_iter3.esf"
 
         # Tensões para trás
-        σeqMaxima_m, _, _, _ = tensoes(arquivoEsf, malha, P, iter, posfile)
+        σeqMaxima_m, _, _, _ = tensoes(arquivoEsf_m, malha, P, iter, posfile)
 
         # Função objetivo para trás
         f_minus = norm(σeqMaxima_m, P)
@@ -71,7 +75,7 @@ function valida_dσ_FD(malha, x0, fkparam, fdkparam, P, iter;
     println("-" ^ 58)
 
     for i in 1:ne
-        a  = dσ_analitica[i]
+        a  = dσ_analitica
         fd = dσ_fd[i]
 
         er = abs(a - fd) / (abs(fd) + 1e-30)

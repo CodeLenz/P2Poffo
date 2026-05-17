@@ -164,7 +164,7 @@ end
 
 
 ### Tensoes
-function norma_dσ(σeq::Vector,σe::Vector{Vector{Float64}},S::Vector{Matrix{Float64}},Pi::Vector{Matrix{Float64}},malha::LFrame.Malha,U::Vector,x::Vector,fkparam::Function,fdkparam::Function,P::Float64)
+function norma_dσ(σeq::Vector{Float64},σe::Vector{Vector{Float64}},S::Vector{Matrix{Float64}},Pi::Vector{Matrix{Float64}},malha::LFrame.Malha,U::Vector{Float64},x::Vector,fkparam::Function,fdkparam::Function,P::Float64)
 
     # Dados da estrutura de malha
     dados_ele = malha.dados_elementos
@@ -181,11 +181,11 @@ function norma_dσ(σeq::Vector,σe::Vector{Vector{Float64}},S::Vector{Matrix{Fl
     # Descobre quais gdls são livres
     dofs_l = LFrame.dofs_livres(nos,apoios)
     
+    @show σeq,P
     ## termo constante
     T0 = (sum(σeq.^P))^((1/P) - 1)
 
     @show T0
-
     # Monta a matriz K global e pega o numero de graus de liberdade
     KG = LFrame.Monta_Kg(malha,x,fkparam)
 
