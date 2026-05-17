@@ -1,5 +1,6 @@
 #
 # Exemplo Hibbeler 8.6, 10° ed.
+# exemplo validado
 #
 
 materiais:
@@ -20,11 +21,9 @@ geometrias:
 coordenadas:
   0.0 0.0 0.0
   1.0 0.0 0.0
-  0.0 1.0 0.0
 
 conectividades: 
   1 2
-  2 3
 
 apoios: 
   1 1 0.0
