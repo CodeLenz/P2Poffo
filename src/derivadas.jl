@@ -223,7 +223,7 @@ function norma_dσ(σeq::Vector{Float64},σe::Vector{Vector{Float64}},S::Vector{
 
         end
     end
-
+    @show T1[dofs_l]
     # variavel auxiliar para a solução do problema adjunto
     aux = (T0 * T1)[dofs_l]
 
@@ -274,7 +274,7 @@ function norma_dσ(σeq::Vector{Float64},σe::Vector{Vector{Float64}},S::Vector{
             idx = 2*(ele-1) + no
             
             # termo direto da derivada da tensão equivalente em relação a cada elemento
-            termo_direto = (σeq[idx]^(P - 2)) * (σe[idx]' * V * Pi[idx] * S[idx] * dKe * Ue)[1]
+            termo_direto = T0 *(σeq[idx]^(P - 2)) * (σe[idx]' * V * Pi[idx] * S[idx] * dKe * Ue)[1]
 
             @show termo_direto, σeq[idx], σeq[idx]^(P - 2)
 
