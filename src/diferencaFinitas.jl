@@ -75,7 +75,7 @@ function valida_dσ_FD(malha, x0, fkparam, fdkparam, P, iter;
     println("-" ^ 58)
 
     for i in 1:ne
-        a  = dσ_analitica
+        a  = dσ_analitica[i]
         fd = dσ_fd[i]
 
         er = abs(a - fd) / (abs(fd) + 1e-30)
