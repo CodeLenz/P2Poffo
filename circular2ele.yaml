@@ -1,5 +1,5 @@
 # Exemplo de um sistema circular com 3 nós e 2 elementos
-# 1 - 2  que eu queria
+# 1 - 2 # o que da errado
 #     |
 #     3
 #   
@@ -59,4 +59,3 @@ dados_elementos:
 # massa concentrada mesmo se não existe precisa add
 mass: 
   2 50.0
-  3 50.0

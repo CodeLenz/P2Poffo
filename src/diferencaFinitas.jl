@@ -101,7 +101,7 @@ function valida_dω_FD(malha, x0,fkparam, fdkparam,fmparam, fdmparam,n_modos, P;
     U0n = U0[:, 1:n_modos]
 
     # Derivada utilizando a norma P
-    dω_analitica = norma_dω(ωnn, U0n,malha, x0,fdkparam, fdmparam,P)
+    dω_analitica = norma_dω(ωnn, U0n,malha, x0,fdkparam, fdmparam,fmparam, P)
 
     # Diferenças finitas centrais
     dω_fd = zeros(Float64, ne)

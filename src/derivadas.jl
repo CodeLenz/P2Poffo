@@ -51,7 +51,7 @@ end
 #####################################################################################
                         # Derivada da frequencia
 #####################################################################################
-function dω(ωn::Float64,U0::Vector,malha::LFrame.Malha,x::Vector,fdkparam::Function,fdmparam::Function)    
+function dω(ωn::Float64,U0::Vector,malha::LFrame.Malha,x::Vector,fdkparam::Function,fdmparam::Function,fmparam::Function)    
 
     # Iniciando a derivada
     D = zeros(malha.ne)
@@ -66,9 +66,6 @@ function dω(ωn::Float64,U0::Vector,malha::LFrame.Malha,x::Vector,fdkparam::Fun
     L = malha.L
     nos = malha.nnos
 
-    # Iniciando o denominador
-    pm = 0.0
-
     # Inicializa o vetor com os modos globais
     ϕg = zeros(nos*6)
 
@@ -77,6 +74,10 @@ function dω(ωn::Float64,U0::Vector,malha::LFrame.Malha,x::Vector,fdkparam::Fun
 
     # Associa o gdl livre ao vetor de modos
     ϕg[dofs_l] .= U0
+
+    Mg = LFrame.Monta_Mg(malha,x,fmparam)
+
+    pm =ϕg'*Mg*ϕg
 
     # Loop pelos elementos
     for ele in LinearIndices(x)
@@ -106,13 +107,10 @@ function dω(ωn::Float64,U0::Vector,malha::LFrame.Malha,x::Vector,fdkparam::Fun
         T = LFrame.Rotacao3d(ele,conect,coordenadas,α)
         
         # Para o local
-        ϕ0l = T'*ϕ0g
+        ϕ0l = T*ϕ0g
     
         # variavel auxiliar para facilitar
         aux = dK - (ωn^2)*dM
-
-        # Denominador
-        pm += dot(ϕ0l,Me,ϕ0l)
 
         # Derivada do elemento
         D[ele] = dot(ϕ0l,aux,ϕ0l)/(2*ωn)
@@ -120,14 +118,14 @@ function dω(ωn::Float64,U0::Vector,malha::LFrame.Malha,x::Vector,fdkparam::Fun
     end
 
     # Deriadas da frequencia ωn em relação a todos os elemento
-    d = D #./ pm
+    d = D ./ pm
 
     # Retorna a derivada
     return d
 end
 
 # ω é um valor de referencia 
-function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam::Function,fdmparam::Function, P::Float64)
+function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam::Function,fdmparam::Function,fmparam::Function, P::Float64)
 
     # frequência de referência
     ω = 1.0 #mean(ωn)
@@ -152,7 +150,7 @@ function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam
     for i in eachindex(ωn)
 
         # dωi/dx
-        dωi = dω(ωn[i],U0[:, i],malha,x,fdkparam,fdmparam)
+        dωi = dω(ωn[i],U0[:, i],malha,x,fdkparam,fdmparam,fmparam)
 
         # derivada normalizada
         D .+= S * (ωn[i] / ω)^(-P - 1) * (dωi ./ ω)
