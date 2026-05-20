@@ -88,7 +88,7 @@ function valida_dσ_FD(malha, x0, fkparam, fdkparam, P, iter;
     return dσ_analitica, dσ_fd
 end
 
-function valida_dω_FD(malha, x0,fkparam, fdkparam,fmparam, fdmparam,n_modos, P;h=1e-6, posfile=false)
+function valida_dω_FD(malha, x0,fkparam, fdkparam,fmparam, fdmparam,n_modos, P;h=1e-4, posfile=false)
 
     # Número de variáveis de projeto 
     ne = length(x0)

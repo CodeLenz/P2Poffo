@@ -1,8 +1,11 @@
 # Exemplo de um sistema circular com 3 nós e 2 elementos
-# 1 - 2 
+# 1 - 2  que eu queria
 #     |
 #     3
-#
+#   
+# 1 - 2 
+#   /   
+# 3
 
 materiais:
   - nome: "aluminio"
@@ -13,15 +16,23 @@ materiais:
     
 loads:
   2 2 100.0
-  2 4 50.0
+  2 4 100.0
+  2 3 100.0
 
 geometrias:
   - File: circular.sec
 
+# da certo
 coordenadas:
   0.0 0.0 0.0
   1.0 0.0 0.0
-  1.0 -1.0 0.0
+  0.0 -1.0 0.0
+
+# da errado
+#coordenadas:
+  #0.0 0.0 0.0
+  #1.0 0.0 0.0
+  #1.0 -1.0 0.0  
 
 conectividades: 
   1 2
@@ -48,3 +59,4 @@ dados_elementos:
 # massa concentrada mesmo se não existe precisa add
 mass: 
   2 50.0
+  3 50.0
