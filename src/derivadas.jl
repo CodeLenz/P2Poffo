@@ -179,11 +179,9 @@ function norma_dσ(σeq::Vector{Float64},σe::Vector{Vector{Float64}},S::Vector{
     # Descobre quais gdls são livres
     dofs_l = LFrame.dofs_livres(nos,apoios)
     
-    @show σeq,P
     ## termo constante
     T0 = (sum(σeq.^P))^((1/P) - 1)
 
-    @show T0
     # Monta a matriz K global e pega o numero de graus de liberdade
     KG = LFrame.Monta_Kg(malha,x,fkparam)
 
@@ -221,7 +219,7 @@ function norma_dσ(σeq::Vector{Float64},σe::Vector{Vector{Float64}},S::Vector{
 
         end
     end
-    @show T1[dofs_l]
+
     # variavel auxiliar para a solução do problema adjunto
     aux = (T0 * T1)[dofs_l]
 
@@ -259,11 +257,11 @@ function norma_dσ(σeq::Vector{Float64},σe::Vector{Vector{Float64}},S::Vector{
 
         # Converte o deslocamento para o sistema local 
         # T H U
-        Ue = T' * U[gls]
+        Ue = T * U[gls]
 
         # Converte o vetor adjunto  para o sistema local 
         # T H γ
-        γe = T' * γg[gls]
+        γe = T * γg[gls]
 
         ## loop pelos nos
         for no in 1:2
