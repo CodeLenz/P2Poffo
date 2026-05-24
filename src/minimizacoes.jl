@@ -190,9 +190,11 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         arquivoEsf = nomeEsf * "_iter$(iter).esf"
 
         # tensão equivalente dos nos e elementos 
-        # σeqMaxima - valor máximo da tensão equivalente em cada nó 1D
-        # σe estado de tensão local crítico (σxx, σxy) para cada nó 1D
-        σeqMaxima,SS,Pi,σe = tensoes(arquivoEsf,malha,P,iter,posfile)
+        # σeq - tensao equivalente de cada nó da seção
+        # S - matriz s da seção
+        # Pi - matriz Pi de cada nó da seção
+        # σe estado de tensão (σxx, σxy) para cada nó da seção
+        σeq,SS,Pi,σe = tensoes(arquivoEsf,malha,iter,posfile)
 
         # so para armanezar a primeira frequencia da primeira iteração
         if iter == 1
@@ -204,19 +206,17 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         U0n = U0[:,1:n_modos]
 
         # Deriva da norma da frequencia - valor mínimo
-        dω = norma_dω(ωnn,U0n,malha,x0,fdkparam,fdmparam,P) 
-        
+        dω = norma_dω(ωnn,U0n,malha,x0,fdkparam,fdmparam,fmparam,P) 
+    
         # derivada da tensao em relacao as variaveis de projeto
-        dσ = norma_dσ(σeqMaxima,σe,SS,Pi,malha,U,x0,fkparam,fdkparam,P)
+        dσ = norma_dσ(σeq,σe,SS,Pi,malha,U,x0,fkparam,fdkparam,P)
     
         # Determina os limites móveis, baseados nas variações das
         # variáveis de projeto. Isso só faz sentido para iter > 2
         atualiza_δ!(iter,δ,Δ1,Δ2,δ_min,δ_max)
 
         # Lineariza o problema 
-        c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup,dσ,σeqMaxima,σesc,P)
-
-        #return c,A,b,xi,xs,n,m, σeqMaxima,SS,Pi,σe
+        c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup,dσ,σeq,σesc,P)
 
         # Chama a solução interna do problema
         xn, gs_lin = LP(c,A,b,xi,xs,n,m)

@@ -1,20 +1,20 @@
 # rotina para o calculo da tensao equivalente 
-function tensoes(arquivoEsf,malha,P,iter,posfile)
+function tensoes(arquivoEsf,malha,iter,posfile)
 
     # numero de elementos 
     ne = malha.ne 
 
-    # tensao eqv maxima de cada no 
-    tensao = zeros(2 * ne)
+    # tensao eqv maxima de cada no
+    σeq = Vector{Vector{Float64}}(undef, 2 * ne)
 
     # matriz S associada a cada no
-    SS = Vector{Matrix{Float64}}(undef, 2 * ne)
+    S = Vector{Matrix{Float64}}(undef, 2 * ne)
 
     # matriz Pi associada a cada no
-    Pi = Vector{Matrix{Float64}}(undef, 2 * ne)
-    
+    Pi = Vector{Vector{Matrix{Float64}}}(undef, 2 * ne)
+
     # vetor da tensao local critica [σxx σxy]
-    σe = Vector{Vector{Float64}}(undef, 2 * ne)
+    σe = Vector{Matrix{Float64}}(undef, 2 * ne) 
 
 
     # Cria um dicionário para armazenar os dados das seções transversais, evitando ler o mesmo arquivo várias vezes
@@ -27,14 +27,14 @@ function tensoes(arquivoEsf,malha,P,iter,posfile)
     for ele in 1:ne
 
         ## tensao do elemento no nó 1
-        tensao[contador],SS[contador],Pi[contador],σe[contador] = tensao_vonMises(linhas,path_base,ele,1,P,iter,cache_secoes,posfile)
-        tensao[contador+1],SS[contador+1],Pi[contador+1],σe[contador+1] = tensao_vonMises(linhas,path_base,ele,2,P,iter,cache_secoes,posfile)
+        σeq[contador],S[contador],Pi[contador],σe[contador] = tensao_vonMises(linhas,path_base,ele,1,iter,cache_secoes,posfile)
+        σeq[contador+1],S[contador+1],Pi[contador+1],σe[contador+1] = tensao_vonMises(linhas,path_base,ele,2,iter,cache_secoes,posfile)
 
         
         contador += 2
     end
     # Tensao_ele1_no1,Tensao_ele1_no2...
-    return tensao,SS,Pi,σe
+    return σeq,S,Pi,σe
 
 end
 
@@ -45,7 +45,7 @@ end
 #
 # arquivo_esforcos é gerado pelo LFrame
 #
-function tensao_vonMises(linhas, path_base, ele, no, P, iter, cache_secoes, posfile=false, ϵ=1E-6)
+function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile=false, ϵ=1E-6)
 
     # Testa se nó é válido
     no in [1;2] || error("Pos_processamento:: nó inválido $no")
@@ -213,16 +213,6 @@ function tensao_vonMises(linhas, path_base, ele, no, P, iter, cache_secoes, posf
         σeq[i] = sqrt.(σe[i,:]' * V * σe[i,:] + ϵ^2)
     end
 
-    # tira o maximo
-    σeq_max = maximum(σeq)
-    @show σeq_max 
-
-    # Recupera a matriz Pi associada a pior tensao, pois esse P * S * F = tensao equivalente máxima no 2d
-    idx_max = argmax(σeq)
-    Pi_critico = Pi[idx_max]
-    
-    # tensão equivalente crítica 
-    σe_critico = [σxx[idx_max], σxy[idx_max]] #.+ϵ
 
     if posfile 
         # Caminho para a pasta POS
@@ -241,7 +231,7 @@ function tensao_vonMises(linhas, path_base, ele, no, P, iter, cache_secoes, posf
 
     end
 
-
-    # Retorna o valor maximo na seção e elemento
-    return σeq_max,S,Pi_critico,σe_critico
+    # retorna a tensao equivalente de todos os nos da seção, S do nó do portico, 
+    # Pi de todos os nós da seção e a matriz com os estados de tensao de cada nó da seção (σxx σxy)
+    return σeq,S,Pi,σe
 end
