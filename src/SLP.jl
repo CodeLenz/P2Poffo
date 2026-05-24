@@ -5,10 +5,11 @@
 #
 #   Função que lineariza o problema
 #
-function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,σeqMaxima,σesc,P,s=1.0)
+function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,σeq,σesc,P,s)
 
     # número de restrições 
-    m = 2
+    nσ = size(dσ,1)
+    m = 1 + nσ
     
     # número de variáveis de projeto
     n = length(x0)
@@ -25,19 +26,22 @@ function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,σeqMaxima,σesc,P,s=1.0
 
     # Gradiente das restrições linearizadas
     A[1,:] = dV'/V_sup
-    A[2,:] = s*dσ'./σesc
 
+    # a derivada da tensao ja leva em consideracao o fator s/σesc
+    A[2:end,:] = dσ
+
+    # aq eu mudei estava sum(x0.*dV)/V_sup - 1.0 e nao estava indo.
     # rhs das restrições linearizadas - a restrição de volume é linear e já tem o rhs definido como V_sup
-    b[1] = sum(x0.*dV)/V_sup - 1.0
+    b[1] = 1.0
 
-    # para a restrição de tensão, o rhs é a tensão de escoamento menos a tensão atual (linearizada)
-    σmaxi = norm(σeqMaxima, P)
+    for i in 1:nσ
 
-    # Valor da restrição de tensão máxima
-    valor_g_σ = s*σmaxi/σesc - 1
+        σi = norm(σeq[i], P) / σesc
+        gi = σi - 1.0
 
-    # Limite linearizado 
-    b[2] = -valor_g_σ + dot(A[2,:], x0)
+        b[i+1] = - gi + dot(dσ[i,:], x0)
+
+    end
 
     # inicializa xs e xi
     xi = zeros(n)
@@ -93,9 +97,9 @@ function LP(c,A,b,xi,xs,n,m)
     modelo = Model(HiGHS.Optimizer)
 
     # cale-se cale-se cale-se
-    #set_silent(modelo)
+    set_silent(modelo)
 
-    set_attribute(modelo, "log_file", "meleca")
+    #set_attribute(modelo, "log_file", "meleca")
 
     # Define as variáveis de projeto
     @variable(modelo, xi[i] <= x[i = 1:n] <= xs[i])
@@ -114,6 +118,12 @@ function LP(c,A,b,xi,xs,n,m)
 
     # Soluciona o sub-problema
     optimize!(modelo)
+    status = termination_status(modelo)
+
+    @show status
+    if status != MOI.OPTIMAL
+        error("LP não convergiu. Status = $status")
+    end
 
     for i = 1:n
 
@@ -162,7 +172,7 @@ end
 #
 # Usar a norma P da frequência - objetivo
 #
-function convergencia(x0,xn,ωx0,ωxn,dV,V_sup,tol_f,tol_g,σeqMaxima,σesc,P)
+function convergencia(x0,xn,ωx0,ωxn,dV,V_sup,tol_f,tol_g,σeq,σesc,P)
 
     # Calcula a diferença relativa da função objetivo
     dif_fx = norm(ωxn - ωx0)/(norm(ωx0))
@@ -171,7 +181,7 @@ function convergencia(x0,xn,ωx0,ωxn,dV,V_sup,tol_f,tol_g,σeqMaxima,σesc,P)
     viol_vol = max(0.0, dot(dV, xn) - V_sup)
 
     # violação da restrição de tensão
-    σagg = norm(σeqMaxima, P)
+    σagg = norm(σeq, P)
     viol_sig = max(0.0, σagg - σesc)
 
     # violação total

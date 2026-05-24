@@ -5,7 +5,7 @@
 Valida a derivada analítica `norma_dσ` usando diferenças finitas centrais.
 """
 function valida_dσ_FD(malha, x0, fkparam, fdkparam, P, iter;
-                      h=1e-6, posfile=true)
+                      h=1e-6,s=2.0, σesc=150e6, posfile=true)
 
     # Dimensão do vetor de variáveis de projeto
     ne = length(x0)
@@ -18,71 +18,58 @@ function valida_dσ_FD(malha, x0, fkparam, fdkparam, P, iter;
     arquivoEsf = nomeEsf * "_iter$(iter).esf"
 
     # Calcula as tensões de referência 
-    σeqMaxima, SS, Pi, σe = tensoes(arquivoEsf, malha, P, iter, posfile)
+    σeq, S, Pi, σe = tensoes(arquivoEsf,malha,iter,posfile)
 
-    #return typeof(σeqMaxima),typeof(σe),typeof(SS),typeof(Pi),typeof(malha),typeof(U),typeof(x0),typeof(fkparam),typeof(fdkparam),typeof(P)
     # Derivada analítica
-    dσ_analitica = norma_dσ(σeqMaxima, σe, SS, Pi,malha, U, x0,fkparam, fdkparam, P)
+    dσ_analitica = norma_dσ(σeq,σe,S,Pi,malha,U,x0,fkparam,fdkparam,P,s,σesc)
 
-    # Diferenças finitas centrais
-    dσ_fd = zeros(Float64, ne)
+    ncomp = 2 * malha.ne
+    dσ_fd = zeros(Float64, ncomp, ne)
 
-    # Loop pelas variáveis de projeto
     for i in LinearIndices(x0)
-
-        # Backup do valor atual 
         xb = x0[i]
 
-        # Perturba para frente
-        x0[i] += h
-       
-        # f(x+h) aq iteraçao 2 é um maneira de ele ler o arquivo de esforços gerado na frente
-        U_p, = Analise3D(malha, posfile,x0=x0,kparam=[fkparam],iter=2)
+        x0[i] = xb + h
+        U_p, = Analise3D(malha, posfile, x0=x0, kparam=[fkparam], iter=2)
+        σeq_p, _, _, _ = tensoes(nomeEsf * "_iter2.esf", malha, iter, posfile)
 
-        arquivoEsf_p = nomeEsf * "_iter2.esf"
-
-        # Calcula as tensões com a perturbação para frente
-        σeqMaxima_p, _, _, _ = tensoes(arquivoEsf_p, malha, P, iter, posfile)
-
-        # Objetivo para frente
-        f_plus = norm(σeqMaxima_p, P)
-
-        # Perturba para trás 
         x0[i] = xb - h
+        U_m, = Analise3D(malha, posfile, x0=x0, kparam=[fkparam], iter=3)
+        σeq_m, _, _, _ = tensoes(nomeEsf * "_iter3.esf", malha, iter, posfile)
 
-        # Análise para trás
-        U_m, = Analise3D(malha, posfile,x0=x0,kparam=[fkparam],iter=3)
-
-        arquivoEsf_m = nomeEsf * "_iter3.esf"
-
-        # Tensões para trás
-        σeqMaxima_m, _, _, _ = tensoes(arquivoEsf_m, malha, P, iter, posfile)
-
-        # Função objetivo para trás
-        f_minus = norm(σeqMaxima_m, P)
-
-        # Diferença finita central
-        dσ_fd[i] = (f_plus - f_minus) / (2h)
-
-        # Restaura a posição i 
         x0[i] = xb
 
+        # Agrega pontos da seção igual ao norma_dσ: ||σ_idx||_P por nó
+        for idx in 1:ncomp
+            σ_p_idx = norm(σeq_p[idx], P)   # escalar por nó
+            σ_m_idx = norm(σeq_m[idx], P)
+            dσ_fd[idx, i] = (σ_p_idx - σ_m_idx) / (2h)
+        end
     end
 
-    println("\n=== Validação de norma_dσ (Diferenças Finitas Centrais) ===")
-    println(@sprintf("%-6s  %-14s  %-14s  %-12s",
-                     "elem", "analítica", "DF central", "erro rel."))
-    println("-" ^ 58)
+   println("\n=== Validação de norma_dσ ===")
+    @printf("%-6s %-6s %-14s %-14s %-12s\n", "comp", "var", "analítica", "DF central", "erro rel.")
+    println("-" ^ 55)
 
-    for i in 1:ne
-        a  = dσ_analitica[i]
-        fd = dσ_fd[i]
+    for j in 1:ncomp
+        for i in 1:ne
+            a  = dσ_analitica[j, i]
+            fd = dσ_fd[j, i]
+            er = abs(a - fd) / (abs(fd) + 1e-12)
+            er = (abs(a) < 1e-7 && abs(fd) < 1e-7) ? 0.0 : er
+            @printf("%-6d %-6d %-14.6e %-14.6e %-12.2e%s\n", j, i, a, fd, er, er > 1e-4 ? "  ← ERRO" : "")
+        end
+    end
+    @show size(dσ_analitica)
+    @show malha.ne
+    @show length(x0)
 
-        er = abs(a - fd) / (abs(fd) + 1e-30)
+    # Ponto base
+    σeq_base = σeq  # já calculado
 
-        flag = er > 1e-4 ? "  ← ERRO" : ""
-
-        println(@sprintf("%-6d  %-14.6e  %-14.6e  %-12.2e%s",i, a, fd, er, flag))
+    for idx in 1:2*malha.ne
+        @show idx, norm(σeq_base[idx], P)   # o que a FD perturba
+        @show idx, sum(σeq_base[idx].^P)    # o que o analítico diferencia
     end
 
     return dσ_analitica, dσ_fd

@@ -161,8 +161,8 @@ function norma_dω(ωn::Vector,U0::Matrix,malha::LFrame.Malha,x::Vector,fdkparam
 end
 
 
-### Tensoes
-function norma_dσ(σeq::Vector{Float64},σe::Vector{Vector{Float64}},S::Vector{Matrix{Float64}},Pi::Vector{Matrix{Float64}},malha::LFrame.Malha,U::Vector{Float64},x::Vector,fkparam::Function,fdkparam::Function,P::Float64)
+# Rotina que volta uma matriz de derivadas da tensão equivalente em relação as variáveis de projeto
+function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S::Vector{Matrix{Float64}},Pi::Vector{Vector{Matrix{Float64}}},malha::LFrame.Malha,U::Vector{Float64},x::Vector,fkparam::Function,fdkparam::Function,P::Float64,s::Float64,σesc::Float64)
 
     # Dados da estrutura de malha
     dados_ele = malha.dados_elementos
@@ -179,20 +179,19 @@ function norma_dσ(σeq::Vector{Float64},σe::Vector{Vector{Float64}},S::Vector{
     # Descobre quais gdls são livres
     dofs_l = LFrame.dofs_livres(nos,apoios)
     
-    ## termo constante
-    T0 = (sum(σeq.^P))^((1/P) - 1)
-
     # Monta a matriz K global e pega o numero de graus de liberdade
     KG = LFrame.Monta_Kg(malha,x,fkparam)
 
     Kg = KG[dofs_l, dofs_l]
 
-    # inicializando T1
-    T1 = zeros(ndof)
+    V = [1 0; 0 3]
 
-    V = [1 0;
-         0 3]
+    #  Inicializa T0  e Q
+    Q = zeros(ndof, 2*ne)
+    T0 = zeros(2*ne)
 
+    Γ = zeros(ndof, 2*ne)
+    
     # loop pelos elementos
     for ele in 1:ne
 
@@ -213,29 +212,30 @@ function norma_dσ(σeq::Vector{Float64},σe::Vector{Vector{Float64}},S::Vector{
 
             ## indice do vetor de tensões equivalente
             idx = 2*(ele-1) + no
-            
-            # Parte T1 para o problema adjunto
-            T1[gls] .+= (σeq[idx]^(P - 2)) *vec(σe[idx]' * (V * Pi[idx] * S[idx] * Ke * T))
+
+            ## termo T0 de cada indice
+            T0[idx] = (sum(σeq[idx].^P))^((1/P) - 1)
+
+            # vetor local TEMPORÁRIO
+            T1 = zeros(ndof)
+
+            # Loop pelos nos da seção transversal e calculo do termo T1 para cada gdl do elemento
+            for ino in eachindex(Pi[idx])
+                T1[gls] .+=(σeq[idx][ino]^(P - 2)) *vec(σe[idx][ino,:]' *(V * Pi[idx][ino] * S[idx] * Ke * T))
+            end
+
+            # monta coluna da matriz adjunta
+            Q[:,idx] .= (s/σesc) .* T0[idx] .* T1
 
         end
+
     end
 
-    # variavel auxiliar para a solução do problema adjunto
-    aux = (T0 * T1)[dofs_l]
-
-    # resolvendo o problema adjunto
-    γ = -(Kg\aux)
-
-    @show γ
-
-    # vetor de multiplicadores de Lagrange no global
-    γg = zeros(ndof)
-
-    # associando os multiplicadores de Lagrange aos gdls livres
-    γg[dofs_l] .= γ
+    # resolvendo o problema adjunto (Lembrar que ta com s e tensao de esc = 1, mudar)
+    Γ[dofs_l,:] = -(Kg \ Q[dofs_l,:])
 
     ## derivada da tensão equivalente em relação a cada elemento
-    dσ = zeros(ne)
+    dσ = zeros(2*ne, ne)
 
     # Loop pelos elementos 
     for ele in 1:ne
@@ -259,29 +259,36 @@ function norma_dσ(σeq::Vector{Float64},σe::Vector{Vector{Float64}},S::Vector{
         # T H U
         Ue = T * U[gls]
 
-        # Converte o vetor adjunto  para o sistema local 
-        # T H γ
-        γe = T * γg[gls]
-
         ## loop pelos nos
         for no in 1:2
 
-            ## indice do vetor de tensões equivalente
+            # indice do vetor de tensões equivalente
             idx = 2*(ele-1) + no
-            
-            # termo direto da derivada da tensão equivalente em relação a cada elemento
-            termo_direto = T0 *(σeq[idx]^(P - 2)) * (σe[idx]' * V * Pi[idx] * S[idx] * dKe * Ue)[1]
 
-            @show termo_direto, σeq[idx], σeq[idx]^(P - 2)
+            # vetor de multiplicadores de Lagrange no sistema local
+            γg = Γ[:,idx]
 
-            # termo indireto da derivada da tensão equivalente em relação a cada elemento
+            # no sistema local 
+            γe = T * γg[gls]
+
+            termo_direto = 0.0
+
+            # Loop pelos nos da seção transversal
+            for ino in eachindex(Pi[idx])
+
+                termo_direto += T0[idx] *(σeq[idx][ino]^(P - 2)) *(σe[idx][ino,:]' *V *Pi[idx][ino] *S[idx] *dKe *Ue)[1]
+            end
+            @show termo_direto
+            @show termo_direto * s / σesc  # com o fator
+            @show (γe' * dKe * Ue)[1]  
+
             termo_indireto = (γe' * dKe * Ue)[1]
 
-            dσ[ele] += termo_direto + termo_indireto
-
+            dσ[idx, ele] += (s / σesc )* termo_direto + termo_indireto
         end
     end
 
     return  dσ
+
 end
 

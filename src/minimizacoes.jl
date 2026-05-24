@@ -118,7 +118,7 @@ de um arquivo `.yaml`.
 # Retorno
 Retorna os parâmetros otimizados da malha e as frequências naturais associadas.
 """
-function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::Function,fmparam::Function, fdmparam::Function, posfile=true; verbose=false,n_modos=3, vf = 0.5 ,P=8.0, niter=3,tol_f=1E-4,tol_g=1E-4)
+function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::Function,fmparam::Function, fdmparam::Function, posfile=true; verbose=false,n_modos=3, vf = 0.5 ,P=20.0, niter=3,tol_f=1E-4,tol_g=1E-4,s = 2.0)
 
     # analise modal somente para a malha
     ωn,U0,malha = Modal3D(arquivo,posfile,verbose=verbose)
@@ -149,8 +149,8 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     xn = copy(x0)    
 
     # Limites máximos e mínimos para os deltas
-    δ_max = 0.1
-    δ_min = 0.01
+    δ_max = 0.3
+    δ_min = 0.1
 
     # inicializa o veltor de deltas
     δ = δ_min*ones(ne)
@@ -194,7 +194,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         # S - matriz s da seção
         # Pi - matriz Pi de cada nó da seção
         # σe estado de tensão (σxx, σxy) para cada nó da seção
-        σeq,SS,Pi,σe = tensoes(arquivoEsf,malha,iter,posfile)
+        σeq,S,Pi,σe = tensoes(arquivoEsf,malha,iter,posfile)
 
         # so para armanezar a primeira frequencia da primeira iteração
         if iter == 1
@@ -209,14 +209,15 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         dω = norma_dω(ωnn,U0n,malha,x0,fdkparam,fdmparam,fmparam,P) 
     
         # derivada da tensao em relacao as variaveis de projeto
-        dσ = norma_dσ(σeq,σe,SS,Pi,malha,U,x0,fkparam,fdkparam,P)
+        dσ = norma_dσ(σeq,σe,S,Pi,malha,U,x0,fkparam,fdkparam,P,s,σesc)
+        @show dσ
     
         # Determina os limites móveis, baseados nas variações das
         # variáveis de projeto. Isso só faz sentido para iter > 2
         atualiza_δ!(iter,δ,Δ1,Δ2,δ_min,δ_max)
 
         # Lineariza o problema 
-        c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup,dσ,σeq,σesc,P)
+        c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup,dσ,σeq,σesc,P,s)
 
         # Chama a solução interna do problema
         xn, gs_lin = LP(c,A,b,xi,xs,n,m)
@@ -226,7 +227,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     
         # Teste de convergência do problema 
         if iter > 2
-            if convergencia(x0,xn,ωx0,ωxn,dV,V_sup,tol_f,tol_g,σeqMaxima,σesc,P)
+            if convergencia(x0,xn,ωx0,ωxn,dV,V_sup,tol_f,tol_g,σeq,σesc,P)
                 break
             end
         end
