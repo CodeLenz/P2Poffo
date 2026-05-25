@@ -5,7 +5,7 @@
 Valida a derivada analítica `norma_dσ` usando diferenças finitas centrais.
 """
 function valida_dσ_FD(malha, x0, fkparam, fdkparam, P, iter;
-                      h=1e-6,s=2.0, σesc=150e6, posfile=true)
+                      h=1e-3,s=2.0, σesc=150e6, posfile=true)
 
     # Dimensão do vetor de variáveis de projeto
     ne = length(x0)
@@ -41,35 +41,36 @@ function valida_dσ_FD(malha, x0, fkparam, fdkparam, P, iter;
 
         # Agrega pontos da seção igual ao norma_dσ: ||σ_idx||_P por nó
         for idx in 1:ncomp
-            σ_p_idx = norm(σeq_p[idx], P)   # escalar por nó
-            σ_m_idx = norm(σeq_m[idx], P)
+
+            # nao sei se precisar o usar o maximo ou continuar para manter a consistencia
+            σ_p_idx = (s/σesc)*norm(σeq_p[idx], P)   # escalar por nó
+            σ_m_idx = (s/σesc)*norm(σeq_m[idx], P)
             dσ_fd[idx, i] = (σ_p_idx - σ_m_idx) / (2h)
         end
     end
 
-   println("\n=== Validação de norma_dσ ===")
-    @printf("%-6s %-6s %-14s %-14s %-12s\n", "comp", "var", "analítica", "DF central", "erro rel.")
-    println("-" ^ 55)
+    println("\n================== Validação de norma_dσ ==================")
+    println("\n2 elementos × 2 nós = 4 restrições")
+    println("\n4 restrições × 2 variáveis(elementos) = 8 derivadas\n") 
+    @printf("%-14s %-18s %-18s %-14s\n","(rest,vari)", "Analítica", "DF Central", "Erro Rel.")
+    println("---------------------------------------------------------------")
 
     for j in 1:ncomp
         for i in 1:ne
-            a  = dσ_analitica[j, i]
-            fd = dσ_fd[j, i]
+
+            a  = dσ_analitica[j,i]
+            fd = dσ_fd[j,i]
+
             er = abs(a - fd) / (abs(fd) + 1e-12)
+
+            # evita falso erro perto de zero
             er = (abs(a) < 1e-7 && abs(fd) < 1e-7) ? 0.0 : er
-            @printf("%-6d %-6d %-14.6e %-14.6e %-12.2e%s\n", j, i, a, fd, er, er > 1e-4 ? "  ← ERRO" : "")
+
+            @printf("(%2d,%2d)  % .6e   % .6e   % .3e     \n",
+                    j, i, a, fd, er)
         end
-    end
-    @show size(dσ_analitica)
-    @show malha.ne
-    @show length(x0)
-
-    # Ponto base
-    σeq_base = σeq  # já calculado
-
-    for idx in 1:2*malha.ne
-        @show idx, norm(σeq_base[idx], P)   # o que a FD perturba
-        @show idx, sum(σeq_base[idx].^P)    # o que o analítico diferencia
+        println("---------------------------------------------------------------")
+    
     end
 
     return dσ_analitica, dσ_fd

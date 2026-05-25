@@ -7,7 +7,7 @@
 #
 function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,σeq,σesc,P,s)
 
-    # número de restrições 
+    # número de restrições uma de volume e nσ de tensão
     nσ = size(dσ,1)
     m = 1 + nσ
     
