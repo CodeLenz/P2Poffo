@@ -43,6 +43,7 @@ function valida_dσ_FD(malha, x0, fkparam, fdkparam, P, iter;
         for idx in 1:ncomp
 
             # nao sei se precisar o usar o maximo ou continuar para manter a consistencia
+            # to usando a derivada com (s/σesc) para manter a consistencia com a analitica, mas isso pode ser questionavel
             σ_p_idx = (s/σesc)*norm(σeq_p[idx], P)   # escalar por nó
             σ_m_idx = (s/σesc)*norm(σeq_m[idx], P)
             dσ_fd[idx, i] = (σ_p_idx - σ_m_idx) / (2h)

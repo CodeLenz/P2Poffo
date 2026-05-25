@@ -276,15 +276,15 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
             # Loop pelos nos da seção transversal
             for ino in eachindex(Pi[idx])
 
-                termo_direto += T0[idx] *(σeq[idx][ino]^(P - 2)) *(σe[idx][ino,:]' *V *Pi[idx][ino] *S[idx] *dKe *Ue)[1]
-            end
-            @show termo_direto
-            @show termo_direto * s / σesc  # com o fator
-            @show (γe' * dKe * Ue)[1]  
+                termo_direto += (s / σesc ) * (T0[idx] *(σeq[idx][ino]^(P - 2)) *(σe[idx][ino,:]' *V *Pi[idx][ino] *S[idx] *dKe *Ue)[1])
+            end 
 
+            # esse termo ja leva em consideração o fator s/σesc
+            # devido ao problema a solucao do adjunto
             termo_indireto = (γe' * dKe * Ue)[1]
 
-            dσ[idx, ele] += (s / σesc )* termo_direto + termo_indireto
+            # derivada da tensão equivalente em relação a variável de projeto do elemento
+            dσ[idx, ele] += termo_direto + termo_indireto
         end
     end
 
