@@ -141,7 +141,7 @@ function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile
         My = parse(Float64, dados[12])
         Mz = parse(Float64, dados[13])
 
-        S = [0 0 0 0 0 1 0 0 0 0 0 0;
+        S = [0 0 0 0 0 0 1 0 0 0 0 0;
              0 0 0 0 0 0 0 0 0 1 0 0;
              0 0 0 0 0 0 0 0 0 0 0 1;
              0 0 0 0 0 0 0 0 0 0 1 0]
@@ -189,8 +189,8 @@ function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile
         σ[ino,:] = [σN cteMy*zl cteMz*yl αμ*∇xΦ αμ*∇yΦ]
 
         # Calcula a matriz Pi associada a esse nó 2d
-        Pi[ino] = [1/area   0   -yl/Izl   zl/Iyl;
-                    0   (1/Jeq)*∇[ino]   0   0
+        Pi[ino] = [1/area       0              -yl/Izl   zl/Iyl;
+                    0   sign(T)*(1/Jeq)*∇[ino]   0         0
                 ]
     end
     
