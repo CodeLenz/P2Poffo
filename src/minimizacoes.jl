@@ -257,7 +257,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     println("Volume inicial ", V0 ," [m^3]")
     println("Volume final ", Vfinal, " [m^3]")
     println("A primeira frequência foi ", ω1, " [rad/s]")
-    println("A priemira frequência da estrutura otimizada é ",ωx0[1], " [rad/s]")
+    println("A primeira frequência da estrutura otimizada é ",ωx0[1], " [rad/s]")
     println("Densidade relativa dos elementos ",xn)
     return 
 end
