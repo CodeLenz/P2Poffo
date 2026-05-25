@@ -4,8 +4,8 @@
 
 Valida a derivada analítica `norma_dσ` usando diferenças finitas centrais.
 """
-function valida_dσ_FD(malha, x0, fkparam, fdkparam, P, iter;
-                      h=1e-3,s=2.0, σesc=150e6, posfile=true)
+function valida_dσ_FD(malha, x0, fkparam=P2Poffo.simp, fdkparam=P2Poffo.dsimp, P=20.0, iter=4;
+                      h=1e-6,s=2.0, σesc=150e6, posfile=true)
 
     # Dimensão do vetor de variáveis de projeto
     ne = length(x0)
@@ -30,12 +30,12 @@ function valida_dσ_FD(malha, x0, fkparam, fdkparam, P, iter;
         xb = x0[i]
 
         x0[i] = xb + h
-        U_p, = Analise3D(malha, posfile, x0=x0, kparam=[fkparam], iter=2)
-        σeq_p, _, _, _ = tensoes(nomeEsf * "_iter2.esf", malha, iter, posfile)
+        U_p, = Analise3D(malha, posfile, x0=x0, kparam=[fkparam], iter=5)
+        σeq_p, _, _, _ = tensoes(nomeEsf * "_iter5.esf", malha, 5, false)
 
         x0[i] = xb - h
-        U_m, = Analise3D(malha, posfile, x0=x0, kparam=[fkparam], iter=3)
-        σeq_m, _, _, _ = tensoes(nomeEsf * "_iter3.esf", malha, iter, posfile)
+        U_m, = Analise3D(malha, posfile, x0=x0, kparam=[fkparam], iter=6)
+        σeq_m, _, _, _ = tensoes(nomeEsf * "_iter6.esf", malha, 6, false)
 
         x0[i] = xb
 

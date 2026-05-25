@@ -205,7 +205,6 @@ function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile
     # matriz de tensao
     σe = [σxx σxy]
 
-    nn = size(σ, 1)
     σeq = zeros(nn)
 
     # loop por todos os nos e calcula a tensao eqv

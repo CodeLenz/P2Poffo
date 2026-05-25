@@ -206,7 +206,7 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
 
         # Rigidez do elemento 
         Ke = LFrame.Ke_portico3d(E,Iz,Iy,G,J0,L[ele],A)
-
+        
         ## loop pelos nos
         for no in 1:2
 
@@ -221,7 +221,7 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
 
             # Loop pelos nos da seção transversal e calculo do termo T1 para cada gdl do elemento
             for ino in eachindex(Pi[idx])
-                T1[gls] .+=(σeq[idx][ino]^(P - 2)) *vec(σe[idx][ino,:]' *(V * Pi[idx][ino] * S[idx] * Ke * T))
+                T1[gls] .+=(σeq[idx][ino]^(P - 2)) *vec(σe[idx][ino,:]' *(V * Pi[idx][ino] * S[idx] * fkparam(x[ele]) * Ke * T))
             end
 
             # monta coluna da matriz adjunta
@@ -237,54 +237,107 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
     ## derivada da tensão equivalente em relação a cada elemento
     dσ = zeros(2*ne, ne)
 
-    # Loop pelos elementos 
+    # Loop pelos elementos - calcula o termo direto (dKe/dxm é zero para m ≠ ele no SIMP)
     for ele in 1:ne
 
-        # dados do elemento  nao estao no central principal
+        # dados do elemento não estão no central principal
         Iz, Iy, J0, A, α, E, G, geo, ρ = LFrame.Dados_fundamentais(ele, dados_ele, dicionario_mat, dicionario_geo)
 
-        # Descobre o gdls do elemento
-        gls = LFrame.Gls(ele,conect)
+        # Descobre os gdls do elemento
+        gls = LFrame.Gls(ele, conect)
 
         # transformação de coordenadas
-        T = LFrame.Rotacao3d(ele,conect,coordenadas,α)
+        T = LFrame.Rotacao3d(ele, conect, coordenadas, α)
 
         # Rigidez do elemento no sistema local 
-        Ke = LFrame.Ke_portico3d(E,Iz,Iy,G,J0,L[ele],A)
+        Ke = LFrame.Ke_portico3d(E, Iz, Iy, G, J0, L[ele], A)
 
         # derivada da rigidez no sistema local 
-        dKe = Ke*fdkparam(x[ele])
+        dKe = Ke * fdkparam(x[ele])
 
         # Converte o deslocamento para o sistema local 
-        # T H U
         Ue = T * U[gls]
 
-        ## loop pelos nos
+        ## loop pelos nós do elemento de pórtico
         for no in 1:2
 
             # indice do vetor de tensões equivalente
             idx = 2*(ele-1) + no
 
-            # vetor de multiplicadores de Lagrange no sistema local
-            γg = Γ[:,idx]
-
-            # no sistema local 
-            γe = T * γg[gls]
-
             termo_direto = 0.0
 
-            # Loop pelos nos da seção transversal
+            # antes do loop de ino, para idx=1, ele=1
+            if idx == 1 && ele == 1
+                @show fkparam(x[ele])
+                @show fdkparam(x[ele])
+                @show S[idx]
+                @show Pi[idx][1]
+                @show σeq[idx][1]
+                @show T0[idx]
+                
+                # calcula contribuição do primeiro nó da seção
+                contrib = σe[idx][1,:]' * V * Pi[idx][1] * S[idx] * dKe * Ue
+                @show contrib
+                
+                # e o que a DF dá só para o termo direto
+                # (diferença com U fixo, só Ke muda)
+                Ue_fixed = T * U[gls]  # U não perturbado
+                dKe_base = LFrame.Ke_portico3d(E,Iz,Iy,G,J0,L[ele],A)
+                contrib_base = σe[idx][1,:]' * V * Pi[idx][1] * S[idx] * dKe_base * Ue_fixed
+                @show contrib_base
+            end
+
+            # Loop pelos nós da seção transversal - termo direto
+            # dKe/dxm é não nulo apenas para m == ele (SIMP)
             for ino in eachindex(Pi[idx])
+                termo_direto += (s / σesc) * (T0[idx] * (σeq[idx][ino]^(P - 2)) * (σe[idx][ino,:]' * V * Pi[idx][ino] * S[idx] * dKe * Ue)[1])
+            end
 
-                termo_direto += (s / σesc ) * (T0[idx] *(σeq[idx][ino]^(P - 2)) *(σe[idx][ino,:]' *V *Pi[idx][ino] *S[idx] *dKe *Ue)[1])
-            end 
+            # termo direto só contribui na coluna ele
+            dσ[idx, ele] += 0.0#termo_direto
 
-            # esse termo ja leva em consideração o fator s/σesc
-            # devido ao problema a solucao do adjunto
-            termo_indireto = (γe' * dKe * Ue)[1]
+        end
+    end
 
-            # derivada da tensão equivalente em relação a variável de projeto do elemento
-            dσ[idx, ele] += termo_direto + termo_indireto
+    # termo indireto: γe_m'*dKm*Um para TODOS os pares (idx, m)
+    # separado para evitar recalcular dados de m dentro do loop de ele
+    for m in 1:ne
+
+        # dados do elemento m
+        Iz_m, Iy_m, J0_m, A_m, α_m, E_m, G_m, geo_m, ρ_m = LFrame.Dados_fundamentais(m, dados_ele, dicionario_mat, dicionario_geo)
+
+        # gdls do elemento m
+        gls_m = LFrame.Gls(m, conect)
+
+        # transformação de coordenadas do elemento m
+        T_m = LFrame.Rotacao3d(m, conect, coordenadas, α_m)
+
+        # Rigidez do elemento m no sistema local
+        Ke_m = LFrame.Ke_portico3d(E_m, Iz_m, Iy_m, G_m, J0_m, L[m], A_m)
+
+        # derivada da rigidez do elemento m no sistema local
+        dKe_m = Ke_m * fdkparam(x[m])
+
+        # deslocamento do elemento m no sistema local
+        Ue_m = T_m * U[gls_m]
+
+        # loop por todas as restrições idx
+        for idx in 1:(2*ne)
+
+            # multiplicador de Lagrange do elemento m no sistema local
+            γg   = Γ[:, idx]
+            γe_m = T_m * γg[gls_m]
+            @show γe_m
+            @show dKe_m * Ue_m
+            @show γe_m' * dKe_m * Ue_m
+
+            # esse termo já leva em consideração o fator s/σesc
+            # devido à solução do problema adjunto
+            termo_indireto = (γe_m' * dKe_m * Ue_m)[1]
+            @show termo_indireto
+
+            # termo indireto contribui em todas as colunas m
+            dσ[idx, m] += termo_indireto
         end
     end
 
