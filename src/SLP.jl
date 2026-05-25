@@ -36,7 +36,7 @@ function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,σeq,σesc,P,s)
 
     for i in 1:nσ
 
-        σi = norm(σeq[i], P) / σesc
+        σi = norm(σeq[i], P) / (σesc/s)
         gi = σi - 1.0
 
         b[i+1] = - gi + dot(dσ[i,:], x0)
