@@ -266,27 +266,6 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
 
             termo_direto = 0.0
 
-            # antes do loop de ino, para idx=1, ele=1
-            if idx == 1 && ele == 1
-                @show fkparam(x[ele])
-                @show fdkparam(x[ele])
-                @show S[idx]
-                @show Pi[idx][1]
-                @show σeq[idx][1]
-                @show T0[idx]
-                
-                # calcula contribuição do primeiro nó da seção
-                contrib = σe[idx][1,:]' * V * Pi[idx][1] * S[idx] * dKe * Ue
-                @show contrib
-                
-                # e o que a DF dá só para o termo direto
-                # (diferença com U fixo, só Ke muda)
-                Ue_fixed = T * U[gls]  # U não perturbado
-                dKe_base = LFrame.Ke_portico3d(E,Iz,Iy,G,J0,L[ele],A)
-                contrib_base = σe[idx][1,:]' * V * Pi[idx][1] * S[idx] * dKe_base * Ue_fixed
-                @show contrib_base
-            end
-
             # Loop pelos nós da seção transversal - termo direto
             # dKe/dxm é não nulo apenas para m == ele (SIMP)
             for ino in eachindex(Pi[idx])
@@ -294,7 +273,7 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
             end
 
             # termo direto só contribui na coluna ele
-            dσ[idx, ele] += 0.0#termo_direto
+            dσ[idx, ele] += termo_direto
 
         end
     end
@@ -327,14 +306,10 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
             # multiplicador de Lagrange do elemento m no sistema local
             γg   = Γ[:, idx]
             γe_m = T_m * γg[gls_m]
-            @show γe_m
-            @show dKe_m * Ue_m
-            @show γe_m' * dKe_m * Ue_m
 
             # esse termo já leva em consideração o fator s/σesc
             # devido à solução do problema adjunto
             termo_indireto = (γe_m' * dKe_m * Ue_m)[1]
-            @show termo_indireto
 
             # termo indireto contribui em todas as colunas m
             dσ[idx, m] += termo_indireto
@@ -344,4 +319,3 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
     return  dσ
 
 end
-
