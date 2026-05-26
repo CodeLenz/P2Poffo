@@ -18,6 +18,12 @@ gimp(x,p=1) = x^p
 dgimp(x,p=1) = p*x^(p-1)
 
 #
+# parametrização da tensao
+sigma(x,p=3,r=2) = x^(p-r)
+dsigma(x,p=3,r=2) = (p-r)*x^(p-r-1)
+
+
+#
 # Rotina principal
 #
 function Main_Otim_OC(arquivo::AbstractString, fkparam::Function, fdkparam::Function, posfile=true; verbose=false,vf = 0.5, niter=3)
@@ -209,7 +215,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     
         # derivada da tensao em relacao as variaveis de projeto
         dσ = norma_dσ(σeq,σe,S,Pi,malha,U,x0,fkparam,fdkparam,P,s,σesc)
-    
+
         # Determina os limites móveis, baseados nas variações das
         # variáveis de projeto. Isso só faz sentido para iter > 2
         atualiza_δ!(iter,δ,Δ1,Δ2,δ_min,δ_max)
