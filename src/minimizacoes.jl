@@ -174,7 +174,8 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
 
     # nome do arquivo
     nomeEsf = malha.nome_arquivo
-
+    dσ = zeros(length(x0))
+    σeq = zeros(length(x0))
     # Loop externo de otimização 
     for iter=1:niter
 
@@ -241,11 +242,18 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         Δ2 = x1 .- x2
         Δ1 = x0 .- x1
 
+       
+
         # Escreve no arquivo de saída
         println("iter $iter")
         println("frequencia ", ωn[1])
         println("x   ",xn)
         println("δ   ",δ)
+        nσ = size(dσ,1)
+        for i in 1:nσ
+            Fs = σesc /norm(σeq[i], P) 
+            println("FS:$i ", Fs)
+        end
         println("------------------------------")
     end # loop externo
 
@@ -256,6 +264,11 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     println("Bateu os critérios de convergencia")
     println("Volume inicial ", V0 ," [m^3]")
     println("Volume final ", Vfinal, " [m^3]")
+    nσ = size(dσ,1)
+    for i in 1:nσ
+        Fs = σesc /norm(σeq[i], P) 
+        println("FS:$i ", Fs)
+    end
     println("A primeira frequência foi ", ω1, " [rad/s]")
     println("A primeira frequência da estrutura otimizada é ",ωx0[1], " [rad/s]")
     println("Densidade relativa dos elementos ",xn)

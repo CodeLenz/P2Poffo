@@ -79,16 +79,6 @@ function LP(c,A,b,xi,xs,n,m)
             error("Bounds invertidos na variável $i: xi=$(xi[i]) > xs=$(xs[i]), x0 provavelmente é zero")
         end
     end
-
-    println("=== DEBUG LP ===")
-    println("n=$n, m=$m")
-    println("c = ", c)
-    println("b = ", b)
-    println("xi = ", xi)
-    println("xs = ", xs)
-    println("A = ", A)
-    println("================")
-
     
     # Aloca vetor de soluções atuais
     xn = zeros(n)

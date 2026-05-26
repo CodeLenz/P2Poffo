@@ -15,9 +15,9 @@ materiais:
     ρ: 2700.0
     
 loads:
-  2 2 100.0
-  2 4 100.0
-  2 3 100.0
+  2 2 1000.0
+  2 4 500.0
+  2 3 -1000.0
 
 geometrias:
   - File: circular.sec
