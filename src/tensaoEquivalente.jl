@@ -26,7 +26,7 @@ function tensoes(arquivoEsf,malha,iter,posfile)
     # loops pelos elementos
     for ele in 1:ne
 
-        ## tensao do elemento no nó 1
+        ## tensao do elemento no nó 1 e 2
         σeq[contador],S[contador],Pi[contador],σe[contador] = tensao_vonMises(linhas,path_base,ele,1,iter,cache_secoes,posfile)
         σeq[contador+1],S[contador+1],Pi[contador+1],σe[contador+1] = tensao_vonMises(linhas,path_base,ele,2,iter,cache_secoes,posfile)
 
@@ -148,7 +148,6 @@ function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile
     end
 
    
-
     # Agora podemos alocar a matriz de saída
     # (σN σMy σMz σxy σxz)
     σ = zeros(nn,5)
@@ -163,6 +162,7 @@ function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile
     # Calcula a cte αμ
     αμ = T/Jeq
 
+    # inicializa o vetor do gradiente de Φ e vetor das propriedades de cada nó da seção
     ∇ = zeros(nn)
     Pi = Vector{Matrix{Float64}}(undef, nn)
     
@@ -183,18 +183,19 @@ function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile
         ∇xΦ = mean(∇Φ[vizi,1])
         ∇yΦ = mean(∇Φ[vizi,2])
 
+        # Calcula o módulo do gradiente para a tensão tangencial equivalente
         ∇[ino] = sqrt(∇xΦ^2 + ∇yΦ^2)
 
         # Guarda nas colunas 
         σ[ino,:] = [σN cteMy*zl cteMz*yl αμ*∇xΦ αμ*∇yΦ]
 
-        # Calcula a matriz Pi associada a esse nó 2d
+        # Calcula a matriz Pi associada a esse nó 2d e garante que o a cisalhante seja decidida pelo sinal do Torque 
         Pi[ino] = [1/area       0              -yl/Izl   zl/Iyl;
                     0   sign(T)*(1/Jeq)*∇[ino]   0         0
                 ]
     end
     
-    # matriz V para o produto quadratico 
+    # matriz V de Von Mises para calcular a tensão equivalente
     V = [1 0;
          0 3]
 
@@ -205,14 +206,15 @@ function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile
     # matriz de tensao
     σe = [σxx σxy]
 
+    # inicializa o vetor de tensao equivalente
     σeq = zeros(nn)
 
-    # loop por todos os nos e calcula a tensao eqv
+    # loop por todos os nos e calcula a tensao eqv ϵ para evitar singularidade quando a tensão for zero
     for i in 1:nn
         σeq[i] = sqrt.(σe[i,:]' * V * σe[i,:] + ϵ^2)
     end
 
-
+    # salva os pos da seção transversal para cada nó da seção
     if posfile 
         # Caminho para a pasta POS
         pos_file_node = joinpath(path_base,nome_secao*"_iter$(iter)_ele$(ele)_No$(no).pos")

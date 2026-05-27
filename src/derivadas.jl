@@ -186,10 +186,11 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
 
     V = [1 0; 0 3]
 
-    #  Inicializa T0  e Q
+    #  Inicializa T0 e Q
     Q = zeros(ndof, 2*ne)
     T0 = zeros(2*ne)
 
+    # Inicializa o problema adjunto
     Γ = zeros(ndof, 2*ne)
     
     # loop pelos elementos
@@ -231,7 +232,7 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
 
     end
 
-    # resolvendo o problema adjunto (Lembrar que ta com s e tensao de esc = 1, mudar)
+    # resolvendo o problema adjunto 
     Γ[dofs_l,:] = -(Kg \ Q[dofs_l,:])
 
     ## derivada da tensão equivalente em relação a cada elemento
@@ -264,6 +265,7 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
             # indice do vetor de tensões equivalente
             idx = 2*(ele-1) + no
 
+            # Inicializa o termo direto para esse indice (Temporario)
             termo_direto = 0.0
 
             # Loop pelos nós da seção transversal - termo direto
@@ -316,6 +318,7 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
         end
     end
 
+    # retorna a matriz de derivadas da tensão equivalente em relação as variáveis de projeto
     return  dσ
 
 end

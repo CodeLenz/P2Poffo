@@ -18,12 +18,6 @@ gimp(x,p=1) = x^p
 dgimp(x,p=1) = p*x^(p-1)
 
 #
-# parametrização da tensao
-sigma(x,p=3,r=2) = x^(p-r)
-dsigma(x,p=3,r=2) = (p-r)*x^(p-r-1)
-
-
-#
 # Rotina principal
 #
 function Main_Otim_OC(arquivo::AbstractString, fkparam::Function, fdkparam::Function, posfile=true; verbose=false,vf = 0.5, niter=3)
@@ -128,6 +122,8 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
 
     # analise modal somente para a malha
     ωn,U0,malha = Modal3D(arquivo,posfile,verbose=verbose)
+
+    # recupera a tensao de escoamento do material (assumindo que é a mesma para todos os elementos)
     σesc = malha.dicionario_materiais[malha.dados_elementos[1,1]]["S_esc"]
 
     # Numero de elementos 
@@ -173,15 +169,16 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     ωx0 = ωn[1]
     ω1 = 0
 
-    # Histórico para gráfico
-    hist_x1 = Float64[]
-    hist_x2 = Float64[]
-    hist_w  = Float64[]
-
-    # nome do arquivo
+    # nome do arquivo de esforços
     nomeEsf = malha.nome_arquivo
+
+    # inicializa o vetor de derivadas da tensão equivalente em relação as variáveis de projeto
     dσ = zeros(length(x0))
+
+    # inicializa o vetor de tensões equivalentes 
     σeq = zeros(length(x0))
+
+
     # Loop externo de otimização 
     for iter=1:niter
 
@@ -224,7 +221,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup,dσ,σeq,σesc,P,s)
 
         # Chama a solução interna do problema
-        xn, gs_lin = LP(c,A,b,xi,xs,n,m)
+        xn,_ = LP(c,A,b,xi,xs,n,m)
 
         # Calcula o valor da função objetivo pela norma
         ωxn = norm(ωnn,-P)
@@ -248,8 +245,6 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         Δ2 = x1 .- x2
         Δ1 = x0 .- x1
 
-       
-
         # Escreve no arquivo de saída
         println("iter $iter")
         println("frequencia ", ωn[1])
@@ -261,6 +256,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
             println("FS:$i ", Fs)
         end
         println("------------------------------")
+
     end # loop externo
 
     # Volume da estrutura final
@@ -278,6 +274,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     println("A primeira frequência foi ", ω1, " [rad/s]")
     println("A primeira frequência da estrutura otimizada é ",ωx0[1], " [rad/s]")
     println("Densidade relativa dos elementos ",xn)
+
     return 
 end
     
