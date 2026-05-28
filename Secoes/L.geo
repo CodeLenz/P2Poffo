@@ -7,7 +7,7 @@ a = 10.0e-3;
 b = 3.8e-3;
 
 // tamanho do elemento
-lc = a/30;
+lc = a/100;
 
 // Pontos
 Point(1) = {   0 ,   0,   0, lc};

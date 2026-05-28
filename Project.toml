@@ -1,7 +1,7 @@
 name = "P2Poffo"
 uuid = "15746f16-e5ef-480f-93b5-237a577d2332"
-authors = ["PedroPoffo <pedrohenriquepoffo@gmail.com>"]
 version = "0.1.0"
+authors = ["PedroPoffo <pedrohenriquepoffo@gmail.com>"]
 
 [deps]
 BMesh = "91fb467a-ecbd-11ec-0e64-1b9c3501232a"
