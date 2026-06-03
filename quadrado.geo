@@ -3,10 +3,10 @@
 //
 
 // Lado da seção 
-a = 1E-2;
+a = 10.0E-3;
 
 // tamanho do elemento
-lc = a/20;
+lc = a/100;
 
 // 
 Point(1) = {   0 ,   0,   0, lc};

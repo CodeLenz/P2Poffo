@@ -16,7 +16,7 @@ loads:
   2 3 100
 
 geometrias:
-  - File: circular.sec
+  - File: Secoes\\circular.sec
 
 coordenadas:
   0.0 0.0 0.0
