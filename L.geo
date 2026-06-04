@@ -4,10 +4,10 @@
 
 // tamanho da Arestas
 a = 10.0e-3;
-b = 3.8e-3;
+b = 2e-3;
 
 // tamanho do elemento
-lc = a/100;
+lc = a/250;
 
 // Pontos
 Point(1) = {   0 ,   0,   0, lc};

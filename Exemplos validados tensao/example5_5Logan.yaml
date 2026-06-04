@@ -13,7 +13,7 @@ materiais:
 loads: 1 2 -100
 
 geometrias:
-  -  File: Secoes\\I.sec
+  -  File: Secoes\\quadrado.sec
 
 # temos que passar ft → in
 coordenadas:
@@ -49,9 +49,9 @@ apoios:
   4 6 0.0
 
 dados_elementos: 
-  aco I
-  aco I
-  aco I
+  aco quadrado
+  aco quadrado
+  aco quadrado
   
 # massa concentrada mesmo se não existe precisa add
 mass: # n tem
