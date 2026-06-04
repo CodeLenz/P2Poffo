@@ -152,12 +152,15 @@ function Pos_processamento(arquivo_esforcos, ele, no,posfile=false)
         Lgmsh_export_init(pos_file_node,nn,ne,XY,etypes,IJ) 
 
         # Exporta o campo σ (falta "somar as tensões")
-        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,1],"σxxN")
-        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,2],"σxxMY")
-        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,3],"σxxMz")
-        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,4],"σzyT")
-        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,5],"σzxT")
-        Lgmsh_export_nodal_scalar(pos_file_node, σeq,"σvon-Mises")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,1],"σxx_N")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,2],"σxx_MY")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,3],"σxx_Mz")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,4],"σzy_T")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,5],"σzx_T")
+
+        Lgmsh_export_nodal_scalar(pos_file_node, σxx,"σxx")
+        Lgmsh_export_nodal_scalar(pos_file_node, σxy,"τxy")
+        Lgmsh_export_nodal_scalar(pos_file_node, σeq,"σeq von-Mises")
 
     end
 
