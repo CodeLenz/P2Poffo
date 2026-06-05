@@ -10,7 +10,7 @@ materiais:
     ρ: 7800.0            # kg/m³
 
 loads:
-  1 2 -100      # N
+  1 2 -4000.00     # N
 
 geometrias:
   - File: Secoes\\circular.sec
