@@ -3,8 +3,8 @@
 //
 
 // tamanho da Arestas
-a = 10.0e-3;
-b = 2e-3;
+a = 10.0e-2;
+b = 2e-2;
 
 // tamanho do elemento
 lc = a/250;

@@ -3,10 +3,10 @@
 //
 
 // Raio da seção 
-R = 10.0e-3;
+R = 10.0e-2;
 
 // tamanho do elemento
-lc = R/50;
+lc = R/100;
 
 // Centro, direita e acima esquerda e abaixo
 Point(1) = {   R ,   R,   0, lc};

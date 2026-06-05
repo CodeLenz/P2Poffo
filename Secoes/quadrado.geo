@@ -3,7 +3,7 @@
 //
 
 // Lado da seção 
-a = 10.0E-3;
+a = 10.0E-2;
 
 // tamanho do elemento
 lc = a/100;

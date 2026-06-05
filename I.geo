@@ -3,10 +3,10 @@
 //
 
 // Dimensões
-a = 10.0e-3; 
-b = 7e-3;    
-c = 1e-3;    
-d = 1e-3;    
+a = 10.0e-2; 
+b = 7e-2;    
+c = 1e-2;    
+d = 1e-2;    
 
 // Tamanho do elemento
 lc = a/300;
