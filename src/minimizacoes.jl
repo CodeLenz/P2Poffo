@@ -134,7 +134,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
 
     # Calcula o volume de cada elemento sem considerar a 
     # parametrização 
-    V = x0 .* Volumes(malha)
+    V = Volumes(malha)
 
     # Volume total ta estrutura
     V0 = sum(V)
