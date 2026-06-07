@@ -33,7 +33,7 @@ function Main_Otim_OC(arquivo::AbstractString, fkparam::Function, fdkparam::Func
 
     # Calcula o volume de cada elemento sem considerar a 
     # parametrização 
-    V = Volumes(malha)
+    V = x0 .* Volumes(malha)
 
     # Volume total ta estrutura
     V0 = sum(V)
@@ -118,7 +118,7 @@ de um arquivo `.yaml`.
 # Retorno
 Retorna os parâmetros otimizados da malha e as frequências naturais associadas.
 """
-function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::Function,fmparam::Function, fdmparam::Function, posfile=true; verbose=false,n_modos=3, vf = 0.5 ,P=20.0, niter=40,tol_f=1E-4,tol_g=1E-4,s = 2.0)
+function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::Function,fmparam::Function, fdmparam::Function, posfile=true; verbose=false,n_modos=3, vf = 0.5 ,P=8.0, niter=100,tol_f=1E-4,tol_g=1E-4,s = 2.0)
 
     # analise modal somente para a malha
     ωn,U0,malha = Modal3D(arquivo,posfile,verbose=verbose)
@@ -129,12 +129,12 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     # Numero de elementos 
     ne = malha.ne
 
-    # Estimativa inicial das densidades relativas
+    # Estimativa inicial das densidades relativas,
     x0 = vf*ones(ne)
 
     # Calcula o volume de cada elemento sem considerar a 
     # parametrização 
-    V = Volumes(malha)
+    V = x0 .* Volumes(malha)
 
     # Volume total ta estrutura
     V0 = sum(V)
@@ -151,8 +151,8 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     xn = copy(x0)    
 
     # Limites máximos e mínimos para os deltas
-    δ_max = 0.3
-    δ_min = 0.1
+    δ_max = 0.6
+    δ_min = 0.05
 
     # inicializa o veltor de deltas
     δ = δ_min*ones(ne)
@@ -179,6 +179,10 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     σeq = zeros(length(x0))
 
 
+    # dicionário para armazenar os dados das seções transversais, evitando ler o mesmo arquivo várias vezes
+    cache_secoes = Dict()
+    hist = nothing
+
     # Loop externo de otimização 
     for iter=1:niter
 
@@ -196,7 +200,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         # S - matriz s da seção
         # Pi - matriz Pi de cada nó da seção
         # σe estado de tensão (σxx, σxy) para cada nó da seção
-        σeq,S,Pi,σe = tensoes(arquivoEsf,malha,iter,posfile)
+        σeq,S,Pi,σe = tensoes(arquivoEsf,malha,iter,posfile,cache_secoes)
 
         # so para armanezar a primeira frequencia da primeira iteração
         if iter == 1
@@ -250,34 +254,63 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         println("frequencia ", ωn[1])
         println("x   ",xn)
         println("δ   ",δ)
-        nσ = size(dσ,1)
+        nσ = length(σeq)   
         for i in 1:nσ
             Fs = σesc /norm(σeq[i], P) 
             println("FS:$i ", Fs)
         end
         println("------------------------------")
 
+        if hist === nothing
+            hist = HistoricoOtim(n_modos, ne, nσ)  # nσ real, só conhecido aqui
+        end
+
+        push!(hist.iters, iter)
+        hist.freq       = vcat(hist.freq,      ωn[1:n_modos]')
+        hist.volume     = vcat(hist.volume,    [xn' * V])
+        hist.densidades = vcat(hist.densidades, xn')
+
+        for i in 1:nσ
+            push!(hist.FS[i], σesc / norm(σeq[i], P))
+        end
+
     end # loop externo
 
     # Volume da estrutura final
     Vfinal = xn'*V
-    
-    # Resultados na tela
-    println("Bateu os critérios de convergencia")
-    println("Volume inicial ", V0 ," [m^3]")
-    println("Volume final ", Vfinal, " [m^3]")
-    nσ = size(dσ,1)
-    for i in 1:nσ
-        Fs = σesc /norm(σeq[i], P) 
-        println("FS:$i ", Fs)
+ 
+    # Recalcula frequências e modos para a solução final
+    ωn, U0, _ = Modal3D(malha, posfile, x0=xn, kparam=[fkparam], mparam=[fmparam])
+ 
+    println()
+    println("╔══════════════════════════════════════════════════╗")
+    println("║           RESULTADOS DA OTIMIZAÇÃO               ║")
+    println("╠══════════════════════════════════════════════════╣")
+    println("║  Volume inicial  : ", lpad(round(V0,     digits=6), 12), " m³         ║")
+    println("║  Volume final    : ", lpad(round(Vfinal, digits=6), 12), " m³         ║")
+    println("║  Fração de volume: ", lpad(round(Vfinal/V0*100, digits=2), 11), " %          ║")
+    println("╠══════════════════════════════════════════════════╣")
+    println("║  1ª frequência inicial  : ", lpad(round(ω1,    digits=4), 10), " rad/s    ║")
+    println("║  1ª frequência otimizada: ", lpad(round(ωn[1], digits=4), 10), " rad/s    ║")
+    println("╠══════════════════════════════════════════════════╣")
+    println("║  Densidades relativas dos elementos:             ║")
+    for i in eachindex(xn)
+        println("║    Elemento $i: ", lpad(round(xn[i], digits=6), 10), "                    ║")
     end
-    println("A primeira frequência foi ", ω1, " [rad/s]")
-    println("A primeira frequência da estrutura otimizada é ",ωx0[1], " [rad/s]")
-    println("Densidade relativa dos elementos ",xn)
-
-    return 
+    println("╠══════════════════════════════════════════════════╣")
+    println("║  Fatores de segurança (tensão):                  ║")
+    nσ = size(dσ, 1)
+    for i in 1:nσ
+        Fs = σesc / norm(σeq[i], P)
+        println("║    FS[$i]: ", lpad(round(Fs, digits=4), 12), "                       ║")
+    end
+    println("╚══════════════════════════════════════════════════╝")
+    println()
+ 
+    return ωn, U0,hist
 end
-    
+
+
 
 
 

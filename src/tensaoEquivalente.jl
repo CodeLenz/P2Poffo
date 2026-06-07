@@ -1,5 +1,5 @@
 # rotina para o calculo da tensao equivalente 
-function tensoes(arquivoEsf,malha,iter,posfile)
+function tensoes(arquivoEsf,malha,iter,posfile,cache_secoes = Dict())
 
     # numero de elementos 
     ne = malha.ne 
@@ -16,9 +16,6 @@ function tensoes(arquivoEsf,malha,iter,posfile)
     # vetor da tensao local critica [σxx σxy]
     σe = Vector{Matrix{Float64}}(undef, 2 * ne) 
 
-
-    # Cria um dicionário para armazenar os dados das seções transversais, evitando ler o mesmo arquivo várias vezes
-    cache_secoes = Dict()
     linhas = readlines(arquivoEsf)
     path_base = dirname(arquivoEsf)
 
