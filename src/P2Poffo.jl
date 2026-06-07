@@ -54,4 +54,7 @@ module P2Poffo
 
     # Rotinas de Otimização
     export Main_Otim_Modal,Main_Otim_OC  
+
+    # Rotinas de diferença finitas para validação
+    export valida_dσ_FD, valida_dω_FD
 end
