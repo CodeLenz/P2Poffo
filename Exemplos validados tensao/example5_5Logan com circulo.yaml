@@ -51,4 +51,6 @@ dados_elementos:
   aco circular
   aco circular
 
+# Nó e Valor
 mass:
+  1 50.0

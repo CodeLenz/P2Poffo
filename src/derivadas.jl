@@ -89,7 +89,7 @@ function dω(ωn::Float64,U0::Vector,malha::LFrame.Malha,x::Vector,fdkparam::Fun
         Ke = LFrame.Ke_portico3d(E,Iz,Iy,G,J0,L[ele],A)
 
         # Massa local do elemento
-        Me = LFrame.Me_portico3d(A,ρ,L[ele])
+        Me = LFrame.Me_portico3d(A,ρ,J0,L[ele])
 
         # Derivada da rigidez em relação a variavel
         dK = Ke*fdkparam(x[ele])
