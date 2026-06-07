@@ -4,7 +4,7 @@
 
 Valida a derivada analítica `norma_dσ` usando diferenças finitas centrais.
 """
-function valida_dσ_FD(malha, x0, fkparam=P2Poffo.simp, fdkparam=P2Poffo.dsimp, P=20.0, iter=4;
+function valida_dσ_FD(malha, x0, fkparam=P2Poffo.simp, fdkparam=P2Poffo.dsimp, P=8.0, iter=4;
                       h=1e-6,s=2.0, σesc=150e6, posfile=true)
 
     # Dimensão do vetor de variáveis de projeto
@@ -77,7 +77,7 @@ function valida_dσ_FD(malha, x0, fkparam=P2Poffo.simp, fdkparam=P2Poffo.dsimp, 
     return dσ_analitica, dσ_fd
 end
 
-function valida_dω_FD(malha, x0,fkparam, fdkparam,fmparam, fdmparam,n_modos, P;h=1e-4, posfile=false)
+function valida_dω_FD(malha, x0,fkparam=P2Poffo.simp, fdkparam=P2Poffo.dsimp, fmparam=P2Poffo.gimp, fdmparam=P2Poffo.dgimp,n_modos=3, P=8.0;h=1e-4, posfile=false)
 
     # Número de variáveis de projeto 
     ne = length(x0)
