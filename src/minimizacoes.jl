@@ -121,7 +121,7 @@ Retorna os parâmetros otimizados da malha e as frequências naturais associadas
 function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::Function,fmparam::Function, fdmparam::Function, posfile=true; verbose=false,n_modos=6, vf = 0.5 ,P=8.0, niter=100,tol_f=1E-4,tol_g=1E-4,s = 2.0)
 
     # analise modal somente para a malha
-    ωn,U0,malha = Modal3D(arquivo,posfile,verbose=verbose)
+    ωn,U0,malha = Modal3D(arquivo,posfile,n_modos=n_modos)
 
     # recupera a tensao de escoamento do material (assumindo que é a mesma para todos os elementos)
     σesc = malha.dicionario_materiais[malha.dados_elementos[1,1]]["S_esc"]
@@ -187,7 +187,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     for iter=1:niter
 
         # Calcula frequências e modos
-        ωn,U0,_ = Modal3D(malha,posfile,x0=x0,kparam=[fkparam],mparam=[fmparam])
+        ωn,U0,_ = Modal3D(malha,posfile,x0=x0,kparam=[fkparam],mparam=[fmparam],n_modos=n_modos,iter=iter)
         
         # Deslocamentos da malha 1
         U, = Analise3D(malha, posfile, x0=x0, kparam=[fkparam],iter=iter)
@@ -207,12 +207,9 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
             ω1 = ωn[1]
         end
 
-        # Extrai somente  os modos de interesse 
-        ωnn = ωn[1:n_modos]
-        U0n = U0[:,1:n_modos]
 
         # Deriva da norma da frequencia - valor mínimo
-        dω = norma_dω(ωnn,U0n,malha,x0,fdkparam,fdmparam,fmparam,P) 
+        dω = norma_dω(ωn,U0,malha,x0,fdkparam,fdmparam,fmparam,P) 
     
         # derivada da tensao em relacao as variaveis de projeto
         dσ = norma_dσ(σeq,σe,S,Pi,malha,U,x0,fkparam,fdkparam,P,s,σesc)
@@ -228,7 +225,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         xn,_ = LP(c,A,b,xi,xs,n,m)
 
         # Calcula o valor da função objetivo pela norma
-        ωxn = norm(ωnn,-P)
+        ωxn = norm(ωn,-P)
     
         # Teste de convergência do problema 
         if iter > 2
@@ -262,11 +259,11 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         println("------------------------------")
 
         if hist === nothing
-            hist = HistoricoOtim(n_modos, ne, nσ)  # nσ real, só conhecido aqui
+            hist = HistoricoOtim(length(ωn), ne, nσ)
         end
 
         push!(hist.iters, iter)
-        hist.freq       = vcat(hist.freq,      ωn[1:n_modos]')
+        hist.freq       = vcat(hist.freq,      ωn')
         hist.volume     = vcat(hist.volume,    [xn' * V])
         hist.densidades = vcat(hist.densidades, xn')
 
@@ -280,7 +277,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     Vfinal = xn'*V
  
     # Recalcula frequências e modos para a solução final
-    ωn, U0, _ = Modal3D(malha, posfile, x0=xn, kparam=[fkparam], mparam=[fmparam])
+    ωn, U0, _ = Modal3D(malha, posfile, x0=xn, kparam=[fkparam], mparam=[fmparam], n_modos=n_modos, iter=0)
  
     println()
     println("╔══════════════════════════════════════════════════╗")
