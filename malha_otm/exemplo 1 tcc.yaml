@@ -6,7 +6,7 @@ materiais:
     S_esc: 350e6
     ρ : 7800.0 #kg/m3
     
-loads: 2 2 -3000
+loads: 2 2 -240e3
 
 geometrias:
   - File: Secoes\\circular.sec

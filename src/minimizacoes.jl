@@ -178,10 +178,12 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     # inicializa o vetor de tensões equivalentes 
     σeq = zeros(length(x0))
 
-
     # dicionário para armazenar os dados das seções transversais, evitando ler o mesmo arquivo várias vezes
     cache_secoes = Dict()
     hist = nothing
+
+    # Chao Le
+    ChaoLe = ones(2*malha.ne)
 
     # Loop externo de otimização 
     for iter=1:niter
@@ -212,14 +214,14 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         dω = norma_dω(ωn,U0,malha,x0,fdkparam,fdmparam,fmparam,P) 
     
         # derivada da tensao em relacao as variaveis de projeto
-        dσ = norma_dσ(σeq,σe,S,Pi,malha,U,x0,fkparam,fdkparam,P,s,σesc)
+        dσ = ChaoLe .* norma_dσ(σeq,σe,S,Pi,malha,U,x0,fkparam,fdkparam,P,s,σesc)
 
         # Determina os limites móveis, baseados nas variações das
         # variáveis de projeto. Isso só faz sentido para iter > 2
         atualiza_δ!(iter,δ,Δ1,Δ2,δ_min,δ_max)
 
         # Lineariza o problema 
-        c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup,dσ,σeq,σesc,P,s)
+        c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup,dσ,σeq,σesc,P,s,ChaoLe)
 
         # Chama a solução interna do problema
         xn,_ = LP(c,A,b,xi,xs,n,m)
@@ -229,7 +231,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     
         # Teste de convergência do problema 
         if iter > 2
-            if convergencia(x0,xn,ωx0,ωxn,dV,V_sup,tol_f,tol_g,σeq,σesc,P)
+            if convergencia(xn,ωx0,ωxn,A,b,tol_f,tol_g)
                 break
             end
         end
@@ -253,7 +255,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         println("δ   ",δ)
         nσ = length(σeq)   
         for i in 1:nσ
-            Fs = σesc /norm(σeq[i], P) 
+            Fs = σesc /maximum(σeq[i])
             println("FS:$i ", Fs)
         end
         println("------------------------------")
@@ -268,8 +270,9 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         hist.densidades = vcat(hist.densidades, xn')
 
         for i in 1:nσ
-            push!(hist.FS[i], σesc / norm(σeq[i], P))
+            push!(hist.FS[i], σesc / maximum(σeq[i]))
         end
+
 
     end # loop externo
 
@@ -298,7 +301,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     println("║  Fatores de segurança (tensão):                  ║")
     nσ = size(dσ, 1)
     for i in 1:nσ
-        Fs = σesc / norm(σeq[i], P)
+        Fs = σesc / maximum(σeq[i])
         println("║    FS[$i]: ", lpad(round(Fs, digits=4), 12), "                       ║")
     end
     println("╚══════════════════════════════════════════════════╝")

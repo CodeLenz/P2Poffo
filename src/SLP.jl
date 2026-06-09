@@ -5,7 +5,7 @@
 #
 #   Função que lineariza o problema
 #
-function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,σeq,σesc,P,s)
+function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,σeq,σesc,P,s,ChaoLe)
 
     # número de restrições uma de volume e nσ de tensão
     nσ = size(dσ,1)
@@ -35,12 +35,14 @@ function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,σeq,σesc,P,s)
     b[1] = 1.0
 
     for i in 1:nσ
-
-        σi = norm(σeq[i], P) / (σesc/s)
+        
+        σi = ChaoLe[i]*norm(σeq[i], P) / (σesc/s)
         gi = σi - 1.0
 
-        b[i+1] = - gi + dot(dσ[i,:], x0)
+        b[i+1] = -gi + dot(dσ[i,:], x0)
 
+        ChaoLe[i] = maximum(σeq[i])/norm(σeq[i],P)
+        @show maximum(σeq[i])
     end
 
     # inicializa xs e xi
@@ -162,20 +164,13 @@ end
 #
 # Usar a norma P da frequência - objetivo
 #
-function convergencia(x0,xn,ωx0,ωxn,dV,V_sup,tol_f,tol_g,σeq,σesc,P)
+function convergencia(xn,ωx0,ωxn,A,b,tol_f,tol_g)
 
     # Calcula a diferença relativa da função objetivo
     dif_fx = norm(ωxn - ωx0)/(norm(ωx0))
 
-    # Calcula o termo violation
-    viol_vol = max(0.0, dot(dV, xn) - V_sup)
-
-    # violação da restrição de tensão
-    σagg = norm(σeq, P)
-    viol_sig = max(0.0, σagg - σesc)
-
-    # violação total
-    violation = max(viol_vol, viol_sig)
+    violation = maximum(A*xn .- b)
+    @show A*xn .- b
      
     # Verifica as tolerâncias
     if dif_fx < tol_f && violation < tol_g
