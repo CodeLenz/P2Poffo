@@ -93,10 +93,20 @@ function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile
         # são vizinhos de cada nó da malha
         vizinhos = Vizinhos_no(nn,IJ)
 
-        # armazena os dados da seção no dicionário para evitar ler o mesmo arquivo novamente
-        dados_secao = (centroide = centroide,area = area,Izl = Izl,Iyl = Iyl,Jeq = Jeq,α = α,∇Φ = ∇Φ,nn = nn,XY = XY,ne2d = ne2d,IJ = IJ,etypes = etypes,vizinhos = vizinhos)
+        zl_yl, grad_xy, grad_n, Pi_geo = precomputa_geometria(
+            (nn=nn, XY=XY, α=α, centroide=centroide,
+            ∇Φ=∇Φ, vizinhos=vizinhos,
+            area=area, Izl=Izl, Iyl=Iyl, Jeq=Jeq)
+        )
 
-        # Armazena os dados da seção no cache
+        dados_secao = (
+            centroide=centroide, area=area, Izl=Izl, Iyl=Iyl,
+            Jeq=Jeq, α=α, ∇Φ=∇Φ, nn=nn, XY=XY, ne2d=ne2d,
+            IJ=IJ, etypes=etypes, vizinhos=vizinhos,
+            # geometria pré-computada:
+            zl_yl=zl_yl, grad_xy=grad_xy,
+            grad_n=grad_n, Pi_geo=Pi_geo
+        )
         cache_secoes[nome_secao] = dados_secao
 
     end
@@ -114,7 +124,6 @@ function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile
     XY        = dados_secao.XY
     IJ        = dados_secao.IJ
     etypes    = dados_secao.etypes
-    vizinhos  = dados_secao.vizinhos
     ne2d      = dados_secao.ne2d
 
     # Dependendo do nó, pegamos os esforços internos e a matriz S de acordo com a teoria
@@ -144,11 +153,6 @@ function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile
              0 0 0 0 0 0 0 0 0 0 1 0]
     end
 
-   
-    # Agora podemos alocar a matriz de saída
-    # (σN σMy σMz σxy σxz)
-    σ = zeros(nn,5)
-
     # A tensão normal devido a teoria de barra é cte
     σN = N/area
 
@@ -156,77 +160,51 @@ function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile
     cteMy =  My/Iyl
     cteMz = -Mz/Izl
 
-    # Calcula a cte αμ
-    αμ = T/Jeq
+    # Extrai do cache
+    zl_yl   = dados_secao.zl_yl
+    grad_xy = dados_secao.grad_xy
+    grad_n  = dados_secao.grad_n
+    Pi_geo  = dados_secao.Pi_geo
+    nn      = dados_secao.nn
 
-    # inicializa o vetor do gradiente de Φ e vetor das propriedades de cada nó da seção
-    ∇ = zeros(nn)
+    αμ = T / Jeq
+
+    # Monta Pi com o sign(T) e αμ já aplicados — vetorizado, sem loop
     Pi = Vector{Matrix{Float64}}(undef, nn)
-    
-    # Loop pelos nós da malha da seção
-    for ino = 1:nn
-
-        # Coordenadas do nó 
-        x,y = XY[ino,1:2]
-
-        # Converte para (z',y')
-        zl,yl = Muda_coordenada(x,y,α,centroide[1],centroide[2])
-        
-        # Agora podemos fazer as médias nodais SIMPLES das tensões 
-        # tangenciais para cada nó (tentar colocar fora do loop, gerar um dicionario para reaproveitar)
-        vizi = vizinhos[ino]
-
-        # Calcula a média nodal SIMPLES do gradiente
-        ∇xΦ = mean(∇Φ[vizi,1])
-        ∇yΦ = mean(∇Φ[vizi,2])
-
-        # Calcula o módulo do gradiente para a tensão tangencial equivalente
-        ∇[ino] = sqrt(∇xΦ^2 + ∇yΦ^2)
-
-        # Guarda nas colunas 
-        σ[ino,:] = [σN cteMy*zl cteMz*yl αμ*∇xΦ αμ*∇yΦ]
-
-        # Calcula a matriz Pi associada a esse nó 2d e garante que o a cisalhante seja decidida pelo sinal do Torque 
-        Pi[ino] = [1/area       0              -yl/Izl   zl/Iyl;
-                    0   sign(T)*(1/Jeq)*∇[ino]   0         0
-                ]
+    for i in 1:nn
+        p = copy(Pi_geo[i])
+        p[2, 2] = sign(T) * grad_n[i] / Jeq
+        Pi[i] = p
     end
-    
-    # matriz V de Von Mises para calcular a tensão equivalente
-    V = [1 0;
-         0 3]
 
-    #tensao em cada elemento
-    σxx  = σ[:,1] + σ[:,2] + σ[:,3]
-    σxy  =  sqrt.(σ[:,4].^2 + σ[:,5].^2)
+    # Tensões — totalmente vetorizadas
+    σxx = σN .+ cteMy .* zl_yl[:, 1] .+ cteMz .* zl_yl[:, 2]
+    σxy = αμ .* sqrt.(grad_xy[:, 1].^2 .+ grad_xy[:, 2].^2)  # = αμ * grad_n
 
-    # matriz de tensao
     σe = [σxx σxy]
 
-    # inicializa o vetor de tensao equivalente
-    σeq = zeros(nn)
+    
+    # matriz V de Von Mises para calcular a tensão equivalente
+    V = [1 0;0 3]
 
-    # loop por todos os nos e calcula a tensao eqv ϵ para evitar singularidade quando a tensão for zero
-    for i in 1:nn
-        σeq[i] = sqrt.(σe[i,:]' * V * σe[i,:] + ϵ^2)
-    end
+    σeq = sqrt.(σe[:, 1].^2 .* V[1,1] .+ σe[:, 2].^2 .* V[2,2] .+ ϵ^2)
 
-    # salva os pos da seção transversal para cada nó da seção
-    if posfile 
-        # Caminho para a pasta POS
-        pos_file_node = joinpath(path_base,nome_secao*"_iter$(iter)_ele$(ele)_No$(no).pos")
+   if posfile
+        σ = zeros(nn, 5)
+        σ[:, 1] .= σN
+        σ[:, 2] .= cteMy .* zl_yl[:, 1]
+        σ[:, 3] .= cteMz .* zl_yl[:, 2]
+        σ[:, 4] .= αμ .* grad_xy[:, 1]
+        σ[:, 5] .= αμ .* grad_xy[:, 2]
 
-        # Inicializa o arquivo de saída
-        Lgmsh_export_init(pos_file_node,nn,ne2d,XY,etypes,IJ) 
-
-        # Exporta o campo σ (falta "somar as tensões")
-        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,1],"σxxN")
-        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,2],"σxxMY")
-        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,3],"σxxMz")
-        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,4],"σzyT")
-        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,5],"σzxT")
-        Lgmsh_export_nodal_scalar(pos_file_node, σeq,"σvon-Mises")
-
+        pos_file_node = joinpath(path_base, nome_secao*"_iter$(iter)_ele$(ele)_No$(no).pos")
+        Lgmsh_export_init(pos_file_node, nn, ne2d, XY, etypes, IJ)
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,1], "σxxN")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,2], "σxxMY")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,3], "σxxMz")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,4], "σzyT")
+        Lgmsh_export_nodal_scalar(pos_file_node, σ[:,5], "σzxT")
+        Lgmsh_export_nodal_scalar(pos_file_node, σeq,    "σvon-Mises")
     end
 
     # retorna a tensao equivalente de todos os nos da seção, S do nó do portico, 

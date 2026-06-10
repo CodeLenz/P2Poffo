@@ -220,9 +220,9 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
             # vetor local TEMPORÁRIO
             T1 = zeros(ndof)
 
-            # Loop pelos nos da seção transversal e calculo do termo T1 para cada gdl do elemento
+            Base_ST = S[idx] * fkparam(x[ele]) * Ke * T  
             for ino in eachindex(Pi[idx])
-                T1[gls] .+=(σeq[idx][ino]^(P - 2)) *vec(σe[idx][ino,:]' *(V * Pi[idx][ino] * S[idx] * fkparam(x[ele]) * Ke * T))
+                T1[gls] .+= (σeq[idx][ino]^(P - 2)) * vec(σe[idx][ino,:]' * (V * Pi[idx][ino] * Base_ST))
             end
 
             # monta coluna da matriz adjunta
@@ -270,8 +270,9 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
 
             # Loop pelos nós da seção transversal - termo direto
             # dKe/dxm é não nulo apenas para m == ele (SIMP)
+            base_dK = S[idx] * dKe * Ue  
             for ino in eachindex(Pi[idx])
-                termo_direto += (s / σesc) * (T0[idx] * (σeq[idx][ino]^(P - 2)) * (σe[idx][ino,:]' * V * Pi[idx][ino] * S[idx] * dKe * Ue)[1])
+                termo_direto += (s / σesc) * T0[idx] * (σeq[idx][ino]^(P - 2)) * (σe[idx][ino,:]' * V * Pi[idx][ino] * base_dK)[1]
             end
 
             # termo direto só contribui na coluna ele
@@ -302,19 +303,13 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
         # deslocamento do elemento m no sistema local
         Ue_m = T_m * U[gls_m]
 
+        # termo indireto para TODOS os idx - vetorizado
+        dKUe_m = dKe_m * Ue_m                  
+        Γe_m   = T_m * Γ[gls_m, :]              
+
         # loop por todas as restrições idx
         for idx in 1:(2*ne)
-
-            # multiplicador de Lagrange do elemento m no sistema local
-            γg   = Γ[:, idx]
-            γe_m = T_m * γg[gls_m]
-
-            # esse termo já leva em consideração o fator s/σesc
-            # devido à solução do problema adjunto
-            termo_indireto = (γe_m' * dKe_m * Ue_m)[1]
-
-            # termo indireto contribui em todas as colunas m
-            dσ[idx, m] += termo_indireto
+            dσ[idx, m] += (Γe_m[:, idx]' * dKUe_m)[1]
         end
     end
 

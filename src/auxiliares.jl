@@ -89,3 +89,42 @@ function OC(x0::Vector, dC::Vector, dV::Vector, V_sup::Float64, ne::Int64, μ1=0
 
 
 end
+
+function precomputa_geometria(dados_secao)
+    nn      = dados_secao.nn
+    XY      = dados_secao.XY
+    α       = dados_secao.α
+    centroide = dados_secao.centroide
+    ∇Φ      = dados_secao.∇Φ
+    vizinhos = dados_secao.vizinhos
+    area    = dados_secao.area
+    Izl     = dados_secao.Izl
+    Iyl     = dados_secao.Iyl
+    Jeq     = dados_secao.Jeq
+
+    zl_yl   = zeros(nn, 2)
+    grad_xy = zeros(nn, 2)
+    grad_n  = zeros(nn)
+    # Pi_base[i] = Pi sem o αμ e sem o sign(T), separado em duas partes:
+    #   Pi[i] = [1/area  0        -yl/Izl  zl/Iyl  ]
+    #           [0       sign(T)*grad_n[i]/Jeq  0  0]
+    # Guardamos a parte geométrica pura (sem sign(T) e sem αμ):
+    Pi_geo = Vector{Matrix{Float64}}(undef, nn)
+
+    for ino in 1:nn
+        x, y = XY[ino, 1:2]
+        zl, yl = Muda_coordenada(x, y, α, centroide[1], centroide[2])
+        zl_yl[ino, :] = [zl, yl]
+
+        vizi = vizinhos[ino]
+        ∇xΦ = mean(∇Φ[vizi, 1])
+        ∇yΦ = mean(∇Φ[vizi, 2])
+        grad_xy[ino, :] = [∇xΦ, ∇yΦ]
+        grad_n[ino]     = sqrt(∇xΦ^2 + ∇yΦ^2)
+
+        Pi_geo[ino] = [1/area    0              -yl/Izl   zl/Iyl;
+                       0         grad_n[ino]/Jeq  0        0     ]
+    end
+
+    return zl_yl, grad_xy, grad_n, Pi_geo
+end
