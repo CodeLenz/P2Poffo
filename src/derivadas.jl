@@ -223,7 +223,7 @@ function norma_dσ(Λ::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S::V
 
             Base_ST = S[idx] * Ke * T  
             for ino in eachindex(Pi[idx])
-                T1[gls] .+= ((Λ[idx][ino])^(P - 2)) * vec((σe[idx][ino,:])' * (V * fσparam(x[ele]) * Pi[idx][ino] * Base_ST))[1]
+                T1[gls] .+= ((Λ[idx][ino])^(P - 2)) * vec((σe[idx][ino,:])' * (V * fσparam(x[ele]) * Pi[idx][ino] * Base_ST))
             end
 
             # monta coluna da matriz adjunta
