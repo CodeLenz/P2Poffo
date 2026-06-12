@@ -5,7 +5,7 @@ function tensoes(arquivoEsf,malha,iter,posfile,cache_secoes = Dict())
     ne = malha.ne 
 
     # tensao eqv maxima de cada no
-    σeq = Vector{Vector{Float64}}(undef, 2 * ne)
+    Λ = Vector{Vector{Float64}}(undef, 2 * ne)
 
     # matriz S associada a cada no
     S = Vector{Matrix{Float64}}(undef, 2 * ne)
@@ -24,14 +24,14 @@ function tensoes(arquivoEsf,malha,iter,posfile,cache_secoes = Dict())
     for ele in 1:ne
 
         ## tensao do elemento no nó 1 e 2
-        σeq[contador],S[contador],Pi[contador],σe[contador] = tensao_vonMises(linhas,path_base,ele,1,iter,cache_secoes,posfile)
-        σeq[contador+1],S[contador+1],Pi[contador+1],σe[contador+1] = tensao_vonMises(linhas,path_base,ele,2,iter,cache_secoes,posfile)
+        Λ[contador],S[contador],Pi[contador],σe[contador] = tensao_vonMises(linhas,path_base,ele,1,iter,cache_secoes,posfile)
+        Λ[contador+1],S[contador+1],Pi[contador+1],σe[contador+1] = tensao_vonMises(linhas,path_base,ele,2,iter,cache_secoes,posfile)
 
         
         contador += 2
     end
     # Tensao_ele1_no1,Tensao_ele1_no2...
-    return σeq,S,Pi,σe
+    return Λ,S,Pi,σe
 
 end
 
@@ -187,7 +187,7 @@ function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile
     # matriz V de Von Mises para calcular a tensão equivalente
     V = [1 0;0 3]
 
-    σeq = sqrt.(σe[:, 1].^2 .* V[1,1] .+ σe[:, 2].^2 .* V[2,2] .+ ϵ^2)
+    Λ = sqrt.(σe[:, 1].^2 .* V[1,1] .+ σe[:, 2].^2 .* V[2,2] .+ ϵ^2)
 
    if posfile
         σ = zeros(nn, 5)
@@ -204,10 +204,10 @@ function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile
         Lgmsh_export_nodal_scalar(pos_file_node, σ[:,3], "σxxMz")
         Lgmsh_export_nodal_scalar(pos_file_node, σ[:,4], "σzyT")
         Lgmsh_export_nodal_scalar(pos_file_node, σ[:,5], "σzxT")
-        Lgmsh_export_nodal_scalar(pos_file_node, σeq,    "σvon-Mises")
+        Lgmsh_export_nodal_scalar(pos_file_node, Λ,    "σvon-Mises")
     end
 
     # retorna a tensao equivalente de todos os nos da seção, S do nó do portico, 
     # Pi de todos os nós da seção e a matriz com os estados de tensao de cada nó da seção (σxx σxy)
-    return σeq,S,Pi,σe
+    return Λ,S,Pi,σe
 end

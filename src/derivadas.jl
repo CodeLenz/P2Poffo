@@ -162,7 +162,8 @@ end
 
 
 # Rotina que volta uma matriz de derivadas da tensão equivalente em relação as variáveis de projeto
-function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S::Vector{Matrix{Float64}},Pi::Vector{Vector{Matrix{Float64}}},malha::LFrame.Malha,U::Vector{Float64},x::Vector,fkparam::Function,fdkparam::Function,P::Float64,s::Float64,σesc::Float64)
+function norma_dσ(Λ::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S::Vector{Matrix{Float64}},Pi::Vector{Vector{Matrix{Float64}}},malha::LFrame.Malha,U::Vector{Float64},x::Vector,fkparam::Function,fdkparam::Function,fσparam::Function,fdσparam::Function,P::Float64,s::Float64,σesc::Float64)
+
 
     # Dados da estrutura de malha
     dados_ele = malha.dados_elementos
@@ -215,14 +216,14 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
             idx = 2*(ele-1) + no
 
             ## termo T0 de cada indice
-            T0[idx] = (sum(σeq[idx].^P))^((1/P) - 1)
+            T0[idx] = (sum((Λ[idx]).^P))^((1/P) - 1)
 
             # vetor local TEMPORÁRIO
             T1 = zeros(ndof)
 
-            Base_ST = S[idx] * fkparam(x[ele]) * Ke * T  
+            Base_ST = S[idx] * Ke * T  
             for ino in eachindex(Pi[idx])
-                T1[gls] .+= (σeq[idx][ino]^(P - 2)) * vec(σe[idx][ino,:]' * (V * Pi[idx][ino] * Base_ST))
+                T1[gls] .+= ((Λ[idx][ino])^(P - 2)) * vec((σe[idx][ino,:])' * (V * fσparam(x[ele]) * Pi[idx][ino] * Base_ST))[1]
             end
 
             # monta coluna da matriz adjunta
@@ -271,13 +272,14 @@ function norma_dσ(σeq::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S:
             # Loop pelos nós da seção transversal - termo direto
             # dKe/dxm é não nulo apenas para m == ele (SIMP)
             base_dK = S[idx] * dKe * Ue  
-            for ino in eachindex(Pi[idx])
-                termo_direto += (s / σesc) * T0[idx] * (σeq[idx][ino]^(P - 2)) * (σe[idx][ino,:]' * V * Pi[idx][ino] * base_dK)[1]
+            for ino in eachindex(Pi[idx]) 
+                termo1 = fσparam(x[ele]) .* (Pi[idx][ino] * base_dK)
+                termo2 = fdσparam(x[ele]) .* σe[idx][ino,:]
+                termo_direto += (s / σesc) * T0[idx] * ((Λ[idx][ino])^(P - 2)) * ((σe[idx][ino,:])' * V * (termo1 .+ termo2))[1]
             end
 
             # termo direto só contribui na coluna ele
             dσ[idx, ele] += termo_direto
-
         end
     end
 

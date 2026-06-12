@@ -5,7 +5,7 @@
 #
 #   Função que lineariza o problema
 #
-function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,σeq,σesc,P,s,ChaoLe)
+function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,Λ,σesc,P,s,ChaoLe)
 
     # número de restrições uma de volume e nσ de tensão
     nσ = size(dσ,1)
@@ -36,13 +36,13 @@ function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,σeq,σesc,P,s,ChaoLe)
 
     for i in 1:nσ
         
-        σi = ChaoLe[i]*norm(σeq[i], P) / (σesc/s)
+        σi = ChaoLe[i]*norm(Λ[i], P) / (σesc/s)
         gi = σi - 1.0
 
         b[i+1] = -gi + dot(dσ[i,:], x0)
 
-        ChaoLe[i] = maximum(σeq[i])/norm(σeq[i],P)
-        @show maximum(σeq[i])
+        ChaoLe[i] = maximum(Λ[i])/norm(Λ[i],P)
+        @show maximum(Λ[i])
     end
 
     # inicializa xs e xi

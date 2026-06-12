@@ -4,9 +4,10 @@
 
 Valida a derivada analítica `norma_dσ` usando diferenças finitas centrais.
 """
-function valida_dσ_FD(malha, x0, fkparam=P2Poffo.simp, fdkparam=P2Poffo.dsimp, P=8.0, iter=4;
-                      h=1e-6,s=2.0, σesc=150e6, posfile=true)
 
+function valida_dσ_FD(malha, x0, fkparam=P2Poffo.Kparam, fdkparam=P2Poffo.dKparam,
+                      fσparam=P2Poffo.σparam, fdσparam=P2Poffo.dσparam,
+                      P=8.0, iter=4; h=1e-6, s=2.0, σesc=150e6, posfile=true)
     # Dimensão do vetor de variáveis de projeto
     ne = length(x0)
 
@@ -18,10 +19,10 @@ function valida_dσ_FD(malha, x0, fkparam=P2Poffo.simp, fdkparam=P2Poffo.dsimp, 
     arquivoEsf = nomeEsf * "_iter$(iter).esf"
 
     # Calcula as tensões de referência 
-    σeq, S, Pi, σe = tensoes(arquivoEsf,malha,iter,posfile)
+    Λ, S, Pi, σe = tensoes(arquivoEsf,malha,iter,posfile)
 
     # Derivada analítica
-    dσ_analitica = norma_dσ(σeq,σe,S,Pi,malha,U,x0,fkparam,fdkparam,P,s,σesc)
+    dσ_analitica = norma_dσ(Λ,σe,S,Pi,malha,U,x0,fkparam,fdkparam,fσparam,fdσparam,P,s,σesc)
 
     ncomp = 2 * malha.ne
     dσ_fd = zeros(Float64, ncomp, ne)
@@ -31,21 +32,24 @@ function valida_dσ_FD(malha, x0, fkparam=P2Poffo.simp, fdkparam=P2Poffo.dsimp, 
 
         x0[i] = xb + h
         U_p, = Analise3D(malha, posfile, x0=x0, kparam=[fkparam], iter=5)
-        σeq_p, _, _, _ = tensoes(nomeEsf * "_iter5.esf", malha, 5, false)
+        Λ_p, _, _, _ = tensoes(nomeEsf * "_iter5.esf", malha, 5, false)
 
         x0[i] = xb - h
         U_m, = Analise3D(malha, posfile, x0=x0, kparam=[fkparam], iter=6)
-        σeq_m, _, _, _ = tensoes(nomeEsf * "_iter6.esf", malha, 6, false)
+        Λ_m, _, _, _ = tensoes(nomeEsf * "_iter6.esf", malha, 6, false)
 
         x0[i] = xb
 
         # Agrega pontos da seção igual ao norma_dσ: ||σ_idx||_P por nó
-        for idx in 1:ncomp
+       for idx in 1:ncomp
 
-            # nao sei se precisar o usar o maximo ou continuar para manter a consistencia
-            # to usando a derivada com (s/σesc) para manter a consistencia com a analitica, mas isso pode ser questionavel
-            σ_p_idx = (s/σesc)*norm(σeq_p[idx], P)   # escalar por nó
-            σ_m_idx = (s/σesc)*norm(σeq_m[idx], P)
+            # precisa recuperar o elemento correspondente ao índice para acessar os dados corretos
+            ele = (idx - 1) ÷ 2 + 1
+            fσ_p = ((idx-1)÷2+1 == i) ? fσparam(xb+h) : fσparam(x0[ele])
+            fσ_m = ((idx-1)÷2+1 == i) ? fσparam(xb-h) : fσparam(x0[ele])
+
+            σ_p_idx = (s/σesc) * norm(fσ_p .* Λ_p[idx], P)
+            σ_m_idx = (s/σesc) * norm(fσ_m .* Λ_m[idx], P)
             dσ_fd[idx, i] = (σ_p_idx - σ_m_idx) / (2h)
         end
     end
@@ -77,7 +81,7 @@ function valida_dσ_FD(malha, x0, fkparam=P2Poffo.simp, fdkparam=P2Poffo.dsimp, 
     return dσ_analitica, dσ_fd
 end
 
-function valida_dω_FD(malha, x0,fkparam=P2Poffo.simp, fdkparam=P2Poffo.dsimp, fmparam=P2Poffo.gimp, fdmparam=P2Poffo.dgimp,n_modos=3, P=8.0;h=1e-4, posfile=false)
+function valida_dω_FD(malha, x0,fkparam=P2Poffo.Kparam, fdkparam=P2Poffo.dKparam, fmparam=P2Poffo.Mparam, fdmparam=P2Poffo.dMparam,n_modos=3, P=8.0;h=1e-4, posfile=false)
 
     # Número de variáveis de projeto 
     ne = length(x0)

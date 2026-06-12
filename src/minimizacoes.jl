@@ -6,16 +6,20 @@
 # 
 
 # Parametrização SIMP 
-simp(x,p=3) = x^p
+Kparam(x,p=3) = x^p
 
 # Derivada da parametrização 
-dsimp(x,p=3) = p*x^(p-1)
+dKparam(x,p=3) = p*x^(p-1)
 
 # Parametrização SIMP 
-gimp(x,p=1) = x^p
+Mparam(x,p=1) = x^p
 
 # Derivada da parametrização 
-dgimp(x,p=1) = p*x^(p-1)
+dMparam(x,p=1) = p*x^(p-1)
+
+σparam(x, p=3.0, q=2.0) = x^(p-q)
+
+dσparam(x, p=3.0, q=2.0) = (p-q)*x^(p-q-1)     
 
 #
 # Rotina principal
@@ -78,7 +82,7 @@ end
 
 
 """
-    Main_Otim_Modal("arquivo.yaml",P2Poffo.simp,P2Poffo.dsimp,P2Poffo.gimp,P2Poffo.dgimp,n_modos=3,vf=0.5,P=8.0,niter=100)
+    Main_Otim_Modal("arquivo.yaml",P2Poffo.Kparam,P2Poffo.dKparam,P2Poffo.Mparam,P2Poffo.dMparam,P2Poffo.fσparam,P2Poffo.fdσparam,n_modos=3,vf=0.5,P=8.0,niter=100)
 
 Rotina para calcular a maior frequência natural de uma estrutura,
 minimizando o volume de uma malha.
@@ -101,13 +105,13 @@ de um arquivo `.yaml`.
 # Modelos de Material (SIMP)
 - Rigidez:
     - Penalização com `p = 3`
-    - Função: `P2Poffo.simp`
-    - Derivada: `P2Poffo.dsimp`
+    - Função: `P2Poffo.Kparam`
+    - Derivada: `P2Poffo.dKparam`
 
 - Massa:
     - Penalização com `p = 1`
-    - Função: `P2Poffo.gimp`
-    - Derivada: `P2Poffo.dgimp`
+    - Função: `P2Poffo.Mparam`
+    - Derivada: `P2Poffo.dMparam`
 
 # Observações
 - As funções SIMP não estão exportadas diretamente, sendo necessário acessá-las
@@ -118,7 +122,7 @@ de um arquivo `.yaml`.
 # Retorno
 Retorna os parâmetros otimizados da malha e as frequências naturais associadas.
 """
-function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::Function,fmparam::Function, fdmparam::Function, posfile=true; verbose=false,n_modos=6, vf = 0.5 ,P=8.0, niter=100,tol_f=1E-4,tol_g=1E-4,s = 2.0)
+function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::Function,fmparam::Function, fdmparam::Function,fσparam::Function, fdσparam::Function, posfile=true; verbose=false,n_modos=6, vf = 0.5 ,P=8.0, niter=100,tol_f=1E-4,tol_g=1E-4,s = 2.0)
 
     # analise modal somente para a malha
     ωn,U0,malha = Modal3D(arquivo,posfile,n_modos=n_modos)
@@ -176,7 +180,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     dσ = zeros(length(x0))
 
     # inicializa o vetor de tensões equivalentes 
-    σeq = zeros(length(x0))
+    Λ = zeros(length(x0))
 
     # dicionário para armazenar os dados das seções transversais, evitando ler o mesmo arquivo várias vezes
     cache_secoes = Dict()
@@ -198,11 +202,11 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         arquivoEsf = nomeEsf * "_iter$(iter).esf"
 
         # tensão equivalente dos nos e elementos 
-        # σeq - tensao equivalente de cada nó da seção
+        # Λ - vetor de tensões equivalentes de cada nó da seção
         # S - matriz s da seção
         # Pi - matriz Pi de cada nó da seção
         # σe estado de tensão (σxx, σxy) para cada nó da seção
-        σeq,S,Pi,σe = tensoes(arquivoEsf,malha,iter,posfile,cache_secoes)
+        Λ,S,Pi,σe = tensoes(arquivoEsf,malha,iter,posfile,cache_secoes)
 
         # so para armanezar a primeira frequencia da primeira iteração
         if iter == 1
@@ -214,14 +218,14 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         dω = norma_dω(ωn,U0,malha,x0,fdkparam,fdmparam,fmparam,P) 
     
         # derivada da tensao em relacao as variaveis de projeto
-        dσ = ChaoLe .* norma_dσ(σeq,σe,S,Pi,malha,U,x0,fkparam,fdkparam,P,s,σesc)
+        dσ = ChaoLe .* norma_dσ(Λ,σe,S,Pi,malha,U,x0,fkparam,fdkparam,fσparam,fdσparam,P,s,σesc)
 
         # Determina os limites móveis, baseados nas variações das
         # variáveis de projeto. Isso só faz sentido para iter > 2
         atualiza_δ!(iter,δ,Δ1,Δ2,δ_min,δ_max)
 
         # Lineariza o problema 
-        c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup,dσ,σeq,σesc,P,s,ChaoLe)
+        c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup,dσ,Λ,σesc,P,s,ChaoLe)
 
         # Chama a solução interna do problema
         xn,_ = LP(c,A,b,xi,xs,n,m)
@@ -253,9 +257,9 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         println("frequencia ", ωn[1])
         println("x   ",xn)
         println("δ   ",δ)
-        nσ = length(σeq)   
+        nσ = length(Λ)   
         for i in 1:nσ
-            Fs = σesc /maximum(σeq[i])
+            Fs = σesc /maximum(Λ[i])
             println("FS:$i ", Fs)
         end
         println("------------------------------")
@@ -270,7 +274,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         hist.densidades = vcat(hist.densidades, xn')
 
         for i in 1:nσ
-            push!(hist.FS[i], σesc / maximum(σeq[i]))
+            push!(hist.FS[i], σesc / maximum(Λ[i]))
         end
 
 
@@ -301,7 +305,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     println("║  Fatores de segurança (tensão):                  ║")
     nσ = size(dσ, 1)
     for i in 1:nσ
-        Fs = σesc / maximum(σeq[i])
+        Fs = σesc / maximum(Λ[i])
         println("║    FS[$i]: ", lpad(round(Fs, digits=4), 12), "                       ║")
     end
     println("╚══════════════════════════════════════════════════╝")
