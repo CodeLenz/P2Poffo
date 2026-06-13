@@ -42,12 +42,14 @@ function valida_dσ_FD(malha, x0, fkparam=P2Poffo.Kparam, fdkparam=P2Poffo.dKpar
 
         # Agrega pontos da seção igual ao norma_dσ: ||σ_idx||_P por nó
        for idx in 1:ncomp
-
-            # precisa recuperar o elemento correspondente ao índice para acessar os dados corretos
             ele = (idx - 1) ÷ 2 + 1
-            fσ_p = ((idx-1)÷2+1 == i) ? fσparam(xb+h) : fσparam(x0[ele])
-            fσ_m = ((idx-1)÷2+1 == i) ? fσparam(xb-h) : fσparam(x0[ele])
-
+            if ele == i
+                fσ_p = fσparam(xb+h)
+                fσ_m = fσparam(xb-h)
+            else
+                fσ_p = fσparam(x0[ele])
+                fσ_m = fσparam(x0[ele])
+            end
             σ_p_idx = (s/σesc) * norm(fσ_p .* Λ_p[idx], P)
             σ_m_idx = (s/σesc) * norm(fσ_m .* Λ_m[idx], P)
             dσ_fd[idx, i] = (σ_p_idx - σ_m_idx) / (2h)

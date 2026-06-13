@@ -216,14 +216,14 @@ function norma_dσ(Λ::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S::V
             idx = 2*(ele-1) + no
 
             ## termo T0 de cada indice
-            T0[idx] = (sum((Λ[idx]).^P))^((1/P) - 1)
+            T0[idx] = (sum((fσparam(x[ele]) .* Λ[idx]).^P))^((1/P) - 1)
 
             # vetor local TEMPORÁRIO
             T1 = zeros(ndof)
 
-            Base_ST = S[idx] * Ke * T  
+            Base_ST = S[idx] * fkparam(x[ele]) * Ke * T  
             for ino in eachindex(Pi[idx])
-                T1[gls] .+= ((Λ[idx][ino])^(P - 2)) * vec((σe[idx][ino,:])' * (V * fσparam(x[ele]) * Pi[idx][ino] * Base_ST))
+                T1[gls] .+= ((fσparam(x[ele])*Λ[idx][ino])^(P - 2)) * vec((fσparam(x[ele]).*σe[idx][ino,:])' * (V * Pi[idx][ino] * Base_ST))
             end
 
             # monta coluna da matriz adjunta
@@ -275,11 +275,12 @@ function norma_dσ(Λ::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S::V
             for ino in eachindex(Pi[idx]) 
                 termo1 = fσparam(x[ele]) .* (Pi[idx][ino] * base_dK)
                 termo2 = fdσparam(x[ele]) .* σe[idx][ino,:]
-                termo_direto += (s / σesc) * T0[idx] * ((Λ[idx][ino])^(P - 2)) * ((σe[idx][ino,:])' * V * (termo1 .+ termo2))[1]
+                termo_direto += (s / σesc) * T0[idx] * ((fσparam(x[ele])*Λ[idx][ino])^(P - 2)) * ((fσparam(x[ele]).*σe[idx][ino,:])' * V * (termo1 .+ termo2))[1]
             end
 
             # termo direto só contribui na coluna ele
             dσ[idx, ele] += termo_direto
+
         end
     end
 
