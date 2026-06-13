@@ -162,7 +162,7 @@ end
 
 
 # Rotina que volta uma matriz de derivadas da tensão equivalente em relação as variáveis de projeto
-function norma_dσ(Λ::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S::Vector{Matrix{Float64}},Pi::Vector{Vector{Matrix{Float64}}},malha::LFrame.Malha,U::Vector{Float64},x::Vector,fkparam::Function,fdkparam::Function,fσparam::Function,fdσparam::Function,P::Float64,s::Float64,σesc::Float64)
+function norma_dσ(Λ_tio::Vector{Vector{Float64}},σe_tio::Vector{Matrix{Float64}},S::Vector{Matrix{Float64}},Pi::Vector{Vector{Matrix{Float64}}},malha::LFrame.Malha,U::Vector{Float64},x::Vector,fkparam::Function,fdkparam::Function,fσparam::Function,fdσparam::Function,P::Float64,s::Float64,σesc::Float64)
 
 
     # Dados da estrutura de malha
@@ -194,6 +194,8 @@ function norma_dσ(Λ::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S::V
     # Inicializa o problema adjunto
     Γ = zeros(ndof, 2*ne)
     
+    Λ  = similar(Λ_tio)
+    σe = similar(σe_tio)
     # loop pelos elementos
     for ele in 1:ne
 
@@ -215,15 +217,19 @@ function norma_dσ(Λ::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S::V
             ## indice do vetor de tensões equivalente
             idx = 2*(ele-1) + no
 
+            # parametrizada
+            Λ[idx] = fσparam(x[ele]) .* Λ_tio[idx]
+
             ## termo T0 de cada indice
-            T0[idx] = (sum((fσparam(x[ele]) .* Λ[idx]).^P))^((1/P) - 1)
+            T0[idx] = (sum(Λ[idx].^P))^((1/P) - 1)
 
             # vetor local TEMPORÁRIO
             T1 = zeros(ndof)
 
-            Base_ST = S[idx] * fkparam(x[ele]) * Ke * T  
+            σe[idx] = fσparam(x[ele]).*σe_tio[idx]
+            
             for ino in eachindex(Pi[idx])
-                T1[gls] .+= ((fσparam(x[ele])*Λ[idx][ino])^(P - 2)) * vec((fσparam(x[ele]).*σe[idx][ino,:])' * (V * Pi[idx][ino] * Base_ST))
+                T1[gls] .+= ((Λ[idx][ino])^(P - 2)) * vec((σe[idx][ino,:])' * (V *fσparam(x[ele]) * Pi[idx][ino] * S[idx] * Ke * T))
             end
 
             # monta coluna da matriz adjunta
@@ -266,16 +272,26 @@ function norma_dσ(Λ::Vector{Vector{Float64}},σe::Vector{Matrix{Float64}},S::V
             # indice do vetor de tensões equivalente
             idx = 2*(ele-1) + no
 
+            # parametrizada
+            Λ[idx] = fσparam(x[ele]) .* Λ_tio[idx]
+            σe[idx] = fσparam(x[ele]).*σe_tio[idx]
+
+
             # Inicializa o termo direto para esse indice (Temporario)
             termo_direto = 0.0
 
             # Loop pelos nós da seção transversal - termo direto
             # dKe/dxm é não nulo apenas para m == ele (SIMP)
-            base_dK = S[idx] * dKe * Ue  
             for ino in eachindex(Pi[idx]) 
-                termo1 = fσparam(x[ele]) .* (Pi[idx][ino] * base_dK)
-                termo2 = fdσparam(x[ele]) .* σe[idx][ino,:]
-                termo_direto += (s / σesc) * T0[idx] * ((fσparam(x[ele])*Λ[idx][ino])^(P - 2)) * ((fσparam(x[ele]).*σe[idx][ino,:])' * V * (termo1 .+ termo2))[1]
+
+                # derivada da param * tensao sem param
+                termo1 = fdσparam(x[ele]) .* σe_tio[idx][ino,:]
+
+                # param * derivada da tensao
+                termo2 = fσparam(x[ele]) .* (Pi[idx][ino] * S[idx] * dKe * Ue)
+
+                # termo todo
+                termo_direto += (s / σesc) * T0[idx] * ((Λ[idx][ino])^(P - 2)) * ((σe[idx][ino,:])' * V * (termo1 .+ termo2))[1]
             end
 
             # termo direto só contribui na coluna ele

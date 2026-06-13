@@ -180,7 +180,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     dσ = zeros(length(x0))
 
     # inicializa o vetor de tensões equivalentes 
-    Λ = zeros(length(x0))
+    Λ_tio = zeros(length(x0))
 
     # dicionário para armazenar os dados das seções transversais, evitando ler o mesmo arquivo várias vezes
     cache_secoes = Dict()
@@ -202,11 +202,11 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         arquivoEsf = nomeEsf * "_iter$(iter).esf"
 
         # tensão equivalente dos nos e elementos 
-        # Λ - vetor de tensões equivalentes de cada nó da seção
+        # Λ_tio - vetor de tensões equivalentes de cada nó da seção
         # S - matriz s da seção
         # Pi - matriz Pi de cada nó da seção
-        # σe estado de tensão (σxx, σxy) para cada nó da seção
-        Λ,S,Pi,σe = tensoes(arquivoEsf,malha,iter,posfile,cache_secoes)
+        # σe_tio estado de tensão (σxx, σxy) para cada nó da seção
+        Λ,S,Pi,σe_tio = tensoes(arquivoEsf,malha,iter,posfile,cache_secoes)
 
         # so para armanezar a primeira frequencia da primeira iteração
         if iter == 1
@@ -218,14 +218,14 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         dω = norma_dω(ωn,U0,malha,x0,fdkparam,fdmparam,fmparam,P) 
     
         # derivada da tensao em relacao as variaveis de projeto
-        dσ = ChaoLe .* norma_dσ(Λ,σe,S,Pi,malha,U,x0,fkparam,fdkparam,fσparam,fdσparam,P,s,σesc)
+        dσ = ChaoLe .* norma_dσ(Λ_tio,σe_tio,S,Pi,malha,U,x0,fkparam,fdkparam,fσparam,fdσparam,P,s,σesc)
 
         # Determina os limites móveis, baseados nas variações das
         # variáveis de projeto. Isso só faz sentido para iter > 2
         atualiza_δ!(iter,δ,Δ1,Δ2,δ_min,δ_max)
 
         # Lineariza o problema 
-        c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup,dσ,Λ,σesc,P,s,ChaoLe)
+        c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup,dσ,Λ_tio,σesc,P,s,ChaoLe)
 
         # Chama a solução interna do problema
         xn,_ = LP(c,A,b,xi,xs,n,m)
@@ -257,9 +257,9 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         println("frequencia ", ωn[1])
         println("x   ",xn)
         println("δ   ",δ)
-        nσ = length(Λ)   
+        nσ = length(Λ_tio)   
         for i in 1:nσ
-            Fs = σesc /maximum(Λ[i])
+            Fs = σesc /maximum(Λ_tio[i])
             println("FS:$i ", Fs)
         end
         println("------------------------------")
@@ -274,7 +274,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         hist.densidades = vcat(hist.densidades, xn')
 
         for i in 1:nσ
-            push!(hist.FS[i], σesc / maximum(Λ[i]))
+            push!(hist.FS[i], σesc / maximum(Λ_tio[i]))
         end
 
 
@@ -305,7 +305,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     println("║  Fatores de segurança (tensão):                  ║")
     nσ = size(dσ, 1)
     for i in 1:nσ
-        Fs = σesc / maximum(Λ[i])
+        Fs = σesc / maximum(Λ_tio[i])
         println("║    FS[$i]: ", lpad(round(Fs, digits=4), 12), "                       ║")
     end
     println("╚══════════════════════════════════════════════════╝")
