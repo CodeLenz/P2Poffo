@@ -228,8 +228,9 @@ function norma_dσ(Λ_tio::Vector{Vector{Float64}},σe_tio::Vector{Matrix{Float6
 
             σe[idx] = fσparam(x[ele]).*σe_tio[idx]
             
+            # olhar se vai denovo o sigmaparam
             for ino in eachindex(Pi[idx])
-                T1[gls] .+= ((Λ[idx][ino])^(P - 2)) * vec((σe[idx][ino,:])' * (V *fσparam(x[ele]) * Pi[idx][ino] * S[idx] * Ke * T))
+                T1[gls] .+= (Λ[idx][ino]^(P-2)) * vec(σe[idx][ino,:]' * (V * Pi[idx][ino] * S[idx] * fσparam(x[ele]) * Ke * T))
             end
 
             # monta coluna da matriz adjunta
@@ -237,10 +238,16 @@ function norma_dσ(Λ_tio::Vector{Vector{Float64}},σe_tio::Vector{Matrix{Float6
 
         end
 
+        println("T0[1] = ", T0[1])
+        println("max Λ_tio[1] = ", maximum(Λ_tio[1]))
+        println("Λ_tio[1]^(P-1) max = ", maximum(Λ_tio[1])^(P-1))
+        println("Λ_tio[1]^(P-2) max = ", maximum(Λ_tio[1])^(P-2))
+        println("razão = ", maximum(Λ_tio[1])^(P-1) / maximum(Λ_tio[1])^(P-2))
     end
 
     # resolvendo o problema adjunto 
     Γ[dofs_l,:] = -(Kg \ Q[dofs_l,:])
+
 
     ## derivada da tensão equivalente em relação a cada elemento
     dσ = zeros(2*ne, ne)
@@ -293,10 +300,7 @@ function norma_dσ(Λ_tio::Vector{Vector{Float64}},σe_tio::Vector{Matrix{Float6
                 # termo todo
                 termo_direto += (s / σesc) * T0[idx] * ((Λ[idx][ino])^(P - 2)) * ((σe[idx][ino,:])' * V * (termo1 .+ termo2))[1]
             end
-
-            # termo direto só contribui na coluna ele
             dσ[idx, ele] += termo_direto
-
         end
     end
 
@@ -324,7 +328,8 @@ function norma_dσ(Λ_tio::Vector{Vector{Float64}},σe_tio::Vector{Matrix{Float6
 
         # termo indireto para TODOS os idx - vetorizado
         dKUe_m = dKe_m * Ue_m                  
-        Γe_m   = T_m * Γ[gls_m, :]              
+        Γe_m   = T_m * Γ[gls_m, :]         
+        
 
         # loop por todas as restrições idx
         for idx in 1:(2*ne)
