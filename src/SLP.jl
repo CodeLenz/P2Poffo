@@ -42,7 +42,6 @@ function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,Λ,σesc,P,s,ChaoLe)
         b[i+1] = -gi + dot(dσ[i,:], x0)
 
         ChaoLe[i] = maximum(Λ[i])/norm(Λ[i],P)
-        @show maximum(Λ[i])
     end
 
     # inicializa xs e xi
@@ -112,7 +111,6 @@ function LP(c,A,b,xi,xs,n,m)
     optimize!(modelo)
     status = termination_status(modelo)
 
-    @show status
     if status != MOI.OPTIMAL
         error("LP não convergiu. Status = $status")
     end
@@ -170,7 +168,6 @@ function convergencia(xn,ωx0,ωxn,A,b,tol_f,tol_g)
     dif_fx = norm(ωxn - ωx0)/(norm(ωx0))
 
     violation = maximum(A*xn .- b)
-    @show A*xn .- b
      
     # Verifica as tolerâncias
     if dif_fx < tol_f && violation < tol_g
