@@ -17,9 +17,9 @@ Mparam(x,p=1) = x^p
 # Derivada da parametrização 
 dMparam(x,p=1) = p*x^(p-1)
 
-σparam(x, p=3.0, q=2.0) =1.0
+σparam(x, p=3.0, q=2.0) = x^(p-q)
 
-dσparam(x, p=3.0, q=2.0) = 0.0  
+dσparam(x, p=3.0, q=2.0) = (p-q)*(x^(p-q-1))
 
 #
 # Rotina principal
