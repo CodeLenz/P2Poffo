@@ -122,8 +122,9 @@ function precomputa_geometria(dados_secao)
         grad_xy[ino, :] = [∇xΦ, ∇yΦ]
         grad_n[ino]     = sqrt(∇xΦ^2 + ∇yΦ^2)
 
-        Pi_geo[ino] = [1/area    0              -yl/Izl   zl/Iyl;
-                       0         grad_n[ino]/Jeq  0        0     ]
+        Pi_geo[ino] = [1/area   0       -yl/Izl  zl/Iyl   ;
+               0        grad_n[ino]/Jeq  0         0      ]
+                       
     end
 
     return zl_yl, grad_xy, grad_n, Pi_geo

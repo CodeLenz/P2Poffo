@@ -5,14 +5,21 @@
 Valida a derivada analítica `norma_dσ` usando diferenças finitas centrais.
 """
 
-function valida_dσ_FD(malha, x0, fkparam=P2Poffo.Kparam, fdkparam=P2Poffo.dKparam,
+function valida_dσ_FD(arquivo::AbstractString, fkparam=P2Poffo.Kparam, fdkparam=P2Poffo.dKparam,
                       fσparam=P2Poffo.σparam, fdσparam=P2Poffo.dσparam,
                       P=8.0, iter=4; h=1e-3, s=2.0, σesc=150e6, posfile=true)
-    # Dimensão do vetor de variáveis de projeto
-    ne = length(x0)
 
+
+    ωn,U0,malha =Modal3D(arquivo)
+
+    # densidade dos elementos
+    x0 = 0.5 * ones(malha.ne)
+
+    # Dimensão do vetor de variáveis de projeto
+    ne = malha.ne
+    
     # Solução no ponto base
-    U, = Analise3D(malha, posfile, x0=x0,kparam=[fkparam], iter=iter)
+    U,= Analise3D(malha, posfile, x0=x0,kparam=[fkparam], iter=iter)
 
     # Carrega arquivo de esforços
     nomeEsf = malha.nome_arquivo

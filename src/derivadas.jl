@@ -217,37 +217,33 @@ function norma_dσ(Λ_tio::Vector{Vector{Float64}},σe_tio::Vector{Matrix{Float6
             ## indice do vetor de tensões equivalente
             idx = 2*(ele-1) + no
 
+            # vetor local TEMPORÁRIO
+            T1 = zeros(ndof)
+
             # parametrizada
             Λ[idx] = fσparam(x[ele]) .* Λ_tio[idx]
 
             ## termo T0 de cada indice
             T0[idx] = (sum(Λ[idx].^P))^((1/P) - 1)
 
-            # vetor local TEMPORÁRIO
-            T1 = zeros(ndof)
 
             σe[idx] = fσparam(x[ele]).*σe_tio[idx]
             
             # olhar se vai denovo o sigmaparam
             for ino in eachindex(Pi[idx])
-                T1[gls] .+= (Λ[idx][ino]^(P-2)) * vec(σe[idx][ino,:]' * (V * Pi[idx][ino] * S[idx] * fσparam(x[ele]) * Ke * T))
+                T1[gls] .+= (Λ[idx][ino]^(P-2)) * vec(σe[idx][ino,:]' * (V * fσparam(x[ele]) * Pi[idx][ino] * S[idx] *fkparam(x[ele]) * Ke * T))
             end
+
 
             # monta coluna da matriz adjunta
             Q[:,idx] .= (s/σesc) .* T0[idx] .* T1
 
         end
 
-        println("T0[1] = ", T0[1])
-        println("max Λ_tio[1] = ", maximum(Λ_tio[1]))
-        println("Λ_tio[1]^(P-1) max = ", maximum(Λ_tio[1])^(P-1))
-        println("Λ_tio[1]^(P-2) max = ", maximum(Λ_tio[1])^(P-2))
-        println("razão = ", maximum(Λ_tio[1])^(P-1) / maximum(Λ_tio[1])^(P-2))
     end
 
     # resolvendo o problema adjunto 
     Γ[dofs_l,:] = -(Kg \ Q[dofs_l,:])
-
 
     ## derivada da tensão equivalente em relação a cada elemento
     dσ = zeros(2*ne, ne)
@@ -301,6 +297,7 @@ function norma_dσ(Λ_tio::Vector{Vector{Float64}},σe_tio::Vector{Matrix{Float6
                 termo_direto += (s / σesc) * T0[idx] * ((Λ[idx][ino])^(P - 2)) * ((σe[idx][ino,:])' * V * (termo1 .+ termo2))[1]
             end
             dσ[idx, ele] += termo_direto
+
         end
     end
 

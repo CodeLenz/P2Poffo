@@ -179,7 +179,7 @@ function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile
 
     # Tensões — totalmente vetorizadas
     σxx = σN .+ cteMy .* zl_yl[:, 1] .+ cteMz .* zl_yl[:, 2]
-    σxy = αμ .* sqrt.(grad_xy[:, 1].^2 .+ grad_xy[:, 2].^2)  # = αμ * grad_n
+    σxy = abs(αμ) .* sqrt.(grad_xy[:, 1].^2 .+ grad_xy[:, 2].^2)
 
     σe_tio = [σxx σxy]
 
