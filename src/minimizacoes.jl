@@ -134,7 +134,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     ne = malha.ne
 
     # Estimativa inicial das densidades relativas,
-    x0 = vf*ones(ne)
+    x0 = 0.5*ones(ne) #vf*ones(ne)
 
     # Calcula o volume de cada elemento sem considerar a 
     # parametrização 
@@ -155,8 +155,8 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     xn = copy(x0)    
 
     # Limites máximos e mínimos para os deltas
-    δ_max = 0.6
-    δ_min = 0.05
+    δ_max = 0.1
+    δ_min = 0.01
 
     # inicializa o veltor de deltas
     δ = δ_min*ones(ne)
@@ -213,7 +213,6 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
             ω1 = ωn[1]
         end
 
-
         # Deriva da norma da frequencia - valor mínimo
         dω = norma_dω(ωn,U0,malha,x0,fdkparam,fdmparam,fmparam,P) 
     
@@ -226,6 +225,8 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
 
         # Lineariza o problema 
         c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup,dσ,Λ_tio,σesc,P,s,ChaoLe)
+
+        @show (A*x0 .- b)
 
         # Chama a solução interna do problema
         xn,_ = LP(c,A,b,xi,xs,n,m)

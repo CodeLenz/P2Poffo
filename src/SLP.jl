@@ -22,7 +22,7 @@ function Lineariza(x0, δ, dω,dV,V_sup,x_inf,x_sup,dσ,Λ,σesc,P,s,ChaoLe)
     # Coeficientes da função objetivo linearizada
     # Lembrando que queremos MAXIMIZAR a menor 
     # frequência (obtida pela norma)
-    c = -dω
+    c = dω
 
     # Gradiente das restrições linearizadas
     A[1,:] = dV'/V_sup
@@ -80,7 +80,7 @@ function LP(c,A,b,xi,xs,n,m)
             error("Bounds invertidos na variável $i: xi=$(xi[i]) > xs=$(xs[i]), x0 provavelmente é zero")
         end
     end
-    
+
     # Aloca vetor de soluções atuais
     xn = zeros(n)
 
@@ -102,7 +102,7 @@ function LP(c,A,b,xi,xs,n,m)
     r = 1E-3
 
     # Define a função objetivo
-    @objective(modelo, Min, c'*x + r*sum(s))
+    @objective(modelo, Min, -(c'*x + r*sum(s)))
 
     # Agora com a restrição nl linearizada com variáveis de folga
     @constraint(modelo, [i=1:m], dot(A[i,:], x) + s[i] <= b[i])
@@ -119,8 +119,14 @@ function LP(c,A,b,xi,xs,n,m)
 
         # Recupera a solução atual
         xn[i] = value(x[i])
-
+        
     end # for i
+
+    for i in 1:m
+        @show value(s[i])
+    end
+
+
 
     return xn,(A*xn .- b)
     

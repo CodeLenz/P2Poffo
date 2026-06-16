@@ -13,7 +13,7 @@ function valida_dσ_FD(arquivo::AbstractString, fkparam=P2Poffo.Kparam, fdkparam
     ωn,U0,malha =Modal3D(arquivo)
 
     # densidade dos elementos
-    x0 = 0.5 * ones(malha.ne)
+    x0 = 0.5 * ones(malha.ne) + 1E-2*randn(malha.ne)
 
     # Dimensão do vetor de variáveis de projeto
     ne = malha.ne

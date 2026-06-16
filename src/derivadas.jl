@@ -193,9 +193,10 @@ function norma_dσ(Λ_tio::Vector{Vector{Float64}},σe_tio::Vector{Matrix{Float6
 
     # Inicializa o problema adjunto
     Γ = zeros(ndof, 2*ne)
-    
+
     Λ  = similar(Λ_tio)
     σe = similar(σe_tio)
+
     # loop pelos elementos
     for ele in 1:ne
 
@@ -208,13 +209,13 @@ function norma_dσ(Λ_tio::Vector{Vector{Float64}},σe_tio::Vector{Matrix{Float6
         # transformação de coordenadas
         T = LFrame.Rotacao3d(ele,conect,coordenadas,α)
 
-        # Rigidez do elemento 
-        Ke = LFrame.Ke_portico3d(E,Iz,Iy,G,J0,L[ele],A)
+        # Rigidez do elemento sem parametrização 
+        Ke0 = LFrame.Ke_portico3d(E,Iz,Iy,G,J0,L[ele],A)
         
-        ## loop pelos nos
+        # loop pelos nos
         for no in 1:2
 
-            ## indice do vetor de tensões equivalente
+            # indice do vetor de tensões equivalente
             idx = 2*(ele-1) + no
 
             # vetor local TEMPORÁRIO
@@ -223,15 +224,15 @@ function norma_dσ(Λ_tio::Vector{Vector{Float64}},σe_tio::Vector{Matrix{Float6
             # parametrizada
             Λ[idx] = fσparam(x[ele]) .* Λ_tio[idx]
 
-            ## termo T0 de cada indice
+            # termo T0 de cada indice
             T0[idx] = (sum(Λ[idx].^P))^((1/P) - 1)
 
-
+            # estado de tensão parametrizado do elemento/nó
             σe[idx] = fσparam(x[ele]).*σe_tio[idx]
             
-            # olhar se vai denovo o sigmaparam
+            # olhar se vai de novo o sigmaparam
             for ino in eachindex(Pi[idx])
-                T1[gls] .+= (Λ[idx][ino]^(P-2)) * vec(σe[idx][ino,:]' * (V * fσparam(x[ele]) * Pi[idx][ino] * S[idx] *fkparam(x[ele]) * Ke * T))
+                T1[gls] .+= (Λ[idx][ino]^(P-2)) * vec(σe[idx][ino,:]' * (V * fσparam(x[ele]) * Pi[idx][ino] * S[idx] *fkparam(x[ele]) * Ke0 * T))
             end
 
 
@@ -245,7 +246,8 @@ function norma_dσ(Λ_tio::Vector{Vector{Float64}},σe_tio::Vector{Matrix{Float6
     # resolvendo o problema adjunto 
     Γ[dofs_l,:] = -(Kg \ Q[dofs_l,:])
 
-    ## derivada da tensão equivalente em relação a cada elemento
+    # derivada da tensão equivalente em relação a cada elemento/nó
+    # linha é a restrição (elemento/nó) e a coluna é o w.r.t 
     dσ = zeros(2*ne, ne)
 
     # Loop pelos elementos - calcula o termo direto (dKe/dxm é zero para m ≠ ele no SIMP)
@@ -260,25 +262,24 @@ function norma_dσ(Λ_tio::Vector{Vector{Float64}},σe_tio::Vector{Matrix{Float6
         # transformação de coordenadas
         T = LFrame.Rotacao3d(ele, conect, coordenadas, α)
 
-        # Rigidez do elemento no sistema local 
-        Ke = LFrame.Ke_portico3d(E, Iz, Iy, G, J0, L[ele], A)
+        # Rigidez do elemento no sistema local (não parametrizado)
+        Ke0 = LFrame.Ke_portico3d(E, Iz, Iy, G, J0, L[ele], A)
 
         # derivada da rigidez no sistema local 
-        dKe = Ke * fdkparam(x[ele])
+        dKe = Ke0 * fdkparam(x[ele])
 
         # Converte o deslocamento para o sistema local 
         Ue = T * U[gls]
 
-        ## loop pelos nós do elemento de pórtico
+        # loop pelos nós do elemento de pórtico
         for no in 1:2
 
             # indice do vetor de tensões equivalente
             idx = 2*(ele-1) + no
 
-            # parametrizada
+            # parametriza a tensão equivalente e o estado de tensões
             Λ[idx] = fσparam(x[ele]) .* Λ_tio[idx]
             σe[idx] = fσparam(x[ele]).*σe_tio[idx]
-
 
             # Inicializa o termo direto para esse indice (Temporario)
             termo_direto = 0.0
@@ -295,7 +296,11 @@ function norma_dσ(Λ_tio::Vector{Vector{Float64}},σe_tio::Vector{Matrix{Float6
 
                 # termo todo
                 termo_direto += (s / σesc) * T0[idx] * ((Λ[idx][ino])^(P - 2)) * ((σe[idx][ino,:])' * V * (termo1 .+ termo2))[1]
+
             end
+
+            # armazena na matriz de derivadas
+            # linha é a restrição (elemento/nó) e a coluna é o w.r.t 
             dσ[idx, ele] += termo_direto
 
         end
@@ -314,20 +319,19 @@ function norma_dσ(Λ_tio::Vector{Vector{Float64}},σe_tio::Vector{Matrix{Float6
         # transformação de coordenadas do elemento m
         T_m = LFrame.Rotacao3d(m, conect, coordenadas, α_m)
 
-        # Rigidez do elemento m no sistema local
-        Ke_m = LFrame.Ke_portico3d(E_m, Iz_m, Iy_m, G_m, J0_m, L[m], A_m)
+        # Rigidez do elemento m no sistema local e sem parametrização
+        Ke0_m = LFrame.Ke_portico3d(E_m, Iz_m, Iy_m, G_m, J0_m, L[m], A_m)
 
         # derivada da rigidez do elemento m no sistema local
-        dKe_m = Ke_m * fdkparam(x[m])
+        dKe_m = Ke0_m * fdkparam(x[m])
 
         # deslocamento do elemento m no sistema local
         Ue_m = T_m * U[gls_m]
 
-        # termo indireto para TODOS os idx - vetorizado
+        # termo indireto para TODOS os idx
         dKUe_m = dKe_m * Ue_m                  
         Γe_m   = T_m * Γ[gls_m, :]         
         
-
         # loop por todas as restrições idx
         for idx in 1:(2*ne)
             dσ[idx, m] += (Γe_m[:, idx]' * dKUe_m)[1]

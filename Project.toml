@@ -24,6 +24,8 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [sources]
 BMesh = {rev = "main", url = "https://github.com/CodeLenz/BMesh"}
 Lgmsh = {rev = "main", url = "https://github.com/CodeLenz/Lgmsh"}
+LFrame = {rev = "main", url = "https://github.com/CodeLenz/LFrame"}
+
 
 [compat]
 BMesh = "1.0.0"
