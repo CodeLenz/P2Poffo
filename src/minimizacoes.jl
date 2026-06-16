@@ -134,7 +134,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     ne = malha.ne
 
     # Estimativa inicial das densidades relativas,
-    x0 = 0.5*ones(ne) #vf*ones(ne)
+    x0 = 0.9*ones(ne) #vf*ones(ne)
 
     # Calcula o volume de cada elemento sem considerar a 
     # parametrização 
@@ -189,6 +189,9 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
     # Chao Le
     ChaoLe = ones(2*malha.ne)
 
+    # Incializa uma penalização inicial para usar no SLP
+    penal = 1.0
+
     # Loop externo de otimização 
     for iter=1:niter
 
@@ -229,7 +232,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         @show (A*x0 .- b)
 
         # Chama a solução interna do problema
-        xn,_ = LP(c,A,b,xi,xs,n,m)
+        xn, violacoes ,penal = LP(c,A,b,xi,xs,n,m,penal)
 
         # Calcula o valor da função objetivo pela norma
         ωxn = norm(ωn,-P)

@@ -65,7 +65,7 @@ end
 #
 #   Soluciona o LP (interno)
 #
-function LP(c,A,b,xi,xs,n,m)
+function LP(c,A,b,xi,xs,n,m,penal)
 
     # Checa antes de passar pro solver
     @assert all(isfinite, c)  "c tem valor não-finito: $c"
@@ -98,14 +98,15 @@ function LP(c,A,b,xi,xs,n,m)
     # Define as variáveis de folga
     @variable(modelo, s[1:m] >= 0)
 
-    # Define a penalização
-    r = 1E-3
+    # Define a penalização mínima
+    r = 10.0
 
     # Define a função objetivo
-    @objective(modelo, Min, -(c'*x + r*sum(s)))
+    @objective(modelo, Min, -c'*x/norm(c) + penal*sum(s))
 
     # Agora com a restrição nl linearizada com variáveis de folga
-    @constraint(modelo, [i=1:m], dot(A[i,:], x) + s[i] <= b[i])
+    # vou guardar como uma variável para poder pegar os duais depois 
+    restricoes = @constraint(modelo, [i=1:m], dot(A[i,:], x) - s[i] <= b[i])
 
     # Soluciona o sub-problema
     optimize!(modelo)
@@ -126,9 +127,16 @@ function LP(c,A,b,xi,xs,n,m)
         @show value(s[i])
     end
 
+    # recupera os multiplicadores de lagrange
+    λ = dual.(restricoes)
 
+    # a penalização vai ser o máximo entre a nossa penalização "fixa" e 
+    # o maior λ
+    penal = max(r,maximum(abs.(λ)))
 
-    return xn,(A*xn .- b)
+    @show λ, penal
+
+    return xn,(A*xn .- b), penal
     
 end
 
