@@ -123,9 +123,9 @@ function LP(c,A,b,xi,xs,n,m,penal)
         
     end # for i
 
-    for i in 1:m
-        @show value(s[i])
-    end
+    #for i in 1:m
+        #@show value(s[i])
+    #end
 
     # recupera os multiplicadores de lagrange
     λ = dual.(restricoes)
@@ -134,7 +134,7 @@ function LP(c,A,b,xi,xs,n,m,penal)
     # o maior λ
     penal = max(r,maximum(abs.(λ)))
 
-    @show λ, penal
+    #@show λ, penal
 
     return xn,(A*xn .- b), penal
     

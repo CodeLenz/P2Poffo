@@ -229,7 +229,7 @@ function Main_Otim_Modal(arquivo::AbstractString, fkparam::Function, fdkparam::F
         # Lineariza o problema 
         c,A,b,xi,xs,n,m = Lineariza(x0, δ, dω, dV,V_sup,x_inf,x_sup,dσ,Λ_tio,σesc,P,s,ChaoLe)
 
-        @show (A*x0 .- b)
+        #@show (A*x0 .- b)
 
         # Chama a solução interna do problema
         xn, violacoes ,penal = LP(c,A,b,xi,xs,n,m,penal)
