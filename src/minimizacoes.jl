@@ -209,7 +209,7 @@ function Main_Otim_Modal(arquivo::AbstractString,x=0.5, fkparam=P2Poffo.Kparam, 
         # S - matriz s da seção
         # Pi - matriz Pi de cada nó da seção
         # σe_tio estado de tensão (σxx, σxy) para cada nó da seção
-        Λ_tio,S,Pi,σe_tio = tensoes(arquivoEsf,malha,iter,posfile,cache_secoes)
+        Λ_tio,S,Pi,σe_tio = tensoes(arquivoEsf,malha,iter,false,cache_secoes)
 
         # so para armanezar a primeira frequencia da primeira iteração
         if iter == 1
