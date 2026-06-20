@@ -122,7 +122,7 @@ de um arquivo `.yaml`.
 # Retorno
 Retorna os parâmetros otimizados da malha e as frequências naturais associadas.
 """
-function Main_Otim_Modal(arquivo::AbstractString,x=0.5, fkparam=P2Poffo.Kparam, fdkparam=P2Poffo.dKparam,fmparam=P2Poffo.Mparam, fdmparam=P2Poffo.dMparam,fσparam=P2Poffo.σparam, fdσparam=P2Poffo.dσparam, posfile=true; verbose=false,n_modos=6, vf = 0.5 ,P=8.0, niter=100,tol_f=1E-4,tol_g=1E-4,s = 2.0)
+function Main_Otim_Modal(arquivo::AbstractString,x=0.5, fkparam=P2Poffo.Kparam, fdkparam=P2Poffo.dKparam,fmparam=P2Poffo.Mparam, fdmparam=P2Poffo.dMparam,fσparam=P2Poffo.σparam, fdσparam=P2Poffo.dσparam, posfile=true; verbose=false,n_modos=6, vf = 0.5 ,P=8.0, niter=300,tol_f=1E-4,tol_g=1E-4,s = 2.0)
 
     # analise modal somente para a malha
     ωn,U0,malha = Modal3D(arquivo,posfile,n_modos=n_modos)
