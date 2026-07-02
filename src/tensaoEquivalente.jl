@@ -93,11 +93,10 @@ function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile
         # são vizinhos de cada nó da malha
         vizinhos = Vizinhos_no(nn,IJ)
 
-        zl_yl, grad_xy, grad_n, Pi_geo = precomputa_geometria(
-            (nn=nn, XY=XY, α=α, centroide=centroide,
-            ∇Φ=∇Φ, vizinhos=vizinhos,
-            area=area, Izl=Izl, Iyl=Iyl, Jeq=Jeq)
-        )
+        zl_yl, grad_xy, grad_n, Pi_geo = precomputa_geometria(  (nn=nn, XY=XY, α=α, centroide=centroide,
+                                                                 ∇Φ=∇Φ, vizinhos=vizinhos,
+                                                                 area=area, Izl=Izl, Iyl=Iyl, Jeq=Jeq)
+                                                             )
 
         dados_secao = (
             centroide=centroide, area=area, Izl=Izl, Iyl=Iyl,
@@ -169,7 +168,7 @@ function tensao_vonMises(linhas, path_base, ele, no, iter, cache_secoes, posfile
 
     αμ = T / Jeq
 
-    # Monta Pi com o sign(T) e αμ já aplicados — vetorizado, sem loop
+    # Monta Pi com o sign(T) e αμ já aplicados 
     Pi = Vector{Matrix{Float64}}(undef, nn)
     for i in 1:nn
         p = copy(Pi_geo[i])

@@ -238,11 +238,11 @@ function Main_Otim_Modal(arquivo::AbstractString,x=0.5, fkparam=P2Poffo.Kparam, 
         ωxn = norm(ωn,-P)
     
         # Teste de convergência do problema 
-        if iter > 2
-            if convergencia(xn,ωx0,ωxn,A,b,tol_f,tol_g)
-                break
-            end
-        end
+        #if iter > 2
+        #    if convergencia(xn,ωx0,ωxn,A,b,tol_f,tol_g)
+        #        break
+        #    end
+        #end
 
         # Copia o valor da funcao 
         ωx0 = copy(ωxn)
